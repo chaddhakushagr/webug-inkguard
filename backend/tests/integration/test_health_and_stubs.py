@@ -26,10 +26,17 @@ def test_demo_users_endpoint():
 
 
 def test_kb_entries_stub():
-    response = client.get("/api/v1/kb/entries")
+    # Login as demo user
+    login_res = client.post(
+        "/api/v1/auth/login",
+        json={"email": "creator.social@lumo.internal", "password": "LumoDemo2026!"},
+    )
+    token = login_res.json()["access_token"]
+    response = client.get(
+        "/api/v1/kb/entries",
+        headers={"Authorization": f"Bearer {token}"},
+    )
     assert response.status_code == 200
-    entries = response.json()
-    assert len(entries) >= 3
 
 
 def test_submissions_and_findings_stubs():

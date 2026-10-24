@@ -29,10 +29,12 @@ def test_rbac_user_management():
     assert res_creator_fail.status_code == 403
 
     # 2. Admin can create users (200 OK)
+    import uuid
+    unique_email = f"new.contractor.{uuid.uuid4().hex[:6]}@lumo.internal"
     res_admin_success = client.post(
         "/api/v1/users",
         json={
-            "email": "new.contractor@lumo.internal",
+            "email": unique_email,
             "name": "New Contractor",
             "role": "creator",
             "max_tier": "public",
@@ -41,7 +43,7 @@ def test_rbac_user_management():
     )
     assert res_admin_success.status_code == 200
     data = res_admin_success.json()
-    assert data["email"] == "new.contractor@lumo.internal"
+    assert data["email"] == unique_email
     assert data["role"] == "creator"
     assert data["max_tier"] == "public"
 
