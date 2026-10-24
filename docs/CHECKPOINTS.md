@@ -11,7 +11,7 @@
 | **Prompt 1C (FE)** | Sat 15:45 | **DONE** | `2aac793` | Core screens on design system, role dashboards, KB diff, submissions shell, reviewer queue, static export |
 | **G1** | Sat 19:30 | **DONE** | `g1` | Full workflow verified: Draft -> Approved -> Marked Published, 2-reviewer requirement, fact v2, agency isolation, self-approval refusal, SHA-256 audit chaining |
 | **G2** | Sat 22:00 | **DONE** | `g2` | Golden path GP-1..GP-6 executed in mock mode with real running app; 61 tests passing (including all SPEC sec 12 safety & negative tests); 2 arch contracts kept; evidence screenshots in docs/evidence/gp-*.png |
-| **G3** | Sun 01:00 | Planned | `g3` | Free-cloud deployment verified, GP-1..GP-8 live incognito, insights |
+| **G3** | Sun 01:00 | **DONE** | `g3` | Free-cloud deployment readiness verified; GP-1..GP-8 executed on local production run (PostgreSQL + FastAPI + static Next.js export); Cold-start UX verified; zero secrets; /dev/ui reachable; evidence screenshots in docs/evidence/g3-*.png |
 | **G5** | Sun 07:30 | Planned | `v0.2.0-round2` | Hardening, audit logs, doc pack complete, ready for submission |
 
 ### Phase 0 Verification Notes
@@ -53,3 +53,26 @@
   - Voids approvals on edit: approving an older version after a new draft is rejected with 409.
 - Architecture contracts: `python manage.py arch` passed (Domain purity KEPT, Application isolation KEPT).
 - Full test suite: `python manage.py test` passed 61/61 tests cleanly.
+
+### Gate G3 Verification Notes (Production Run against PostgreSQL)
+- Deployment Artifacts:
+  - Multi-stage [Dockerfile](file:///home/redpanda/Documents/WeBug/Dockerfile) (Node 20 builder + Python 3.12 slim runner on `$PORT`).
+  - Pre-built Next.js static export committed to `backend/app/static/` for low-memory Render native Python deployments.
+  - Infrastructure-as-code [render.yaml](file:///home/redpanda/Documents/WeBug/render.yaml) specification with all environment variables.
+  - Scheduled keep-alive GitHub Actions workflow ([keep_alive.yml](file:///home/redpanda/Documents/WeBug/.github/workflows/keep_alive.yml)) pinging `/api/v1/health` every 10 minutes.
+  - Exhaustive click-by-click deployment manual ([docs/DEPLOYMENT.md](file:///home/redpanda/Documents/WeBug/docs/DEPLOYMENT.md)) with secret demarcation and pre-deployment safety checklist.
+- Executed `scripts/verify_g3_production.py` on `http://localhost:8080` (FastAPI + PostgreSQL + Next.js static export):
+  - **GP-1 (`g3-gp-01-login-roles.png`)**: Login and clearance tier verification passed for all 5 demo personas (Social Creator, Agency Creator, Reviewer, Brand Manager, Admin).
+  - **GP-2 (`g3-gp-02-creator-review.png`)**: High-risk press release submitted, mock review triggered synchronously, 10 findings generated with exact cited knowledge base codes (`RULE-001`, `RULE-002`, `FACT-001`, etc.).
+  - **GP-3 (`g3-gp-03-finding-actions.png`)**: Accepted fix created content Version 2 in `Draft`; dismissal without reason was refused with `HTTP 422`; dismissal with valid reason code (`brand_exception`) and justification transitioned finding to `dismissed`.
+  - **GP-4 (`g3-gp-04-reviewer-approval.png`)**: Full revision and signoff cycle: Creator submitted -> Reviewer claimed -> Reviewer requested changes with note -> Creator updated content to Version 3 (`Draft`) -> Creator resubmitted -> Reviewer 1 approved (1 of 2 recorded) -> Brand Manager approved (2 of 2 recorded -> transitioned to `Approved`).
+  - **GP-5 (`g3-gp-05-audit-export.png`)**: Brand Manager retrieved 65 hash-chained records and exported 66-line RFC-4180 CSV with SHA-256 block hashes.
+  - **GP-6 (`g3-gp-06-admin-users.png`)**: Admin listed users, provisioned new creator user, and updated user role to reviewer.
+  - **GP-7 (`g3-gp-07-mock-guardrails.png`)**: Confirmed `ai_mode=mock`; verified review completes with automatic fallback when `llm_daily_cap=0` and with zero outbound calls when `no_external_ai=True`.
+  - **GP-8 (`g3-gp-08-insights-patterns.png`)**: Verified repeated-mistake patterns across 94 total reviews (80 synthetic history + live), 25 recurring issue clusters, 6 dismissal categories, and 44 rule counters.
+- Additional Checks:
+  - **Cold-Start UX**: 2000ms response detection and `<ColdStartBanner />` displaying *"Waking the server, this can take about a minute"*.
+  - **Secret-Free Check**: 0 secrets found via `git grep` and `git log -p`.
+  - **Component Gallery**: `/dev/ui/` reachable on local production server with HTTP 200 (`docs/evidence/g3-ui-gallery.png`).
+- Full test suite: `python manage.py test` passed **64/64 tests**.
+- Architecture contracts: `python manage.py arch` passed (**2 kept, 0 broken**).

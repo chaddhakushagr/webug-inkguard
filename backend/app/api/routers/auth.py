@@ -79,8 +79,10 @@ def get_health():
 def get_system_status():
     return SystemStatusResponse(
         version="0.2.0",
+        commit="05fbbb2",
         ai_mode=settings.LLM_MODE,
         ai_provider="Google AI Studio" if settings.LLM_API_KEY else "Offline Mock Engine",
+        health="healthy",
         daily_quota_limit=settings.LLM_DAILY_CAP,
         daily_calls_made=0,
         uptime_seconds=3600,

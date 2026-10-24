@@ -748,26 +748,27 @@ def generate_synthetic_history(
     dismiss_reasons = ["editorial_context", "legal_pre_cleared", "stylistic_choice", "approved_exception"]
 
     history = []
-    base_time = datetime.now(timezone.utc) - timedelta(weeks=weeks)
+    base_time = datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc)
+    rng = random.Random(42)
 
     for i in range(1, total_reviews + 1):
         # Progress timestamps across 8 weeks
-        offset_days = random.uniform(0, weeks * 7)
+        offset_days = rng.uniform(0, weeks * 7)
         rev_time = base_time + timedelta(days=offset_days)
-        team = random.choice(teams)
-        creator = random.choice(creators)
-        reviewer = random.choice(reviewers)
+        team = rng.choice(teams)
+        creator = rng.choice(creators)
+        reviewer = rng.choice(reviewers)
 
         # Inconsistent dismissals of the ambiguous rule
         include_ambig = (i % 4 == 0)
-        rule_code = "RULE-AMBIG-01" if include_ambig else random.choice(rule_codes)
+        rule_code = "RULE-AMBIG-01" if include_ambig else rng.choice(rule_codes)
 
         # Decide action
         if rule_code == "RULE-AMBIG-01":
             # 60% dismissed inconsistently
-            action = "dismiss" if random.random() < 0.65 else "accept"
+            action = "dismiss" if rng.random() < 0.65 else "accept"
         else:
-            action = random.choice(["accept", "accept", "dismiss", "escalate"])
+            action = rng.choice(["accept", "accept", "dismiss", "escalate"])
 
         item = {
             "review_id": f"syn-rev-{i:03d}",
@@ -779,7 +780,7 @@ def generate_synthetic_history(
             "timestamp": rev_time.isoformat(),
             "rule_code": rule_code,
             "action": action,
-            "dismiss_reason": random.choice(dismiss_reasons) if action == "dismiss" else None,
+            "dismiss_reason": rng.choice(dismiss_reasons) if action == "dismiss" else None,
             "comment": (
                 "Phrasing is acceptable in marketing headline"
                 if action == "dismiss" and rule_code == "RULE-AMBIG-01"

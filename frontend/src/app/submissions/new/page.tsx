@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Banner,
+  toast,
 } from "@/shared/ui";
 import { api } from "@/shared/api/client";
 import { AuthGuard } from "@/features/auth/AuthGuard";
@@ -129,9 +130,12 @@ function NewSubmissionContent() {
         channel,
         content: content.trim(),
       });
+      toast("Draft submission created successfully.", "success");
       window.location.href = `/submission/?id=${sub.id}`;
     } catch (err: any) {
-      setError(err.message || "Failed to create submission");
+      const errMsg = err.message || "Failed to create submission";
+      setError(errMsg);
+      toast(errMsg, "error");
       setIsSubmitting(false);
     }
   };

@@ -1,0 +1,28 @@
+name: Free-Tier Keep-Alive Ping
+
+on:
+  schedule:
+    # Ping every 10 minutes to prevent Render free-tier idle spin down (15m inactivity limit)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Instance
+        run: |
+          URL="${{ secrets.APP_URL }}"
+          if [ -z "$URL" ]; then
+            echo "[Notice] Secret APP_URL not configured. Add your Render deployment URL (e.g., https://inkguard.onrender.com) to GitHub Repo Secrets to enable automated keep-alive."
+            exit 0
+          fi
+          echo "Pinging $URL/api/v1/health..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 75 "$URL/api/v1/health")
+          echo "Received status code: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "[Success] Instance is awake and responsive."
+          else
+            echo "[Notice] Instance waking up or non-200 code ($HTTP_STATUS)."
+          fi

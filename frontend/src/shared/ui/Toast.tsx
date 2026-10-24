@@ -49,7 +49,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onDismiss, durationMs = 400
     <div
       role="status"
       aria-live="polite"
-      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg ${config.bg} ${config.border} max-w-sm w-full transition-all`}
+      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg ${config.bg} ${config.border} max-w-sm w-full transition-all animate-in fade-in slide-in-from-bottom-2`}
     >
       {config.icon}
       <div className="flex-1">
@@ -66,3 +66,53 @@ export const Toast: React.FC<ToastProps> = ({ toast, onDismiss, durationMs = 400
     </div>
   );
 };
+
+export function toast(message: string, type: "success" | "error" | "info" = "info", title?: string) {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("inkguard:toast", {
+        detail: {
+          id: Math.random().toString(36).substring(2, 9),
+          message,
+          type,
+          title,
+        },
+      })
+    );
+  }
+}
+
+export const ToastContainer: React.FC = () => {
+  const [toasts, setToasts] = React.useState<ToastMessage[]>([]);
+
+  React.useEffect(() => {
+    const handleToast = (e: any) => {
+      if (e?.detail) {
+        setToasts((prev) => [...prev, e.detail]);
+      }
+    };
+    window.addEventListener("inkguard:toast", handleToast);
+    return () => window.removeEventListener("inkguard:toast", handleToast);
+  }, []);
+
+  const handleDismiss = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  if (toasts.length === 0) return null;
+
+  return (
+    <div
+      aria-live="polite"
+      aria-atomic="true"
+      className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"
+    >
+      {toasts.map((t) => (
+        <div key={t.id} className="pointer-events-auto">
+          <Toast toast={t} onDismiss={handleDismiss} />
+        </div>
+      ))}
+    </div>
+  );
+};
+

@@ -15,6 +15,7 @@ import {
   Input,
   Select,
   Skeleton,
+  toast,
 } from "@/shared/ui";
 import { api } from "@/shared/api/client";
 import { KBEntry, KBVersion, User } from "@/shared/api/types";
@@ -161,8 +162,9 @@ function KnowledgeBaseContent() {
       await loadEntries();
       const vers = await api.getKBEntryVersions(updated.id);
       setVersions(vers || []);
+      toast(`Entry ${updated.code} updated to Version ${updated.current_version}.`, "success");
     } catch (err: any) {
-      alert(err.message || "Failed to update entry");
+      toast(err.message || "Failed to update entry", "error");
     } finally {
       setIsSaving(false);
     }
@@ -174,8 +176,9 @@ function KnowledgeBaseContent() {
       const retired = await api.retireKBEntry(selectedEntry.id);
       setSelectedEntry(retired);
       await loadEntries();
+      toast(`Entry ${selectedEntry.code} retired from active governance.`, "info");
     } catch (err: any) {
-      alert(err.message || "Failed to retire entry");
+      toast(err.message || "Failed to retire entry", "error");
     }
   };
 
@@ -259,7 +262,7 @@ function KnowledgeBaseContent() {
           {/* Filter Bar */}
           <div className="bg-white rounded-xl border border-[#CBD2DC] p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
             {/* Search */}
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative flex-1 w-full lg:max-w-sm">
               <Search className="w-4 h-4 text-[#5B6475] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -340,7 +343,7 @@ function KnowledgeBaseContent() {
                 description="Try loosening your filters or clearing the search query."
               />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Knowledge base entries table">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-[#F7F7F4] border-b border-[#E2E5EA] text-[#5B6475] font-semibold">

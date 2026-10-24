@@ -61,8 +61,58 @@ const DEMOS: Record<string, User> = {
 };
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles }) => {
-  const [user, setUser] = useState<User | null>(DEMOS.creator);
-  const [token, setToken] = useState<string | null>("demo-token-creator");
+  const defaultUser = allowedRoles && !allowedRoles.includes("creator") ? DEMOS.manager : DEMOS.creator;
+
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const demoParam = params.get("demo");
+      if (demoParam && DEMOS[demoParam.toLowerCase()]) {
+        const u = DEMOS[demoParam.toLowerCase()];
+        sessionStorage.setItem("inkguard_token", `demo-token-${u.id}`);
+        sessionStorage.setItem("inkguard_user", JSON.stringify(u));
+        sessionStorage.removeItem("inkguard_logout");
+        return u;
+      }
+      if (sessionStorage.getItem("inkguard_logout") === "true") {
+        return null;
+      }
+      const storedUser = sessionStorage.getItem("inkguard_user");
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          // If stored user is not allowed on this route, switch to defaultUser
+          if (allowedRoles && !allowedRoles.includes(parsed.role)) {
+            sessionStorage.setItem("inkguard_token", `demo-token-${defaultUser.id}`);
+            sessionStorage.setItem("inkguard_user", JSON.stringify(defaultUser));
+            return defaultUser;
+          }
+          return parsed;
+        } catch {}
+      }
+      // Ensure storage has default user token
+      sessionStorage.setItem("inkguard_token", `demo-token-${defaultUser.id}`);
+      sessionStorage.setItem("inkguard_user", JSON.stringify(defaultUser));
+    }
+    return defaultUser;
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const demoParam = params.get("demo");
+      if (demoParam && DEMOS[demoParam.toLowerCase()]) {
+        const u = DEMOS[demoParam.toLowerCase()];
+        return `demo-token-${u.id}`;
+      }
+      if (sessionStorage.getItem("inkguard_logout") === "true") {
+        return null;
+      }
+      return sessionStorage.getItem("inkguard_token") || `demo-token-${defaultUser.id}`;
+    }
+    return `demo-token-${defaultUser.id}`;
+  });
+
   const [demoUsers, setDemoUsers] = useState<DemoUser[]>([]);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -91,15 +141,19 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles }) 
       const storedToken = sessionStorage.getItem("inkguard_token");
       if (storedUser && storedToken) {
         try {
-          setUser(JSON.parse(storedUser));
+          const parsed = JSON.parse(storedUser);
+          if (allowedRoles && !allowedRoles.includes(parsed.role)) {
+            sessionStorage.setItem("inkguard_token", `demo-token-${defaultUser.id}`);
+            sessionStorage.setItem("inkguard_user", JSON.stringify(defaultUser));
+            setUser(defaultUser);
+            setToken(`demo-token-${defaultUser.id}`);
+            return;
+          }
+          setUser(parsed);
           setToken(storedToken);
           return;
         } catch {}
       }
-
-      // Default demo session
-      sessionStorage.setItem("inkguard_token", "demo-token-creator");
-      sessionStorage.setItem("inkguard_user", JSON.stringify(DEMOS.creator));
     }
 
     api.getDemoUsers().then((d) => {

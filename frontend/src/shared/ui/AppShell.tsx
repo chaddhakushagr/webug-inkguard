@@ -17,10 +17,12 @@ import {
   UserCheck,
   LogOut,
   PenTool,
+  Activity,
 } from "lucide-react";
 import { ModeChip, AIMode } from "./ModeChip";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
+import { ToastContainer } from "./Toast";
 import { User, DemoUser } from "../api/types";
 import { api } from "../api/client";
 
@@ -128,6 +130,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
           { label: "Settings", href: "/settings/", icon: <Settings className="w-4 h-4" /> },
         ]
       : []),
+    { label: "Status", href: "/status/", icon: <Activity className="w-4 h-4" /> },
     { label: "About AI", href: "/about-ai/", icon: <HelpCircle className="w-4 h-4" /> },
   ];
 
@@ -385,6 +388,9 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
           </div>
         </div>
       </Dialog>
+
+      {/* 6. Global Floating Toast Notification Stack */}
+      <ToastContainer />
     </div>
   );
 };

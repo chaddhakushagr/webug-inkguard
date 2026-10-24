@@ -10,6 +10,7 @@ import {
   EmptyState,
   ErrorState,
   Skeleton,
+  toast,
 } from "@/shared/ui";
 import { api } from "@/shared/api/client";
 import { AuditLogItem } from "@/shared/api/types";
@@ -24,6 +25,9 @@ import {
   Clock,
   ArrowRight,
   Database,
+  Download,
+  Calendar,
+  X,
 } from "lucide-react";
 
 export default function AuditPage() {
@@ -44,14 +48,27 @@ function AuditContent() {
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Filters state
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
+  const [entityFilter, setEntityFilter] = useState("all");
+  const [actorFilter, setActorFilter] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
   const loadAudit = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await api.getAuditLog();
+      const data = await api.getAuditLog({
+        action: actionFilter !== "all" ? actionFilter : undefined,
+        entity_type: entityFilter !== "all" ? entityFilter : undefined,
+        actor_id: actorFilter ? actorFilter : undefined,
+        from_date: fromDate ? new Date(fromDate).toISOString() : undefined,
+        to_date: toDate ? new Date(toDate).toISOString() : undefined,
+      });
       setLogs(data || []);
     } catch (err: any) {
       setError(err.message || "Failed to load audit trail");
@@ -62,21 +79,86 @@ function AuditContent() {
 
   useEffect(() => {
     loadAudit();
-  }, []);
+  }, [actionFilter, entityFilter, fromDate, toDate]);
 
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      const token = typeof window !== "undefined" ? sessionStorage.getItem("inkguard_token") : null;
+      const url = api.getAuditExportUrl({
+        action: actionFilter !== "all" ? actionFilter : undefined,
+        entity_type: entityFilter !== "all" ? entityFilter : undefined,
+        actor_id: actorFilter ? actorFilter : undefined,
+        from_date: fromDate ? new Date(fromDate).toISOString() : undefined,
+        to_date: toDate ? new Date(toDate).toISOString() : undefined,
+      });
+
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (!res.ok) {
+        throw new Error(`Export failed: ${res.statusText}`);
+      }
+
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `inkguard_audit_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      toast("Audit ledger exported to CSV file.", "success");
+    } catch (err: any) {
+      toast(err.message || "Failed to export audit log CSV", "error");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setActionFilter("all");
+    setEntityFilter("all");
+    setActorFilter("");
+    setFromDate("");
+    setToDate("");
+  };
+
+  // Client-side quick filter for text search
   const filteredLogs = logs.filter((log) => {
-    if (actionFilter !== "all" && log.action !== actionFilter) return false;
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
       log.action.toLowerCase().includes(q) ||
       log.entity_type.toLowerCase().includes(q) ||
+      log.entity_id.toLowerCase().includes(q) ||
       log.hash.toLowerCase().includes(q) ||
-      (log.actor_role && log.actor_role.toLowerCase().includes(q))
+      (log.actor_role && log.actor_role.toLowerCase().includes(q)) ||
+      (log.actor_id && log.actor_id.toLowerCase().includes(q))
     );
   });
 
-  const uniqueActions = Array.from(new Set(logs.map((l) => l.action)));
+  const uniqueActions = [
+    "submission_created",
+    "submission_submitted",
+    "submission_claimed",
+    "submission_approved",
+    "submission_changes_requested",
+    "submission_published",
+    "review_triggered",
+    "review_completed",
+    "finding_accepted",
+    "finding_dismissed",
+    "finding_escalated",
+    "kb_entry_created",
+    "kb_entry_updated",
+    "system_seed_loaded",
+  ];
+
+  const uniqueEntities = ["submission", "review", "finding", "kb_entry", "system"];
 
   return (
     <AuthGuard allowedRoles={["brand_manager", "admin"]}>
@@ -92,43 +174,98 @@ function AuditContent() {
                 </h1>
               </div>
               <p className="mt-1 text-xs sm:text-sm text-[#5B6475]">
-                Strictly append-only ledger protected by SHA-256 hash chaining and database immutability triggers.
+                Strictly append-only tamper-evident ledger protected by SHA-256 hash chaining and database immutability triggers.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-[#ECFDF3] text-[#067647] border border-[#ABEFC6]">
                 Chain Intact ({logs.length} blocks)
               </span>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleExportCSV}
+                disabled={isExporting || logs.length === 0}
+              >
+                <Download className="w-4 h-4 mr-1.5" />
+                {isExporting ? "Exporting..." : "Export CSV"}
+              </Button>
             </div>
           </div>
 
           {/* Filter Bar */}
-          <div className="bg-white rounded-xl border border-[#CBD2DC] p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="w-4 h-4 text-[#5B6475] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search action, entity, or hash..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[#CBD2DC] bg-[#F7F7F4] text-[#1F2A44] focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
-              />
-            </div>
+          <div className="bg-white rounded-xl border border-[#CBD2DC] p-4 space-y-3">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              {/* Search text */}
+              <div className="relative flex-1 max-w-sm">
+                <Search className="w-4 h-4 text-[#5B6475] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search hash, actor, or entity ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-[#CBD2DC] bg-[#F7F7F4] text-[#1F2A44] focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+                />
+              </div>
 
-            <div className="flex items-center gap-2">
-              <select
-                aria-label="Filter audit logs by action"
-                value={actionFilter}
-                onChange={(e) => setActionFilter(e.target.value)}
-                className="px-2.5 py-1.5 text-xs rounded-lg border border-[#CBD2DC] bg-white text-[#1F2A44] focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
-              >
-                <option value="all">All Actions ({logs.length})</option>
-                {uniqueActions.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
-                ))}
-              </select>
+              {/* Action Dropdown */}
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  aria-label="Filter audit logs by action"
+                  value={actionFilter}
+                  onChange={(e) => setActionFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs rounded-lg border border-[#CBD2DC] bg-white text-[#1F2A44] focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+                >
+                  <option value="all">All Actions</option>
+                  {uniqueActions.map((a) => (
+                    <option key={a} value={a}>
+                      {a.replace(/_/g, " ")}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Entity Dropdown */}
+                <select
+                  aria-label="Filter audit logs by entity type"
+                  value={entityFilter}
+                  onChange={(e) => setEntityFilter(e.target.value)}
+                  className="px-2.5 py-1.5 text-xs rounded-lg border border-[#CBD2DC] bg-white text-[#1F2A44] focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
+                >
+                  <option value="all">All Entities</option>
+                  {uniqueEntities.map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Date Pickers */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] text-[#5B6475]">From:</span>
+                  <input
+                    type="date"
+                    aria-label="Filter from date"
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    className="px-2 py-1 text-xs rounded-lg border border-[#CBD2DC] bg-white text-[#1F2A44]"
+                  />
+                  <span className="text-[11px] text-[#5B6475]">To:</span>
+                  <input
+                    type="date"
+                    aria-label="Filter to date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="px-2 py-1 text-xs rounded-lg border border-[#CBD2DC] bg-white text-[#1F2A44]"
+                  />
+                </div>
+
+                {(actionFilter !== "all" || entityFilter !== "all" || fromDate || toDate || searchQuery) && (
+                  <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                    <X className="w-3.5 h-3.5 mr-1" />
+                    Reset
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -144,47 +281,48 @@ function AuditContent() {
               <ErrorState message={error} onRetry={loadAudit} />
             ) : filteredLogs.length === 0 ? (
               <EmptyState
-                title="No audit log entries found"
-                description="Events will appear here as governance actions, reviews, and edits occur."
+                title="No audit log entries match filters"
+                description="Try clearing your filters or resetting the date range."
               />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Cryptographic audit trail table">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-[#F7F7F4] border-b border-[#E2E5EA] text-[#5B6475] font-semibold">
                       <th className="py-3 px-4">Timestamp (UTC)</th>
                       <th className="py-3 px-4">Actor &amp; Role</th>
                       <th className="py-3 px-4">Action</th>
-                      <th className="py-3 px-4">Entity</th>
-                      <th className="py-3 px-4">Details</th>
-                      <th className="py-3 px-4">SHA-256 Hash Block</th>
+                      <th className="py-3 px-4">Entity Type &amp; ID</th>
+                      <th className="py-3 px-4">Details JSON</th>
+                      <th className="py-3 px-4">SHA-256 Block</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E2E5EA]">
                     {filteredLogs.map((log) => (
                       <tr key={log.id} className="hover:bg-[#F7F7F4]/70 transition-colors">
-                        <td className="py-3 px-4 font-mono text-[#5B6475]">
+                        <td className="py-3 px-4 font-mono text-[#5B6475] whitespace-nowrap">
                           {new Date(log.ts).toLocaleString()}
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="font-bold text-[#1F2A44] block">
-                            {log.actor_role ? log.actor_role.replace("_", " ") : "System"}
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <span className="font-bold text-[#1F2A44] block capitalize">
+                            {log.actor_role ? log.actor_role.replace(/_/g, " ") : "System"}
                           </span>
-                          <span className="text-[10px] text-[#5B6475]">{log.actor_id || "system"}</span>
+                          <span className="text-[10px] text-[#5B6475] font-mono">{log.actor_id || "system"}</span>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="font-mono font-bold text-[#0F766E] uppercase px-1.5 py-0.5 rounded bg-[#ECFDF3]">
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <span className="font-mono font-bold text-[#0F766E] uppercase px-1.5 py-0.5 rounded bg-[#ECFDF3] border border-[#ABEFC6]">
                             {log.action}
                           </span>
                         </td>
-                        <td className="py-3 px-4 font-mono text-[#1F2A44]">
-                          {log.entity_type}
+                        <td className="py-3 px-4 font-mono text-[#1F2A44] whitespace-nowrap">
+                          <span className="font-bold">{log.entity_type}</span>
+                          <span className="text-[10px] text-[#5B6475] block truncate max-w-[120px]">{log.entity_id}</span>
                         </td>
-                        <td className="py-3 px-4 max-w-xs truncate text-[#5B6475]">
+                        <td className="py-3 px-4 max-w-xs truncate text-[#5B6475] font-mono text-[11px]">
                           {JSON.stringify(log.details)}
                         </td>
-                        <td className="py-3 px-4 font-mono text-[10px] text-[#5B6475]">
-                          <span className="text-[#1F2A44] font-bold">
+                        <td className="py-3 px-4 font-mono text-[10px] whitespace-nowrap">
+                          <span className="text-[#1F2A44] font-bold bg-[#F7F7F4] px-1.5 py-0.5 rounded border border-[#CBD2DC]">
                             {log.hash ? log.hash.slice(0, 16) : "GENESIS"}...
                           </span>
                         </td>

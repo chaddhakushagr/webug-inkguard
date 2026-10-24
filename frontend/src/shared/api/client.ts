@@ -9,10 +9,25 @@ import {
   DataBoundary,
   Comment,
   InsightsSummary,
+  RecurringIssue,
+  DismissalBreakdown,
+  RuleCounter,
+  SystemStatus,
   AuditLogItem,
 } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api/v1";
+let hasCompletedFirstRequest = false;
+
+export function getApiBase(): string {
+  if (typeof window !== "undefined") {
+    // In production (Render, Docker, or any port other than Next.js dev server 3000),
+    // use same-origin /api/v1 with zero CORS.
+    if (window.location.port !== "3000") {
+      return "/api/v1";
+    }
+  }
+  return process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api/v1";
+}
 
 class ApiError extends Error {
   code: string;
@@ -28,8 +43,25 @@ class ApiError extends Error {
 }
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
-  const token = typeof window !== "undefined" ? sessionStorage.getItem("inkguard_token") : null;
+  const apiBase = getApiBase();
+  const url = `${apiBase}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  let token = typeof window !== "undefined" ? sessionStorage.getItem("inkguard_token") : null;
+  if (!token && typeof window !== "undefined" && sessionStorage.getItem("inkguard_logout") !== "true") {
+    const params = new URLSearchParams(window.location.search);
+    const demoParam = params.get("demo") || "creator";
+    const demoId =
+      demoParam === "manager"
+        ? "u-manager"
+        : demoParam === "admin"
+        ? "u-admin"
+        : demoParam === "reviewer"
+        ? "u-reviewer"
+        : demoParam === "agency"
+        ? "u-creator-agency"
+        : "u-creator-social";
+    token = `demo-token-${demoId}`;
+    sessionStorage.setItem("inkguard_token", token);
+  }
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -39,6 +71,20 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  let coldStartTimer: any = null;
+  let didTriggerColdStart = false;
+
+  if (!hasCompletedFirstRequest && typeof window !== "undefined") {
+    coldStartTimer = setTimeout(() => {
+      didTriggerColdStart = true;
+      window.dispatchEvent(
+        new CustomEvent("inkguard:cold_start", {
+          detail: { waking: true, message: "Waking the server, this can take about a minute" },
+        })
+      );
+    }, 2000);
   }
 
   try {
@@ -70,7 +116,25 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     return (await res.json()) as T;
   } catch (err: any) {
     if (err instanceof ApiError) throw err;
-    throw new ApiError(0, "NETWORK_ERROR", err.message || "Network request failed");
+    const isNetwork =
+      err?.name === "TypeError" ||
+      err?.message === "Failed to fetch" ||
+      err?.message?.toLowerCase().includes("fetch") ||
+      err?.message?.toLowerCase().includes("network");
+    const readableMsg = isNetwork
+      ? "Unable to reach the Inkguard backend API. Please ensure the server is running at http://localhost:8000."
+      : err?.message || "Network request failed";
+    throw new ApiError(0, "NETWORK_ERROR", readableMsg);
+  } finally {
+    if (coldStartTimer) clearTimeout(coldStartTimer);
+    if (didTriggerColdStart && typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("inkguard:cold_start", {
+          detail: { waking: false, message: "Server is awake and ready" },
+        })
+      );
+    }
+    hasCompletedFirstRequest = true;
   }
 }
 
@@ -85,7 +149,7 @@ export const api = {
   getDemoUsers: () => request<DemoUser[]>("/auth/demo-users"),
   getMe: () => request<User>("/auth/me"),
   getHealth: () => request<{ status: string; version: string; ai_mode: string }>("/health"),
-  getSystemStatus: () => request<any>("/system/status"),
+  getSystemStatus: () => request<SystemStatus>("/system/status"),
   getSettings: () => request<any>("/settings"),
 
   // Knowledge Base
@@ -180,10 +244,43 @@ export const api = {
       body: JSON.stringify({ body, finding_id: findingId, parent_id: parentId }),
     }),
 
-  // Insights & Audit
+  // Insights, Audit & Status
   getInsightsSummary: () => request<InsightsSummary>("/insights/summary"),
-  getRecurringIssues: () => request<any[]>("/insights/recurring"),
-  getDismissalsBreakdown: () => request<any[]>("/insights/dismissals"),
-  getRuleCounters: () => request<any[]>("/insights/rules"),
-  getAuditLog: () => request<AuditLogItem[]>("/audit"),
+  getRecurringIssues: () => request<RecurringIssue[]>("/insights/recurring"),
+  getDismissalsBreakdown: () => request<DismissalBreakdown[]>("/insights/dismissals"),
+  getRuleCounters: () => request<RuleCounter[]>("/insights/rules"),
+  getAuditLog: (params?: {
+    actor_id?: string;
+    action?: string;
+    entity_type?: string;
+    from_date?: string;
+    to_date?: string;
+    limit?: number;
+  }) => {
+    const qs = new URLSearchParams();
+    if (params?.actor_id) qs.append("actor_id", params.actor_id);
+    if (params?.action && params.action !== "all") qs.append("action", params.action);
+    if (params?.entity_type && params.entity_type !== "all") qs.append("entity_type", params.entity_type);
+    if (params?.from_date) qs.append("from_date", params.from_date);
+    if (params?.to_date) qs.append("to_date", params.to_date);
+    if (params?.limit) qs.append("limit", String(params.limit));
+    const query = qs.toString();
+    return request<AuditLogItem[]>(`/audit${query ? `?${query}` : ""}`);
+  },
+  getAuditExportUrl: (params?: {
+    actor_id?: string;
+    action?: string;
+    entity_type?: string;
+    from_date?: string;
+    to_date?: string;
+  }) => {
+    const qs = new URLSearchParams();
+    if (params?.actor_id) qs.append("actor_id", params.actor_id);
+    if (params?.action && params.action !== "all") qs.append("action", params.action);
+    if (params?.entity_type && params.entity_type !== "all") qs.append("entity_type", params.entity_type);
+    if (params?.from_date) qs.append("from_date", params.from_date);
+    if (params?.to_date) qs.append("to_date", params.to_date);
+    const query = qs.toString();
+    return `${getApiBase()}/audit/export${query ? `?${query}` : ""}`;
+  },
 };

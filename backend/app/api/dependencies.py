@@ -19,6 +19,7 @@ FALLBACK_USERS = {
         "role": "creator",
         "max_tier": "internal",
         "team": "Team Social",
+        "team_id": "team-social",
     },
     "u-creator-agency": {
         "id": "u-creator-agency",
@@ -27,6 +28,7 @@ FALLBACK_USERS = {
         "role": "creator",
         "max_tier": "public",
         "team": "External Agency",
+        "team_id": "team-agency",
     },
     "u-reviewer": {
         "id": "u-reviewer",
@@ -35,6 +37,7 @@ FALLBACK_USERS = {
         "role": "reviewer",
         "max_tier": "internal",
         "team": "Brand Review",
+        "team_id": "team-pr",
     },
     "u-manager": {
         "id": "u-manager",
@@ -43,6 +46,7 @@ FALLBACK_USERS = {
         "role": "brand_manager",
         "max_tier": "confidential",
         "team": "Brand Strategy",
+        "team_id": "team-brand",
     },
     "u-admin": {
         "id": "u-admin",
@@ -51,19 +55,21 @@ FALLBACK_USERS = {
         "role": "admin",
         "max_tier": "confidential",
         "team": "Operations",
+        "team_id": "team-ops",
     },
 }
 
 
 class AuthenticatedUser:
     """Lightweight representation of the active session user."""
-    def __init__(self, id: str, name: str, email: str, role: str, max_tier: str, team: Optional[str] = None):
+    def __init__(self, id: str, name: str, email: str, role: str, max_tier: str, team: Optional[str] = None, team_id: Optional[str] = None):
         self.id = id
         self.name = name
         self.email = email
         self.role = role
         self.max_tier = max_tier
         self.team = team
+        self.team_id = team_id
 
     def to_dict(self):
         return {
@@ -73,6 +79,7 @@ class AuthenticatedUser:
             "role": self.role,
             "max_tier": self.max_tier,
             "team": self.team,
+            "team_id": self.team_id,
         }
 
 
@@ -100,6 +107,19 @@ def get_current_user(
         if user_key in FALLBACK_USERS:
             info = FALLBACK_USERS[user_key]
             return AuthenticatedUser(**info)
+        # Check database
+        db_u = db.query(User).filter(User.id == user_key).first()
+        if db_u:
+            team_name = db_u.team.name if db_u.team else None
+            return AuthenticatedUser(
+                id=db_u.id,
+                name=db_u.name,
+                email=db_u.email,
+                role=db_u.role,
+                max_tier=db_u.max_tier,
+                team=team_name,
+                team_id=db_u.team_id,
+            )
         # Search by role
         for u in FALLBACK_USERS.values():
             if u["role"] == user_key:
@@ -134,6 +154,7 @@ def get_current_user(
             role=db_user.role,
             max_tier=db_user.max_tier,
             team=team_name,
+            team_id=db_user.team_id,
         )
 
     # In DEMO_MODE, if user is in fallback users or payload

@@ -1,0 +1,11 @@
+.git
+.venv
+node_modules
+frontend/.next
+frontend/out
+__pycache__
+*.pyc
+.pytest_cache
+.import_linter_cache
+data/*.db
+docs/evidence

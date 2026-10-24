@@ -25,6 +25,7 @@ from app.adapters.db.models import (
     Finding,
     Review,
     AICall,
+    Team,
 )
 from app.adapters.db.audit import record_audit
 from app.adapters.retrieval.bm25 import BM25Retriever
@@ -245,13 +246,19 @@ def create_submission(
         )
     content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()
 
+    team_val = req.team_id or getattr(current_user, "team_id", None) or getattr(current_user, "team", None)
+    resolved_team_id = None
+    if team_val:
+        t_obj = db.query(Team).filter((Team.id == team_val) | (Team.name == team_val)).first()
+        resolved_team_id = t_obj.id if t_obj else None
+
     sub = Submission(
         title=req.title.strip(),
         channel=req.channel.strip().lower(),
         risk_tier=risk_tier,
         status="Draft",
         creator_id=current_user.id,
-        team_id=req.team_id or current_user.team,
+        team_id=resolved_team_id,
         is_synthetic=True,
         created_at=now,
         updated_at=now,

@@ -87,7 +87,7 @@ export const HighlightedText: React.FC<HighlightedTextProps> = ({
             tabIndex={0}
             role="button"
             aria-pressed={isSelected}
-            aria-label={`${finding.severity} severity ${finding.source} finding: ${finding.explanation}`}
+            aria-label={`${segment.text}: ${finding.severity} severity ${finding.source} finding. ${finding.explanation}`}
             onClick={() => onSelectFinding?.(finding.id)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {

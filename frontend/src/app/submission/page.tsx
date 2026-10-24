@@ -17,6 +17,7 @@ import {
   Skeleton,
   StatusStepper,
   Banner,
+  toast,
 } from "@/shared/ui";
 import { api } from "@/shared/api/client";
 import {
@@ -251,11 +252,13 @@ function SubmissionDetailContent() {
             await loadData(true);
 
             if (currentRev.status === "completed") {
-              setActionSuccess(
-                `Brand review completed (${currentRev.findings_count} findings detected). Submission status updated to Checked.`
-              );
+              const msg = `Brand review completed (${currentRev.findings_count} findings detected). Submission status updated to Checked.`;
+              setActionSuccess(msg);
+              toast(msg, "success");
             } else {
-              setActionError(currentRev.error || "Review pipeline failed during execution");
+              const err = currentRev.error || "Review pipeline failed during execution";
+              setActionError(err);
+              toast(err, "error");
             }
           }
         } catch (pollErr: any) {
@@ -264,12 +267,16 @@ function SubmissionDetailContent() {
             pollIntervalRef.current = null;
           }
           setIsReviewRunning(false);
-          setActionError(pollErr.message || "Lost connection to review orchestrator");
+          const err = pollErr.message || "Lost connection to review orchestrator";
+          setActionError(err);
+          toast(err, "error");
         }
       }, 450);
     } catch (err: any) {
       setIsReviewRunning(false);
-      setActionError(err.message || "Failed to initiate brand review");
+      const errMsg = err.message || "Failed to initiate brand review";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     }
   };
 
@@ -279,12 +286,14 @@ function SubmissionDetailContent() {
     setActionError(null);
     try {
       await api.acceptFinding(findingId);
-      setActionSuccess(
-        "Suggested fix accepted! New content version created, approvals reset, and status reverted to Draft."
-      );
+      const msg = "Suggested fix accepted! New content version created, approvals reset, and status reverted to Draft.";
+      setActionSuccess(msg);
+      toast(msg, "success");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Failed to accept fix. Underlying copy may have changed.");
+      const errMsg = err.message || "Failed to accept fix. Underlying copy may have changed.";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     } finally {
       setIsActionPending(false);
     }
@@ -296,10 +305,14 @@ function SubmissionDetailContent() {
     setActionError(null);
     try {
       await api.dismissFinding(dismissFinding.id, reasonCode, reasonText);
-      setActionSuccess("Finding dismissed and recorded in the append-only audit trail.");
+      const msg = "Finding dismissed and recorded in the append-only audit trail.";
+      setActionSuccess(msg);
+      toast(msg, "info");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Failed to dismiss finding");
+      const errMsg = err.message || "Failed to dismiss finding";
+      setActionError(errMsg);
+      toast(errMsg, "error");
       throw err;
     } finally {
       setIsActionPending(false);
@@ -312,10 +325,14 @@ function SubmissionDetailContent() {
     setActionError(null);
     try {
       await api.escalateFinding(escalateFinding.id, note);
-      setActionSuccess("Finding escalated to brand manager. Revision ticket attached.");
+      const msg = "Finding escalated to brand manager. Revision ticket attached.";
+      setActionSuccess(msg);
+      toast(msg, "info");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Failed to escalate finding");
+      const errMsg = err.message || "Failed to escalate finding";
+      setActionError(errMsg);
+      toast(errMsg, "error");
       throw err;
     } finally {
       setIsActionPending(false);
@@ -327,8 +344,10 @@ function SubmissionDetailContent() {
     try {
       const created = await api.postComment(sub.id, body, findingId);
       setComments((prev) => [...prev, created]);
+      toast("Comment posted.", "success");
     } catch (err: any) {
-      alert(err.message || "Failed to post finding comment");
+      const errMsg = err.message || "Failed to post finding comment";
+      toast(errMsg, "error");
     }
   };
 
@@ -341,10 +360,14 @@ function SubmissionDetailContent() {
       const updated = await api.updateContent(sub.id, editContent);
       setSub(updated);
       setIsEditing(false);
-      setActionSuccess("Content updated. Submission reverted to Draft. Run Re-check to verify.");
+      const msg = "Content updated. Submission reverted to Draft. Run Re-check to verify.";
+      setActionSuccess(msg);
+      toast(msg, "success");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Failed to update copy");
+      const errMsg = err.message || "Failed to update copy";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     } finally {
       setIsSavingEdit(false);
     }
@@ -358,10 +381,14 @@ function SubmissionDetailContent() {
     try {
       const updated = await api.submit(sub.id);
       setSub(updated);
-      setActionSuccess("Submission forwarded to the reviewer queue.");
+      const msg = "Submission forwarded to the reviewer queue.";
+      setActionSuccess(msg);
+      toast(msg, "success");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Submit failed");
+      const errMsg = err.message || "Submit failed";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     } finally {
       setIsActionPending(false);
     }
@@ -374,10 +401,14 @@ function SubmissionDetailContent() {
     try {
       const updated = await api.claim(sub.id);
       setSub(updated);
-      setActionSuccess("Submission claimed and transitioned to In Review.");
+      const msg = "Submission claimed and transitioned to In Review.";
+      setActionSuccess(msg);
+      toast(msg, "success");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Claim failed");
+      const errMsg = err.message || "Claim failed";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     } finally {
       setIsActionPending(false);
     }
@@ -391,21 +422,27 @@ function SubmissionDetailContent() {
       if (noteModalType === "approve") {
         const updated = await api.approve(sub.id, actionNote);
         setSub(updated);
-        setActionSuccess("Approval recorded for current content version.");
+        const msg = "Approval recorded for current content version.";
+        setActionSuccess(msg);
+        toast(msg, "success");
       } else {
         if (!actionNote.trim()) {
-          alert("A review note explaining requested changes is required.");
+          toast("A review note explaining requested changes is required.", "error");
           setIsActionPending(false);
           return;
         }
         const updated = await api.requestChanges(sub.id, actionNote);
         setSub(updated);
-        setActionSuccess("Changes requested. Creator notified.");
+        const msg = "Changes requested. Creator notified.";
+        setActionSuccess(msg);
+        toast(msg, "info");
       }
       setNoteModalOpen(false);
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Action failed");
+      const errMsg = err.message || "Action failed";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     } finally {
       setIsActionPending(false);
     }
@@ -419,10 +456,14 @@ function SubmissionDetailContent() {
     try {
       const updated = await api.markPublished(sub.id, "https://brand.lumo.skincare/campaign-live");
       setSub(updated);
-      setActionSuccess("Submission marked published with timestamp and immutable audit row.");
+      const msg = "Submission marked published with timestamp and immutable audit row.";
+      setActionSuccess(msg);
+      toast(msg, "success");
       await loadData(true);
     } catch (err: any) {
-      setActionError(err.message || "Publish action failed");
+      const errMsg = err.message || "Publish action failed";
+      setActionError(errMsg);
+      toast(errMsg, "error");
     } finally {
       setIsActionPending(false);
     }

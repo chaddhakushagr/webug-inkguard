@@ -166,6 +166,46 @@ export interface InsightsSummary {
   total_dismissals: number;
   avg_review_turnaround_hours: number;
   active_governance_rules: number;
+  synthetic_reviews_count?: number;
+  real_reviews_count?: number;
+  is_synthetic_included?: boolean;
+}
+
+export interface RecurringIssue {
+  issue_type: string;
+  rule_code: string;
+  rule_title: string;
+  count: number;
+  team_name: string;
+  week: string;
+  is_synthetic: boolean;
+}
+
+export interface DismissalBreakdown {
+  reason_code: string;
+  count: number;
+  percentage: number;
+}
+
+export interface RuleCounter {
+  rule_code: string;
+  rule_title: string;
+  times_triggered: number;
+  times_dismissed: number;
+  times_accepted: number;
+  distinct_dismissers: number;
+}
+
+export interface SystemStatus {
+  version: string;
+  commit?: string;
+  ai_mode: string;
+  ai_provider: string;
+  health?: string;
+  daily_quota_limit: number;
+  daily_calls_made: number;
+  uptime_seconds: number;
+  db_connected: boolean;
 }
 
 export interface AuditLogItem {
@@ -181,3 +221,4 @@ export interface AuditLogItem {
   prev_hash?: string | null;
   hash: string;
 }
+

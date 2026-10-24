@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     DATABASE_URL: str = "sqlite:///./data/inkguard.db"
     JWT_SECRET: str = "inkguard-insecure-dev-secret-change-in-production-1234567890"
-    DEMO_MODE: bool = True
+    DEMO_MODE: bool = False
     DEMO_PASSWORD: str = "LumoDemo2026!"
     LLM_MODE: str = "mock"  # live, cached, mock, rules_only
     LLM_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai/"

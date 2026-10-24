@@ -122,7 +122,7 @@ export default function LoginPage() {
       </div>
 
       {/* Main Two-Column Container */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 flex items-center">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-16 flex items-center outline-none">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 w-full items-start">
           {/* Left Column: Product Pitch & Honesty Notice */}
           <div className="lg:col-span-5 flex flex-col justify-center">

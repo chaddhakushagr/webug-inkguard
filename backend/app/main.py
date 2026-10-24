@@ -22,8 +22,22 @@ from app.api.routers import (
 )
 
 
+from contextlib import asynccontextmanager
+from app.adapters.db.session import wait_for_db, run_migrations_and_seed
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Free databases (e.g. Neon) suspend on idle; connect with retry
+    wait_for_db()
+    # Apply Alembic migrations to head and seed if empty
+    run_migrations_and_seed()
+    yield
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
+        lifespan=lifespan,
         title="Inkguard Brand Governance API",
         version="0.2.0",
         description="Automated pre-publication brand governance platform for marketing copy and claims verification.",
@@ -48,7 +62,19 @@ def create_app() -> FastAPI:
         req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         request.state.request_id = req_id
         start_time = time.time()
-        
+
+        # Security hardening: Gate /dev and /dev/ui routes in production
+        if settings.APP_ENV.lower() == "production" and request.url.path.startswith("/dev"):
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "code": "HTTP_404",
+                    "message": f"Endpoint '{request.url.path}' not found",
+                    "details": {"path": request.url.path, "request_id": req_id},
+                },
+                headers={"X-Request-ID": req_id},
+            )
+
         response = await call_next(request)
         
         process_time = time.time() - start_time

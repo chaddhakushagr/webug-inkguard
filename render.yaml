@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: inkguard
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: DEMO_PASSWORD
+        value: "LumoDemo2026!"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_BASE
+        value: /api/v1
+      - key: LLM_MODE
+        value: mock
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai/
+      - key: LLM_MODEL
+        value: gemini-2.5-flash
+      - key: LLM_DAILY_CAP
+        value: "100"
+      - key: MAX_CONTENT_CHARS
+        value: "20000"
+      - key: RATE_LIMIT_REVIEWS_PER_HOUR
+        value: "60"

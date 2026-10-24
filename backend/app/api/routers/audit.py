@@ -68,6 +68,12 @@ def get_audit_log(
 
 @router.get("/audit/export")
 def export_audit_log_csv(
+    actor_id: Optional[str] = None,
+    action: Optional[str] = None,
+    entity_type: Optional[str] = None,
+    entity_id: Optional[str] = None,
+    from_date: Optional[datetime] = None,
+    to_date: Optional[datetime] = None,
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
 ):
@@ -77,7 +83,21 @@ def export_audit_log_csv(
             detail=f"Role '{current_user.role}' is not authorized to export audit logs",
         )
 
-    logs = db.query(AuditLog).order_by(AuditLog.ts.desc()).all()
+    query = db.query(AuditLog)
+    if actor_id:
+        query = query.filter(AuditLog.actor_id == actor_id)
+    if action:
+        query = query.filter(AuditLog.action == action)
+    if entity_type:
+        query = query.filter(AuditLog.entity_type == entity_type)
+    if entity_id:
+        query = query.filter(AuditLog.entity_id == entity_id)
+    if from_date:
+        query = query.filter(AuditLog.ts >= from_date)
+    if to_date:
+        query = query.filter(AuditLog.ts <= to_date)
+
+    logs = query.order_by(AuditLog.ts.desc()).all()
 
     output = io.StringIO()
     writer = csv.writer(output)

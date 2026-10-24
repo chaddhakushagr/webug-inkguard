@@ -26,11 +26,13 @@ class HealthResponse(BaseModel):
 
 class SystemStatusResponse(BaseModel):
     version: str = "0.2.0"
+    commit: str = "05fbbb2"
     ai_mode: str = "mock"
     ai_provider: str = "mock"
+    health: str = "healthy"
     daily_quota_limit: int = 100
     daily_calls_made: int = 0
-    uptime_seconds: int = 120
+    uptime_seconds: int = 3600
     db_connected: bool = True
 
 
@@ -293,6 +295,9 @@ class InsightsSummary(BaseModel):
     total_dismissals: int
     avg_review_turnaround_hours: float
     active_governance_rules: int
+    synthetic_reviews_count: int = 0
+    real_reviews_count: int = 0
+    is_synthetic_included: bool = True
 
 
 class RecurringIssue(BaseModel):
@@ -302,6 +307,7 @@ class RecurringIssue(BaseModel):
     count: int
     team_name: str
     week: str
+    is_synthetic: bool = True
 
 
 class DismissalBreakdown(BaseModel):
@@ -316,6 +322,7 @@ class RuleCounter(BaseModel):
     times_triggered: int
     times_dismissed: int
     times_accepted: int
+    distinct_dismissers: int = 0
 
 
 # --- Audit ---

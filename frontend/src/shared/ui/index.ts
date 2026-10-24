@@ -20,3 +20,4 @@ export * from "./PageHeader";
 export * from "./AIBadge";
 export * from "./ModeChip";
 export * from "./AppShell";
+export * from "./ColdStartBanner";

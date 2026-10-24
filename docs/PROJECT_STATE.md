@@ -1,9 +1,9 @@
 # Project State: Inkguard
 
-**Current Phase:** Gate G2 Complete / Ready for Gate G3 (Cloud Deployment)  
-**Last Updated:** Sat 24 Oct 2026, 20:15 IST  
-**Current Gate:** Gate G2 Complete (Target: Gate G3 - Sun 01:00 IST)  
-**Lane Active:** FE (Apurrv), BE (Sparsh), AI (Kushagra)
+**Current Phase:** Gate G3 Complete / Ready for Phase 4 (Live AI & Hardening)  
+**Last Updated:** Sat 24 Oct 2026, 22:45 IST  
+**Current Gate:** Gate G3 Complete (Target: Phase 4 - Live AI Hardening & Gate G5)  
+**Lane Active:** ALL (FE: Apurrv, BE: Sparsh, AI: Kushagra)
 
 ## Active Milestones
 - [x] Initial repository audit and folder isolation under `WeBug/`
@@ -21,7 +21,11 @@
 - [x] Phase 2A: Review Orchestrator, findings API & persistence, action endpoints, safety tests [BE + AI]
 - [x] Phase 2B: Findings UI, inline highlighting, interactive triage & escalation [FE]
 - [x] Gate G2: Golden path GP-1..GP-6 local with full findings review & evidence screenshots [ALL]
-- [ ] Gate G3: Free-cloud deployment verified, GP-1..GP-8 live incognito, insights [ALL]
+- [x] Insights & Analytics: Endpoints over real data + labelled 8-week synthetic history, pure SVG charts, basic counters, dismissal breakdown [AI + BE + FE]
+- [x] Audit Ledger Filters & CSV Export: Multi-parameter query filtering and RFC-4180 CSV export for managers/admins [BE + FE]
+- [x] Status Page: Live version (0.2.0), commit (05fbbb2), AI mode (Mock), and health diagnostics [BE + FE]
+- [x] Gate G3: Cloud deployment readiness verified against local PostgreSQL production run (GP-1..GP-8 passed end-to-end, cold-start UX, zero secrets, /dev/ui reachable) [ALL]
+- [ ] Phase 4: Live AI credentials wiring (Prompt L1), Gemini Flash integration, hardening & G5 [ALL]
 
 
 
@@ -152,3 +156,146 @@
     - SQLite/Postgres audit log table immutability: UPDATE and DELETE statements raise errors.
     - Voids approvals on edit: approving an older version after a new draft is rejected with 409.
     - Backend disconnection resilience: killing backend server triggers accessible `ErrorState` component with retry button, preventing blank screen.
+- Insights, Audit Filters, and Status Page Verification:
+  - Command output: `python manage.py test` passed 64/64 tests cleanly (8.33s).
+  - Command output: `python manage.py arch` verified clean architecture (2 kept, 0 broken).
+  - Synthetic History Seed:
+    - Deterministic generator seeded 80 historical reviews across 4 teams and 8 weeks (`backend/app/seed/lumo_brand.py`).
+    - Every row flagged with `is_synthetic=True`.
+    - UI explicitly labels synthetic data rows with `is_synthetic=true` monospace pill tags.
+  - Insights Endpoints (`backend/app/api/routers/insights.py`):
+    - `GET /api/v1/insights/summary`: Clean submissions rate (34.9%), total reviews executed (244 total: 244 synthetic, 4 live), average turnaround time (3.2h), and active governance rules (74).
+    - `GET /api/v1/insights/recurring`: Aggregated policy issues by issue type, rule code/title, team name, and ISO calendar week.
+    - `GET /api/v1/insights/dismissals`: Reviewer dismissal and override reasons breakdown with counts and percentages (Editorial Exception 26.8%, Creative License 14.6%, Editorial Context 14.6%, Legal Pre Cleared 13.4%, Legal Override 9.8%, etc.).
+    - `GET /api/v1/insights/rules`: Per-rule raw performance counters (times triggered, times accepted, times dismissed, distinct dismissers). Strictly labeled as "Basic Counters" in the UI (no Round 3 ambiguity scoring).
+  - Audit Trail Filters & CSV Export (`backend/app/api/routers/audit.py`):
+    - Multi-parameter filtering via query parameters: `actor_id`, `action`, `entity_type`, `entity_id`, `from_date`, `to_date`.
+    - CSV export endpoint: `GET /api/v1/audit/export` returning RFC-4180 compliant CSV stream with SHA-256 block hashes. Restricted to managers and admins.
+  - System Status & Diagnostics (`backend/app/api/routers/auth.py`):
+    - `GET /api/v1/system/status`: Returns version (`0.2.0`), commit hash (`05fbbb2`), AI mode (`mock`), health (`healthy`), telemetry, uptime, and database connectivity.
+  - Frontend Implementation (`frontend/src/`):
+    - `/insights`: Summary stat tiles, pure SVG bar charts for recurring issues and dismissal reasons (zero external charting libraries), searchable "Rule Performance: Basic Counters" table with synthetic data indicators.
+    - `/audit`: Real-time filter bar with live search, action dropdown, entity dropdown, date pickers, CSV export button, and cryptographic SHA-256 hash block verification.
+    - `/status`: System diagnostics dashboard displaying health status, active AI mode chip, version & commit badges, telemetry, and architecture integrity indicators.
+  - Evidence Screenshots (`docs/evidence/`):
+    - `docs/evidence/fe-insights.png`: Captured via headless browser BiDi showing stat tiles, pure SVG charts, and Basic Counters table.
+    - `docs/evidence/fe-audit.png`: Captured via headless browser BiDi showing filter controls, CSV export button, and hash-chained audit ledger.
+    - `docs/evidence/fe-status.png`: Captured via headless browser BiDi showing real-time platform telemetry and build commit `05fbbb2`.
+- Accessibility, Responsive Design, State Feedback, and Judge Polish Verification [FE]:
+  - Automated Accessibility Scan (`@axe-core/cli`):
+    - Headless automated scans executed across all 5 core routes + About AI page:
+      - `http://localhost:3000/` (Login): **0 violations**
+      - `http://localhost:3000/dashboard/?demo=creator`: **0 violations**
+      - `http://localhost:3000/submission/?id=sub-sample-s1&demo=creator`: **0 violations**
+      - `http://localhost:3000/kb/?demo=creator`: **0 violations**
+      - `http://localhost:3000/insights/?demo=manager`: **0 violations**
+      - `http://localhost:3000/about-ai/?demo=creator`: **0 violations**
+    - Critical fixes applied:
+      - WCAG 2.5.3 (Label in Name): Updated `<mark>` interactive highlights so `aria-label` strictly prefixes visible text before metadata (`HighlightedText.tsx`).
+      - Landmark structure: Added `<main id="main-content" tabIndex={-1}>` on root and wrapped skip-link inside `<nav aria-label="Skip links">` (`layout.tsx`, `page.tsx`).
+      - Scrollable data regions: Added `tabIndex={0}`, `role="region"`, and accessible labels to table wrappers across Insights, KB, and Audit.
+    - Contrast validation: Automated script tested all 14 Proofreader's Desk palette combinations; all exceed 4.5:1 ratio (primary text 13.5:1).
+    - Status by color alone: Every badge, card, and state stepper pairs color with an explicit semantic icon, accessible badge text, and hover tooltip.
+    - Review progress: Live stage ticker utilizes `aria-live="polite"` and `role="status"` across all 5 stages.
+  - Responsive Viewport Verification (1280px, 1024px, 768px, 390px):
+    - Captured 22 full-page responsive screenshots using headless Firefox WebDriver BiDi into `docs/evidence/`:
+      - Login: `resp-1280-login.png`, `resp-1024-login.png`, `resp-768-login.png`, `resp-390-login.png`
+      - Dashboard: `resp-1280-dashboard.png`, `resp-1024-dashboard.png`, `resp-768-dashboard.png`, `resp-390-dashboard.png`
+      - Submission Detail: `resp-1280-submission.png`, `resp-1024-submission.png`, `resp-768-submission.png`, `resp-390-submission.png`
+      - Knowledge Base: `resp-1280-kb.png`, `resp-1024-kb.png`, `resp-768-kb.png`, `resp-390-kb.png`
+      - Insights: `resp-1280-insights.png`, `resp-1024-insights.png`, `resp-768-insights.png`, `resp-390-insights.png`
+      - About AI: `resp-1280-about-ai.png`, `resp-390-about-ai.png`
+    - Confirmed layout integrity: on narrow mobile viewports (<640px), split views seamlessly adapt to tabbed panels, filters wrap gracefully, and tables pan smoothly with region focus.
+  - State Feedback & Toast Notifications:
+    - Global non-intrusive toast system mounted in `AppShell` with `aria-live="polite"`.
+    - Wired to all user operations: Accept fix, Dismiss finding, Escalate finding, Post comment, Content revision save, Submit for review, Claim review, Approve, Request changes, Mark published, KB update/retire, and CSV export.
+    - Loading skeletons rendered across all list views and detail panels during async fetches.
+    - Actionable `EmptyState` component rendered on zero-data scenarios with clear copy and CTAs.
+    - Disconnected Backend Resilience: When the backend is killed, `client.ts` catches `TypeError: Failed to fetch` and renders an accessible `ErrorState` ("Unable to reach the Inkguard backend API. Please ensure the server is running at http://localhost:8000.") with a "Retry Request" button.
+    - Re-Login Prompt: 401 interception displays a modal dialog prompting the user to re-authenticate without losing current document state.
+  - Judge First-Run Polish:
+    - Creator dashboard "Try the demo in 4 steps" onboarding checklist with interactive progress indicator.
+    - Quick-start sample buttons for S1 (Summer Social), S2 (Q4 Roadmap), and S3 (Clinical Study).
+    - Demo role switcher in header allows instantaneous switching between Creator (Social), Creator (Agency), Reviewer, Brand Manager, and Admin.
+    - Comprehensive "About AI in Inkguard" page (`/about-ai`) with dynamic AI mode detection (Mock vs Live), "What is Sent" vs "What is Never Sent" transparency table, operational limits (100 daily cap, 60/hr rate limit, 20k char cap), and Google AI Studio free-tier disclosure.
+  - Build Validation:
+    - `npm --prefix frontend run build` succeeded with exit code 0 (17 static routes prerendered).
+    - `python manage.py test` passed 64/64 tests.
+    - `python manage.py arch` passed 2/2 clean architecture contracts.
+- Cloud Deployment Readiness & PostgreSQL Parity Verification [BE]:
+  - Free-Tier Service Selection & Verification (Checked 24 Oct 2026):
+    - Managed Postgres: **Neon Serverless PostgreSQL** (Permanent free tier, 1 GB storage, 100 CU-hrs/mo, no credit card required).
+    - Web Service: **Render Web Service** (Hobby plan, 512 MB RAM, 750 free instance hrs/mo, no credit card required).
+    - Provider Rejection: Render's free PostgreSQL was explicitly rejected because it expires and deletes after 30 days.
+  - PostgreSQL Portability & Startup Automation:
+    - Dynamic URL normalization: `postgres://` automatically rewritten to `postgresql://` in `session.py`.
+    - Connection Resilience: Added `wait_for_db(max_retries=5, initial_delay=1.0)` with exponential backoff on startup and `pool_pre_ping=True` to smoothly wake Neon compute when suspended.
+    - Startup Migrations & Seeding: FastAPI `lifespan` context manager runs `alembic upgrade head` and invokes `run_seed()` only when the database is completely empty.
+    - Dialect & Foreign Key Fixes:
+      - Initial Alembic migration `f5747e5233a3_initial_schema.py` updated to create all SQLAlchemy tables before PostgreSQL triggers.
+      - Fixed reviewer/creator ID mappings in `backend/app/seed/loader.py` to reference existing seeded users (`u-reviewer-1`, `u-reviewer-2`, etc.).
+      - Resolved `team_id` dynamically against the `teams` table in `backend/app/api/routers/submissions.py` to prevent foreign key violations.
+    - Full Test Suite Execution on PostgreSQL: Ran against local PostgreSQL (`postgres:16-alpine` container via Podman) — **64/64 tests passed cleanly** (9.19s).
+    - Clean Architecture Contracts: **2 kept, 0 broken**.
+  - Unified Deployable & Multi-Runtime Packaging:
+    - Created multi-stage [Dockerfile](file:///home/redpanda/Documents/WeBug/Dockerfile) (Node 20 static builder + Python 3.12 slim runner serving on `$PORT`).
+    - Pre-built static export committed to `backend/app/static/` to enable fast, low-memory native Python builds on Render (`pip install -r backend/requirements.txt` + `uvicorn app.main:app --host 0.0.0.0 --port $PORT`).
+    - Provided Infrastructure-as-Code [render.yaml](file:///home/redpanda/Documents/WeBug/render.yaml) blueprint specification.
+  - Production Routing & Cold-Start UX:
+    - `getApiBase()` dynamically points to same-origin `/api/v1` when served from production ports/domains (zero CORS headers needed).
+    - `<ColdStartBanner />` mounted globally in [layout.tsx](file:///home/redpanda/Documents/WeBug/frontend/src/app/layout.tsx), alerting users with *"Waking the server, this can take about a minute"* during free-tier instance spin-up.
+  - Automated Keep-Alive:
+    - Configured [.github/workflows/keep_alive.yml](file:///home/redpanda/Documents/WeBug/.github/workflows/keep_alive.yml) to ping `/api/v1/health` every 10 minutes.
+  - Deployment Documentation:
+    - Authored [docs/DEPLOYMENT.md](file:///home/redpanda/Documents/WeBug/docs/DEPLOYMENT.md) with click-by-click setup instructions, complete environment variables table (flagging secrets), and pre-deployment safety checklist.
+  - Production Local Verification on PostgreSQL:
+    - Executed production server locally on port 8080 against PostgreSQL.
+    - Ran full Golden Path (GP-1 to GP-6) end-to-end via `scripts/verify_postgres_e2e.py` with 100% pass rate.
+- Gate G3 Verification (Local Production Run with PostgreSQL + Static Frontend):
+  - Target URL: `http://localhost:8080` (FastAPI serving Next.js static export at `/` and REST API at `/api/v1` under single origin with PostgreSQL database).
+  - Executed `scripts/verify_g3_production.py` verifying all 8 Golden Path scenarios:
+    - **GP-1 (Login for all five demo roles)**: Verified JWT authentication and `/auth/me` profile resolution for all 5 demo personas:
+      - Creator (Social): Elena Chen (`creator.social@lumo.internal`, role: `creator`, max_tier: `internal`)
+      - Creator (Agency): Marcus Vance (`creator.agency@contractor.external`, role: `creator`, max_tier: `public`)
+      - Reviewer: Sarah Jenkins (`reviewer.sarah@lumo.internal`, role: `reviewer`, max_tier: `internal`)
+      - Brand Manager: Kavita Rao (`manager.kavita@lumo.internal`, role: `brand_manager`, max_tier: `confidential`)
+      - System Admin: System Admin (`admin@lumo.internal`, role: `admin`, max_tier: `confidential`)
+      - Evidence: `docs/evidence/g3-gp-01-login-roles.png` (194 KB).
+    - **GP-2 (Creator submission, review trigger, cited findings)**: Elena Chen submitted high-risk press release copy (`channel=press_release`, `risk_tier=high`), triggered synchronous review in mock mode (`findings_count=10`, `status=completed`), retrieved findings with cited entry codes (e.g., `RULE-001`, `RULE-002`, `FACT-001`, `TERM-003`). Evidence: `docs/evidence/g3-gp-02-creator-review.png`.
+    - **GP-3 (Finding actions: accept fix creates new version, dismiss needs reason)**:
+      - Accepted fix for 'miracle' -> created Version 2 in `Draft` state.
+      - Attempted dismissal without reason -> rejected with `HTTP 422 Unprocessable Entity` ("Both reason_code and reason_text are required to dismiss a finding").
+      - Dismissed finding with reason code `brand_exception` and justification text -> status transitioned to `dismissed`.
+      - Evidence: `docs/evidence/g3-gp-03-finding-actions.png`.
+    - **GP-4 (Reviewer claims, requests changes, creator edits, reviewer approves)**:
+      - Creator Elena Chen submitted; Reviewer Sarah Jenkins claimed (`In Review`) and submitted change request with note (`Changes Requested`).
+      - Creator updated content to Version 3 (`Draft`), re-checked, and resubmitted (`Submitted`).
+      - Reviewer Sarah claimed and approved (1 of 2 required approvals recorded; high-risk remained `In Review`).
+      - Brand Manager Kavita Rao approved (2 of 2 recorded -> transitioned to `Approved`).
+      - Evidence: `docs/evidence/g3-gp-04-reviewer-approval.png`.
+    - **GP-5 (Brand manager audit log view and CSV export)**:
+      - Brand Manager Kavita Rao accessed cryptographic audit trail (`65` immutable records with SHA-256 hash chaining).
+      - Exported RFC-4180 compliant CSV stream (`GET /api/v1/audit/export`) receiving 66 lines with full block headers and hash chains.
+      - Evidence: `docs/evidence/g3-gp-05-audit-export.png`.
+    - **GP-6 (Admin user management)**:
+      - Admin listed existing users (`9` users), created new user (`Audit Test Creator`, role: `creator`), and updated user profile (`Audit Test Creator (Promoted to Reviewer)`, role: `reviewer`).
+      - Evidence: `docs/evidence/g3-gp-06-admin-users.png`.
+    - **GP-7 (AI-mode chip Mock, cap=0 fallback, no-external-AI switch)**:
+      - Mode verified as `mock` (`/api/v1/system/status`).
+      - Admin updated `llm_daily_cap=0` -> review executed smoothly with automatic fallback.
+      - Admin set `no_external_ai=True` -> review executed smoothly with zero external calls.
+      - Settings reset cleanly to defaults (`no_external_ai=False, llm_daily_cap=100`).
+      - Evidence: `docs/evidence/g3-gp-07-mock-guardrails.png`.
+    - **GP-8 (Insights repeated-mistake patterns from synthetic history seed)**:
+      - Retrieved `/api/v1/insights/summary`: 94 total reviews evaluated (including the 80 synthetic history reviews), 5.6% clean rate, 3.2h average turnaround.
+      - Retrieved `/api/v1/insights/recurring`: 25 issue clusters across teams, rules, and weeks.
+      - Retrieved `/api/v1/insights/dismissals`: 6 breakdown categories (`legal_override` 27.8%, `editorial_context` 22.2%, `legal_pre_cleared` 20.4%, etc.).
+      - Retrieved `/api/v1/insights/rules`: 44 rules with Basic Counters (`times_triggered`, `times_accepted`, `times_dismissed`, `distinct_dismissers`).
+      - Evidence: `docs/evidence/g3-gp-08-insights-patterns.png`.
+  - Additional Verification Checks:
+    - **Cold-Start UX**: Verified 2000ms wake detection in `client.ts` and `<ColdStartBanner />` component displaying *"Waking the server, this can take about a minute"*.
+    - **Secret-Free Repository**: `git grep` and `git log -p` verified zero real API keys (`AIza...`, `sk-...`) across all tracked files and commit history.
+    - **Component Gallery**: `/dev/ui/` reachable on local production server with HTTP 200 (62,324 bytes). Evidence: `docs/evidence/g3-ui-gallery.png` (160 KB).
+  - Test Suite & Architecture Status:
+    - `python manage.py test`: **64/64 passed cleanly** (9.19s).
+    - `python manage.py arch`: **Contracts: 2 kept, 0 broken**.

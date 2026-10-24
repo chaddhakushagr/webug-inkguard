@@ -2242,6 +2242,7 @@
           "Insights"
         ],
         "summary": "Get Rule Counters",
+        "description": "Per-rule raw counters over real data plus synthetic history.\nReports times_triggered, times_accepted, times_dismissed, and distinct_dismissers.\nStrictly basic counters; no ambiguity scoring (Round 3 improvement).",
         "operationId": "get_rule_counters_api_v1_insights_rules_get",
         "responses": {
           "200": {
@@ -2419,6 +2420,111 @@
         ],
         "summary": "Export Audit Log Csv",
         "operationId": "export_audit_log_csv_api_v1_audit_export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor Id"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Date"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -2427,13 +2533,18 @@
                 "schema": {}
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/settings": {
@@ -3193,6 +3304,21 @@
           "active_governance_rules": {
             "type": "integer",
             "title": "Active Governance Rules"
+          },
+          "synthetic_reviews_count": {
+            "type": "integer",
+            "title": "Synthetic Reviews Count",
+            "default": 0
+          },
+          "real_reviews_count": {
+            "type": "integer",
+            "title": "Real Reviews Count",
+            "default": 0
+          },
+          "is_synthetic_included": {
+            "type": "boolean",
+            "title": "Is Synthetic Included",
+            "default": true
           }
         },
         "type": "object",
@@ -3529,6 +3655,11 @@
           "week": {
             "type": "string",
             "title": "Week"
+          },
+          "is_synthetic": {
+            "type": "boolean",
+            "title": "Is Synthetic",
+            "default": true
           }
         },
         "type": "object",
@@ -3657,6 +3788,11 @@
           "times_accepted": {
             "type": "integer",
             "title": "Times Accepted"
+          },
+          "distinct_dismissers": {
+            "type": "integer",
+            "title": "Distinct Dismissers",
+            "default": 0
           }
         },
         "type": "object",
@@ -3888,6 +4024,11 @@
             "title": "Version",
             "default": "0.2.0"
           },
+          "commit": {
+            "type": "string",
+            "title": "Commit",
+            "default": "05fbbb2"
+          },
           "ai_mode": {
             "type": "string",
             "title": "Ai Mode",
@@ -3897,6 +4038,11 @@
             "type": "string",
             "title": "Ai Provider",
             "default": "mock"
+          },
+          "health": {
+            "type": "string",
+            "title": "Health",
+            "default": "healthy"
           },
           "daily_quota_limit": {
             "type": "integer",
@@ -3911,7 +4057,7 @@
           "uptime_seconds": {
             "type": "integer",
             "title": "Uptime Seconds",
-            "default": 120
+            "default": 3600
           },
           "db_connected": {
             "type": "boolean",
