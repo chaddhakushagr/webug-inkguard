@@ -19,6 +19,8 @@ import {
   PenTool,
 } from "lucide-react";
 import { ModeChip, AIMode } from "./ModeChip";
+import { Dialog } from "./Dialog";
+import { Button } from "./Button";
 import { User, DemoUser } from "../api/types";
 import { api } from "../api/client";
 
@@ -34,6 +36,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
   const [aiMode, setAiMode] = useState<AIMode>("mock");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const [isReLoginOpen, setIsReLoginOpen] = useState(false);
+  const [reLoginMessage, setReLoginMessage] = useState("Your session has expired. Please sign in again.");
 
   useEffect(() => {
     // 1. Load active user
@@ -61,6 +65,17 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
         if (h.ai_mode) setAiMode(h.ai_mode as AIMode);
       })
       .catch(() => {});
+
+    // 4. 401 Unauthorized listener
+    const handleUnauthorized = (e: any) => {
+      setReLoginMessage(e?.detail?.message || "Your session has expired. Please sign in again.");
+      setIsReLoginOpen(true);
+    };
+
+    window.addEventListener("inkguard:unauthorized", handleUnauthorized);
+    return () => {
+      window.removeEventListener("inkguard:unauthorized", handleUnauthorized);
+    };
   }, []);
 
   const handleSwitchDemoRole = async (user: DemoUser) => {
@@ -321,6 +336,55 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
           </main>
         </div>
       </div>
+
+      {/* 5. Automatic Re-Login Prompt on 401 Session Expiry */}
+      <Dialog
+        isOpen={isReLoginOpen}
+        onClose={() => {
+          setIsReLoginOpen(false);
+          window.location.href = "/";
+        }}
+        title="Session Re-Authentication Required"
+        description={reLoginMessage}
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-[#5B6475]">
+            Select a brand persona to restore your session immediately, or return to the sign-in page.
+          </p>
+          <div className="space-y-2">
+            {demoUsers.map((u) => (
+              <button
+                key={u.id}
+                onClick={async () => {
+                  await handleSwitchDemoRole(u);
+                  setIsReLoginOpen(false);
+                }}
+                className="w-full text-left p-3 rounded-lg border border-[#CBD2DC] hover:border-[#0F766E] hover:bg-[#F7F7F4] flex items-center justify-between transition-colors"
+              >
+                <div>
+                  <p className="text-xs font-bold text-[#1F2A44]">{u.name}</p>
+                  <p className="text-[11px] text-[#5B6475] capitalize">{u.role.replace("_", " ")} &middot; {u.team}</p>
+                </div>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[#E2E5EA] text-[#1F2A44]">
+                  {u.max_tier.toUpperCase()}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="pt-2 border-t border-[#E2E5EA] flex justify-end">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setIsReLoginOpen(false);
+                window.location.href = "/";
+              }}
+            >
+              Go to Full Login
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };

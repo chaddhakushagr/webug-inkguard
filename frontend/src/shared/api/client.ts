@@ -50,6 +50,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       } catch {
         errBody = { message: res.statusText };
       }
+      if (res.status === 401) {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("inkguard_token");
+          window.dispatchEvent(
+            new CustomEvent("inkguard:unauthorized", {
+              detail: { message: errBody.message || "Your session has expired. Please sign in again." },
+            })
+          );
+        }
+      }
       throw new ApiError(
         res.status,
         errBody.code || `HTTP_${res.status}`,
@@ -79,14 +89,33 @@ export const api = {
   getSettings: () => request<any>("/settings"),
 
   // Knowledge Base
-  getKBEntries: (type?: string) =>
-    request<KBEntry[]>(`/kb/entries${type ? `?type=${type}` : ""}`),
+  getKBEntries: (type?: string, status?: string, classification?: string, expiringSoonOnly?: boolean) => {
+    const params = new URLSearchParams();
+    if (type && type !== "all") params.append("type", type);
+    if (status && status !== "all") params.append("status", status);
+    if (classification && classification !== "all") params.append("classification", classification);
+    if (expiringSoonOnly) params.append("expiring_soon_only", "true");
+    const qs = params.toString();
+    return request<KBEntry[]>(`/kb/entries${qs ? `?${qs}` : ""}`);
+  },
   getKBEntry: (id: string) => request<KBEntry>(`/kb/entries/${id}`),
+  createKBEntry: (entry: { code: string; type: string; title: string; body?: string; data?: any; classification: string }) =>
+    request<KBEntry>("/kb/entries", { method: "POST", body: JSON.stringify(entry) }),
+  updateKBEntry: (id: string, entry: { title?: string; body?: string; data?: any; classification?: string; change_note?: string }) =>
+    request<KBEntry>(`/kb/entries/${id}`, { method: "PUT", body: JSON.stringify(entry) }),
+  retireKBEntry: (id: string) =>
+    request<KBEntry>(`/kb/entries/${id}/retire`, { method: "POST" }),
   getKBEntryVersions: (id: string) => request<any[]>(`/kb/entries/${id}/versions`),
 
   // Submissions
-  getSubmissions: (status?: string) =>
-    request<Submission[]>(`/submissions${status ? `?status=${status}` : ""}`),
+  getSubmissions: (status?: string, channel?: string, riskTier?: string) => {
+    const params = new URLSearchParams();
+    if (status && status !== "all") params.append("status", status);
+    if (channel && channel !== "all") params.append("channel", channel);
+    if (riskTier && riskTier !== "all") params.append("risk_tier", riskTier);
+    const qs = params.toString();
+    return request<Submission[]>(`/submissions${qs ? `?${qs}` : ""}`);
+  },
   getSubmission: (id: string) => request<Submission>(`/submissions/${id}`),
   createSubmission: (data: { title: string; channel: string; content: string; team_id?: string }) =>
     request<Submission>("/submissions", {
@@ -105,10 +134,11 @@ export const api = {
   // Workflow
   submit: (id: string) => request<Submission>(`/submissions/${id}/submit`, { method: "POST" }),
   claim: (id: string) => request<Submission>(`/submissions/${id}/claim`, { method: "POST" }),
+  unclaim: (id: string) => request<Submission>(`/submissions/${id}/unclaim`, { method: "POST" }),
   approve: (id: string, note?: string) =>
     request<Submission>(`/submissions/${id}/approve`, {
       method: "POST",
-      body: JSON.stringify({ note }),
+      body: JSON.stringify({ note: note || "Editorial review approval" }),
     }),
   requestChanges: (id: string, note: string) =>
     request<Submission>(`/submissions/${id}/request-changes`, {
@@ -118,7 +148,7 @@ export const api = {
   markPublished: (id: string, url?: string) =>
     request<Submission>(`/submissions/${id}/mark-published`, {
       method: "POST",
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url: url || "https://brand.lumo.skincare/published" }),
     }),
 
   // Review & Findings

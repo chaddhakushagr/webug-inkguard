@@ -7,12 +7,20 @@ export interface DiffLine {
 }
 
 interface DiffViewProps {
+  original?: string;
+  modified?: string;
   diffText?: string;
   lines?: DiffLine[];
   className?: string;
 }
 
-export const DiffView: React.FC<DiffViewProps> = ({ diffText, lines, className = "" }) => {
+export const DiffView: React.FC<DiffViewProps> = ({
+  original,
+  modified,
+  diffText,
+  lines,
+  className = "",
+}) => {
   let parsedLines: DiffLine[] = lines || [];
 
   if (!lines && diffText) {
@@ -25,6 +33,26 @@ export const DiffView: React.FC<DiffViewProps> = ({ diffText, lines, className =
       }
       return { type: "unchanged", text: line };
     });
+  } else if (!lines && !diffText && original !== undefined && modified !== undefined) {
+    const origLines = original.split("\n");
+    const modLines = modified.split("\n");
+    const res: DiffLine[] = [];
+
+    // Removed lines
+    for (const l of origLines) {
+      if (l.trim() && !modLines.includes(l)) {
+        res.push({ type: "removed", text: l });
+      }
+    }
+    // Added / unchanged lines
+    for (const l of modLines) {
+      if (l.trim() && !origLines.includes(l)) {
+        res.push({ type: "added", text: l });
+      } else {
+        res.push({ type: "unchanged", text: l });
+      }
+    }
+    parsedLines = res.length > 0 ? res : [{ type: "unchanged", text: modified }];
   }
 
   return (

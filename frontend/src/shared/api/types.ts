@@ -41,6 +41,27 @@ export interface KBEntry {
   updated_at: string;
 }
 
+export interface KBVersion {
+  id: string;
+  entry_id: string;
+  version: number;
+  snapshot: Record<string, any>;
+  changed_by: string;
+  change_note?: string | null;
+  created_at: string;
+}
+
+export interface SubmissionVersion {
+  id: string;
+  submission_id: string;
+  version_no: number;
+  content: string;
+  content_hash: string;
+  created_by: string;
+  source: string;
+  created_at: string;
+}
+
 export interface Submission {
   id: string;
   title: string;

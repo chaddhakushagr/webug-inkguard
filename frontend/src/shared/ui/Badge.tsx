@@ -34,12 +34,17 @@ export type BadgeType =
   | { kind: "tier"; value: "public" | "internal" | "confidential" };
 
 interface BadgeProps {
-  badge: BadgeType;
+  badge?: BadgeType;
+  status?: "Draft" | "Checked" | "Submitted" | "In Review" | "Changes Requested" | "Approved" | "Marked Published" | string;
   className?: string;
   size?: "sm" | "md";
 }
 
-export const Badge: React.FC<BadgeProps> = ({ badge, className = "", size = "md" }) => {
+export const Badge: React.FC<BadgeProps> = ({ badge: propBadge, status, className = "", size = "md" }) => {
+  const badge: BadgeType = propBadge || {
+    kind: "status",
+    value: (status as any) || "Draft",
+  };
   const sizeStyles = size === "sm" ? "text-[11px] px-2 py-0.5 gap-1" : "text-xs px-2.5 py-1 gap-1.5";
 
   // 1. Severity Badges (WCAG Verified Colors)
