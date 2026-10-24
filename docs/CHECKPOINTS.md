@@ -6,8 +6,10 @@
 |---|---|---|---|---|
 | **Phase 0 (Exit)** | Sat 13:45 | **DONE** | `p0` | Monolith scaffold, contracts/openapi.json, 15 models, stubs, 11 tests, Next.js static export |
 | **Prompt 0 (UI)** | Sat 14:15 | **DONE** | `839cece` | Proofreader design system, typed UI components, AppShell, login overhaul, gallery, evidence screenshots |
-| **Prompt 1A (BE)** | Sat 14:50 | **DONE** | commit pending | Real JWT auth, RBAC domain, immutable KB versioning, Submissions & diff, Table-driven workflow, Hash-chained audit, Seed loader |
-| **G1** | Sat 17:30 | In Progress | `g1` (target) | Core workflow end-to-end, domain rules, tracer deploy |
+| **Prompt 1A (BE)** | Sat 14:50 | **DONE** | `0dfb8b3` | Real JWT auth, RBAC domain, immutable KB versioning, Submissions & diff, Table-driven workflow, Hash-chained audit, Seed loader |
+| **Prompt 1B (AI)** | Sat 15:15 | **DONE** | `fabf445` | AI review pipeline, BM25 retriever, LLM adapters, Lumo seed content, synthetic history, 10 offline tests |
+| **Prompt 1C (FE)** | Sat 15:45 | **DONE** | `2aac793` | Core screens on design system, role dashboards, KB diff, submissions shell, reviewer queue, static export |
+| **G1** | Sat 19:30 | **DONE** | `g1` | Full workflow verified: Draft -> Approved -> Marked Published, 2-reviewer requirement, fact v2, agency isolation, self-approval refusal, SHA-256 audit chaining |
 | **G2** | Sat 22:00 | Planned | `g2` | Review engine integrated, golden path GP-1..GP-6 local, screenshots |
 | **G3** | Sun 01:00 | Planned | `g3` | Free-cloud deployment verified, GP-1..GP-8 live incognito, insights |
 | **G5** | Sun 07:30 | Planned | `v0.2.0-round2` | Hardening, audit logs, doc pack complete, ready for submission |

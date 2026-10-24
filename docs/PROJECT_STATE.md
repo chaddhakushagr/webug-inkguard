@@ -1,8 +1,8 @@
 # Project State: Inkguard
 
-**Current Phase:** Phase 1 (Core Domain & Monolith Implementation)  
-**Last Updated:** Sat 24 Oct 2026, 13:20 IST  
-**Current Gate:** Pre-Gate 1 (Target: 17:30 IST)  
+**Current Phase:** Phase 1 Complete / Transition to Phase 2 (Review Orchestrator & Triage)  
+**Last Updated:** Sat 24 Oct 2026, 19:30 IST  
+**Current Gate:** Gate G1 Complete (Target: Gate G2 - Sat 22:00 IST)  
 **Lane Active:** ALL (Sparsh [BE], Kushagra [AI], Apurrv [FE])
 
 ## Active Milestones
@@ -17,7 +17,10 @@
 - [x] Prompt 1A: Backend real implementation (Auth, RBAC, KB CRUD & versioning, Submissions & diff, State machine & queue, Audit hash chaining, Seed loader) [BE]
 - [x] Prompt 1B: AI domain, seed data, adapters (Lumo seed content, synthetic history, Sanitise/Rules/A11y/Guardrails/Suggest, BM25 retriever, Mock/OpenAI/Cached LLM adapters) [AI]
 - [x] Prompt 1C: Core screens on the design system (KB, Submissions, Reviewer Queue, Submission Detail shell) [FE]
-- [ ] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
+- [x] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
+- [ ] Phase 2A: Review Orchestrator, findings API & persistence, action endpoints [BE + AI]
+- [ ] Phase 2B: Findings UI, inline highlighting, interactive triage & escalation [FE]
+- [ ] Gate G2: Golden path GP-1..GP-6 local with full findings review & evidence screenshots [ALL]
 
 ## Completed Verification
 - `manage.py setup`: Virtualenv creation, dependency installation, Alembic migration, and seeding verified.
@@ -58,5 +61,24 @@
   - Submissions & Detail Shell: filterable list, new submission form with S1 to S5 one-click loaders and auto risk-tier calculation; detail shell with `StatusStepper`, context-sensitive primary actions based on `allowed_actions`, plain textarea Edit mode, Versions tab with `DiffView`, Comments tab (threaded submission-level), Approvals timeline, and Findings panel placeholder.
   - Reviewer Queue: unassigned vs claimed views, filter by risk tier and submission age, and one-click "Claim" action transitioning items to In Review.
   - Evidence screenshots: captured into `docs/evidence/fe-*.png`.
+- Gate G1 Verification:
+  - Command output: `python manage.py test` passed 54/54 tests cleanly.
+  - Command output: `python manage.py arch` verified clean architecture (2 kept, 0 broken).
+  - Live End-to-End Walkthrough: Executed multi-role lifecycle via real backend on port 8000:
+    1. Creator created high-risk submission (`channel=press_release`, `risk_tier=high`, Version 1, `Draft`).
+    2. Creator edited content -> Version 2, reverted to `Draft`.
+    3. Review triggered in offline mock mode -> transitioned to `Checked`.
+    4. Creator submitted -> transitioned to `Submitted`.
+    5. Reviewer 1 claimed -> transitioned to `In Review`.
+    6. Reviewer 1 commented -> threaded comment recorded.
+    7. Reviewer 1 requested changes -> transitioned to `Changes Requested`.
+    8. Creator revised content -> Version 3, resubmitted -> `Checked` -> `Submitted`.
+    9. Multi-reviewer check: Reviewer 1 approved (1/2, remained `In Review`), Reviewer 2 approved (2/2 -> transitioned to `Approved`).
+    10. Creator marked published -> transitioned to `Marked Published` with live URL.
+    11. Admin edited fact `FACT-001` -> Version 2 appeared with full snapshot history.
+    12. Agency creator access restricted strictly to `public` tier entries; internal and confidential entries masked.
+    13. Self-approval blocked: Creator attempting to approve own submission refused with `403 Forbidden`.
+    14. Cryptographic audit log: 11 hash-chained rows verified with SHA-256 integrity intact.
+  - Evidence screenshots: captured into `docs/evidence/g1-*.png`.
 
 

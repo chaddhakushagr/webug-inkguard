@@ -31,3 +31,9 @@ This document records key technical decisions, rationale, alternatives considere
 - **Decision:** Use `lucide-react` for lightweight, tree-shakeable SVG icons across the design system.
 - **Rationale:** Strictly avoids external icon fonts or CDN image requests. Required to satisfy the accessibility constraint "never color alone" by providing distinct iconography for findings, statuses, verdicts, and source types.
 - **Free Tier Justification:** Open-source MIT package bundled locally.
+
+## Decision 006: Offline Review Pipeline Execution for Pre-Deployment Verification (Gate G1)
+- **Date:** 2026-10-24
+- **Decision:** Drive the Gate G1 golden path transition (Draft -> Checked) using the deterministic offline mock engine (`LLM_MODE=mock`) with zero external network egress.
+- **Rationale:** Aligns with hard constraint 2 ("Local first - no cloud account or API key required locally") and enables complete end-to-end multi-role state machine verification before wiring live external AI credentials.
+- **Free Tier Justification:** 100% offline, zero external LLM calls or cloud usage.

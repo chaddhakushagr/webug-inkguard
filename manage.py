@@ -91,7 +91,7 @@ def cmd_test(args):
 def cmd_arch(args):
     py = get_python()
     print("[Inkguard Arch] Verifying clean architecture boundaries with import-linter...")
-    run_cmd([py, "-m", "importlinter.cli"], cwd=ROOT_DIR)
+    run_cmd([py, "-c", "import importlinter.cli, sys; sys.exit(importlinter.cli.lint_imports())"], cwd=ROOT_DIR)
 
 
 def cmd_openapi(args):
