@@ -1,0 +1,25 @@
+[importlinter]
+root_package = app
+include_external_packages = True
+
+[importlinter:contract:1]
+name = Domain layer purity
+type = forbidden
+source_modules =
+    app.domain
+forbidden_modules =
+    app.application
+    app.adapters
+    app.api
+    sqlalchemy
+    fastapi
+    httpx
+
+[importlinter:contract:2]
+name = Application layer isolation
+type = forbidden
+source_modules =
+    app.application
+forbidden_modules =
+    app.adapters
+    app.api
