@@ -74,7 +74,7 @@ class UserSchema(BaseModel):
 class UserCreate(BaseModel):
     email: str
     name: str
-    password: str
+    password: Optional[str] = "LumoDemo2026!"
     role: str
     max_tier: str = "internal"
     team_id: Optional[str] = None
