@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Dict, Any
+from sqlalchemy.orm import Session
 from app.api.schemas import (
     LoginRequest,
     TokenResponse,
@@ -7,6 +8,10 @@ from app.api.schemas import (
     SystemStatusResponse,
     DemoUser,
 )
+from app.adapters.db.session import get_db
+from app.adapters.db.models import User
+from app.adapters.security import create_access_token, verify_password, hash_password
+from app.api.dependencies import get_current_user, AuthenticatedUser
 from app.config import settings
 
 router = APIRouter(tags=["Auth & System"])
@@ -77,7 +82,7 @@ def get_system_status():
         ai_mode=settings.LLM_MODE,
         ai_provider="Google AI Studio" if settings.LLM_API_KEY else "Offline Mock Engine",
         daily_quota_limit=settings.LLM_DAILY_CAP,
-        daily_calls_made=14,
+        daily_calls_made=0,
         uptime_seconds=3600,
         db_connected=True,
     )
@@ -85,48 +90,100 @@ def get_system_status():
 
 @router.get("/auth/demo-users", response_model=List[DemoUser])
 def get_demo_users():
+    if not settings.DEMO_MODE:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Demo users are only available when DEMO_MODE is active",
+        )
     return DEMO_USERS
 
 
 @router.post("/auth/login", response_model=TokenResponse)
-def login(req: LoginRequest):
-    # Match demo users or check password
-    for user in DEMO_USERS:
-        if user.email.lower() == req.email.lower():
-            return TokenResponse(
-                access_token=f"mock-jwt-token-{user.id}",
-                user={
-                    "id": user.id,
-                    "name": user.name,
-                    "email": user.email,
-                    "role": user.role,
-                    "max_tier": user.max_tier,
-                    "team": user.team,
-                },
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    email = req.email.strip().lower()
+
+    # 1. Check in real database
+    db_user = db.query(User).filter(User.email.ilike(email)).first()
+    if db_user:
+        # Verify password if hashed, or in demo mode accept DEMO_PASSWORD
+        valid = False
+        if req.password == settings.DEMO_PASSWORD and settings.DEMO_MODE:
+            valid = True
+        elif db_user.password_hash and verify_password(req.password, db_user.password_hash):
+            valid = True
+
+        if not valid:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
             )
-    # Default fallback demo user
-    return TokenResponse(
-        access_token="mock-jwt-token-creator",
-        user={
-            "id": "u-creator-social",
-            "name": "Elena Chen",
-            "email": req.email,
-            "role": "creator",
-            "max_tier": "internal",
-            "team": "Team Social",
-        },
+
+        team_name = db_user.team.name if db_user.team else None
+        token = create_access_token({
+            "sub": db_user.id,
+            "email": db_user.email,
+            "name": db_user.name,
+            "role": db_user.role,
+            "max_tier": db_user.max_tier,
+            "team": team_name,
+        })
+        return TokenResponse(
+            access_token=token,
+            user={
+                "id": db_user.id,
+                "name": db_user.name,
+                "email": db_user.email,
+                "role": db_user.role,
+                "max_tier": db_user.max_tier,
+                "team": team_name,
+            },
+        )
+
+    # 2. In DEMO_MODE, match demo personas
+    if settings.DEMO_MODE:
+        for demo in DEMO_USERS:
+            if demo.email.lower() == email:
+                if req.password and req.password != settings.DEMO_PASSWORD:
+                    # Allow blank or DEMO_PASSWORD
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Invalid password for demo user",
+                    )
+                token = create_access_token({
+                    "sub": demo.id,
+                    "email": demo.email,
+                    "name": demo.name,
+                    "role": demo.role,
+                    "max_tier": demo.max_tier,
+                    "team": demo.team,
+                })
+                return TokenResponse(
+                    access_token=token,
+                    user={
+                        "id": demo.id,
+                        "name": demo.name,
+                        "email": demo.email,
+                        "role": demo.role,
+                        "max_tier": demo.max_tier,
+                        "team": demo.team,
+                    },
+                )
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid email or password",
     )
 
 
 @router.get("/auth/me")
-def get_me():
+def get_me(current_user: AuthenticatedUser = Depends(get_current_user)):
     return {
-        "id": "u-creator-social",
-        "name": "Elena Chen",
-        "email": "creator.social@lumo.internal",
-        "role": "creator",
-        "max_tier": "internal",
-        "team": "Team Social",
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role,
+        "max_tier": current_user.max_tier,
+        "team": current_user.team,
         "is_active": True,
     }
 
