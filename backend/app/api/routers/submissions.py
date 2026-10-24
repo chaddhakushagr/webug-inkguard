@@ -42,6 +42,9 @@ from app.domain.workflow.state_machine import WorkflowStateMachine, WorkflowStat
 
 router = APIRouter(tags=["Submissions & Workflow"])
 
+# In-memory per-user review rate limiter: user_id -> list of timestamps
+_user_review_timestamps: Dict[str, List[float]] = {}
+
 
 def get_risk_tier_for_channel(channel: str) -> str:
     c = channel.strip().lower()
@@ -235,6 +238,11 @@ def create_submission(
     now = datetime.now(timezone.utc)
     risk_tier = get_risk_tier_for_channel(req.channel)
     content_text = req.content.strip()
+    if len(content_text) > settings.MAX_CONTENT_CHARS:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Content length ({len(content_text)}) exceeds limit of {settings.MAX_CONTENT_CHARS} characters",
+        )
     content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()
 
     sub = Submission(
@@ -312,6 +320,11 @@ def update_submission_content(
 
     now = datetime.now(timezone.utc)
     content_text = req.content.strip()
+    if len(content_text) > settings.MAX_CONTENT_CHARS:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Content length ({len(content_text)}) exceeds limit of {settings.MAX_CONTENT_CHARS} characters",
+        )
     content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()
 
     # Get latest version number
@@ -774,6 +787,18 @@ def trigger_review(
     sub = db.query(Submission).filter(Submission.id == submission_id).first()
     if not sub:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
+
+    import time
+    now_ts = time.time()
+    user_ts = _user_review_timestamps.get(current_user.id, [])
+    recent_ts = [t for t in user_ts if (now_ts - t) < 3600]
+    if len(recent_ts) >= settings.RATE_LIMIT_REVIEWS_PER_HOUR:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded: maximum {settings.RATE_LIMIT_REVIEWS_PER_HOUR} reviews per hour",
+        )
+    recent_ts.append(now_ts)
+    _user_review_timestamps[current_user.id] = recent_ts
 
     now = datetime.now(timezone.utc)
     rev_id = str(uuid.uuid4())

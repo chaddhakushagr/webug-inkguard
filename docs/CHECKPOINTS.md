@@ -10,7 +10,7 @@
 | **Prompt 1B (AI)** | Sat 15:15 | **DONE** | `fabf445` | AI review pipeline, BM25 retriever, LLM adapters, Lumo seed content, synthetic history, 10 offline tests |
 | **Prompt 1C (FE)** | Sat 15:45 | **DONE** | `2aac793` | Core screens on design system, role dashboards, KB diff, submissions shell, reviewer queue, static export |
 | **G1** | Sat 19:30 | **DONE** | `g1` | Full workflow verified: Draft -> Approved -> Marked Published, 2-reviewer requirement, fact v2, agency isolation, self-approval refusal, SHA-256 audit chaining |
-| **G2** | Sat 22:00 | Planned | `g2` | Review engine integrated, golden path GP-1..GP-6 local, screenshots |
+| **G2** | Sat 22:00 | **DONE** | `g2` | Golden path GP-1..GP-6 executed in mock mode with real running app; 61 tests passing (including all SPEC sec 12 safety & negative tests); 2 arch contracts kept; evidence screenshots in docs/evidence/gp-*.png |
 | **G3** | Sun 01:00 | Planned | `g3` | Free-cloud deployment verified, GP-1..GP-8 live incognito, insights |
 | **G5** | Sun 07:30 | Planned | `v0.2.0-round2` | Hardening, audit logs, doc pack complete, ready for submission |
 
@@ -30,3 +30,26 @@
 - Component Gallery: `/dev/ui` showing all component variants.
 - Static export: `npm run build` succeeds cleanly. Evidence screenshots saved in `docs/evidence/ui-*.png`.
 
+### Gate G2 Verification Notes
+- Executed Golden Path GP-1 through GP-6 on live running services with full evidence captures (`docs/evidence/gp-*.png`):
+  - **GP-1 (`gp-01-login-creator.png`)**: Authenticated as Creator Elena Chen; verified ModeChip displays `Mock` and Creator Dashboard displays demo checklist and active drafts.
+  - **GP-2 (`gp-02-sample-review.png`)**: High-risk press release submission created; triggered mock review engine; 32 findings generated across Rule and AI categories; ModeChip verified `Mock`; Data Boundary panel verified 0 characters sent, 0 external calls, and explicit mock disclaimer.
+  - **GP-3 (`gp-03-triage-actions.png`)**: Triaged findings: Accepted fix for "miracle" (created v2 in Draft, voided prior state), dismissed banned term "serum" with mandatory reason code `brand_exception` and justification, escalated clinical trial claim to brand manager; cleared remaining high-risk blockers.
+  - **GP-4 (`gp-04-reviewer-changes-requested.png`)**: Creator submitted; Reviewer Marcus Vance claimed submission (`In Review`), posted threaded review comment on finding span, and submitted formal change request with note (`Changes Requested`).
+  - **GP-5 (`gp-05-version-diff-and-approvals.png`)**: Creator revised content to v3 (`Draft`), re-checked in mock mode, resubmitted; Approver 1 (Reviewer Marcus Vance) approved (1 of 2 recorded, stayed `In Review`); Approver 2 (Brand Manager Jordan Reed) approved (2 of 2 recorded -> transitioned to `Approved`); computed clean version diff v1 -> v3 showing exact additions and removals.
+  - **GP-6 (`gp-06-published-live.png`)**: Creator marked published with live URL (`https://brand.lumo.skincare/press/spring-hydration-v3`), transitioning status to `Marked Published`. Full cryptographic audit trail verified with 100 SHA-256 hash-chained entries.
+- All SPEC section 12 negative and safety tests verified passing:
+  - 403 on self-approval attempt by creator.
+  - 409 on invalid workflow transition.
+  - 422 on finding dismissal without reason code/text.
+  - 413 on oversized content payload (>20,000 characters).
+  - 429 on rate limit exceeded (>60 reviews/hour).
+  - Agency user clearance restricted to public tier only.
+  - Zero confidential entries or seeded secrets present in any outbound LLM request.
+  - Code-level guardrails: hallucinated citations dropped, mismatched excerpts dropped, expired facts evaluated in code, low-confidence findings flagged for human review.
+  - Prompt injection sample S5 flagged without altering evaluation behaviour.
+  - Fallback to `rules_only` when daily cap is 0 or admin "no external AI" switch is enabled.
+  - SQLite/Postgres audit log table immutability: UPDATE and DELETE statements raise errors.
+  - Voids approvals on edit: approving an older version after a new draft is rejected with 409.
+- Architecture contracts: `python manage.py arch` passed (Domain purity KEPT, Application isolation KEPT).
+- Full test suite: `python manage.py test` passed 61/61 tests cleanly.

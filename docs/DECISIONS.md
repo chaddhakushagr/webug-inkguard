@@ -37,3 +37,10 @@ This document records key technical decisions, rationale, alternatives considere
 - **Decision:** Drive the Gate G1 golden path transition (Draft -> Checked) using the deterministic offline mock engine (`LLM_MODE=mock`) with zero external network egress.
 - **Rationale:** Aligns with hard constraint 2 ("Local first - no cloud account or API key required locally") and enables complete end-to-end multi-role state machine verification before wiring live external AI credentials.
 - **Free Tier Justification:** 100% offline, zero external LLM calls or cloud usage.
+
+## Decision 007: Review Quota, Content Size Guards, and Headless Auth Support (Gate G2)
+- **Date:** 2026-10-24
+- **Decision:** Enforce 413 on content exceeding `MAX_CONTENT_CHARS` (20,000 characters), 429 on review rate limit (`RATE_LIMIT_REVIEWS_PER_HOUR=60`), and support `demo-token-` authorization prefix in `DEMO_MODE`.
+- **Rationale:** Hardens API boundaries against denial-of-service, verifies SPEC section 12 negative safety requirements, and enables headless browser screenshot capture without fragile session cookie setups.
+- **Free Tier Justification:** In-memory tracking and stateless HTTP enforcement; zero cloud infrastructure dependencies.
+

@@ -1,8 +1,8 @@
 # Project State: Inkguard
 
-**Current Phase:** Phase 2 Complete (2A Review Engine & 2B Findings UI) / Ready for Gate G2  
-**Last Updated:** Sat 24 Oct 2026, 20:00 IST  
-**Current Gate:** Gate G1 Complete (Target: Gate G2 - Sat 22:00 IST)  
+**Current Phase:** Gate G2 Complete / Ready for Gate G3 (Cloud Deployment)  
+**Last Updated:** Sat 24 Oct 2026, 20:15 IST  
+**Current Gate:** Gate G2 Complete (Target: Gate G3 - Sun 01:00 IST)  
 **Lane Active:** FE (Apurrv), BE (Sparsh), AI (Kushagra)
 
 ## Active Milestones
@@ -20,7 +20,9 @@
 - [x] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
 - [x] Phase 2A: Review Orchestrator, findings API & persistence, action endpoints, safety tests [BE + AI]
 - [x] Phase 2B: Findings UI, inline highlighting, interactive triage & escalation [FE]
-- [ ] Gate G2: Golden path GP-1..GP-6 local with full findings review & evidence screenshots [ALL]
+- [x] Gate G2: Golden path GP-1..GP-6 local with full findings review & evidence screenshots [ALL]
+- [ ] Gate G3: Free-cloud deployment verified, GP-1..GP-8 live incognito, insights [ALL]
+
 
 
 
@@ -126,7 +128,27 @@
     - Sample S4 (`sub-sample-s4`): Social Teaser — 5 findings flagged including confidential launch codename leak ("Project Aurora") on external channel.
     - Sample S5 (`sub-sample-s5`): Security Test — 3 findings flagged; prompt injection attempt ("ignore previous instructions") flagged in context while review completes safely without behavior alteration.
   - Build & Static Export: `npm run build` succeeds cleanly with all 16 static routes prerendered.
-
-
-
-
+- Gate G2 Verification (Golden Path GP-1..GP-6 & Safety Audit):
+  - Command output: `python manage.py test` passed 61/61 tests cleanly (7.25s).
+  - Command output: `python manage.py arch` verified clean architecture (2 kept, 0 broken).
+  - Golden Path Walkthrough in Mock Mode (`scripts/run_golden_path_g2.py`):
+    - **GP-1**: Creator authentication (Elena Chen) -> PASS. ModeChip displays `Mock`. Dashboard loads first-run checklist. Screenshot: `docs/evidence/gp-01-login-creator.png`.
+    - **GP-2**: High-risk press release created and evaluated with offline review engine -> PASS. 32 findings flagged across Rule and AI categories with explicit citations. Data boundary panel confirmed zero external egress (0 characters sent, 0 external requests). Screenshot: `docs/evidence/gp-02-sample-review.png`.
+    - **GP-3**: Findings triage -> PASS. Accepted suggested fix for "miracle" (created v2 in Draft, voided prior approvals), dismissed banned term "serum" with mandatory reason code `brand_exception` and justification, escalated clinical trial claim to brand manager; cleared remaining high-severity issues. Screenshot: `docs/evidence/gp-03-triage-actions.png`.
+    - **GP-4**: Creator submitted; Reviewer 1 (Marcus Vance) claimed submission (`In Review`), added threaded inline review comment, and requested changes with note (`Changes Requested`) -> PASS. Screenshot: `docs/evidence/gp-04-reviewer-changes-requested.png`.
+    - **GP-5**: Creator revised content to v3 (`Draft`), re-checked in mock mode, resubmitted; Approver 1 (Marcus Vance) approved (1/2, stayed `In Review`); Approver 2 (Jordan Reed) approved (2/2 -> `Approved`); computed unified version diff v1 -> v3 -> PASS. Screenshot: `docs/evidence/gp-05-version-diff-and-approvals.png`.
+    - **GP-6**: Creator marked published with live URL (`https://brand.lumo.skincare/press/spring-hydration-v3`) -> PASS (`Marked Published`). Cryptographic audit trail contains 100 SHA-256 hash-chained entries. Screenshot: `docs/evidence/gp-06-published-live.png`.
+  - Negative & Safety Invariants Verified:
+    - 403 on self-approval attempt by creator.
+    - 409 on invalid workflow transition.
+    - 422 on finding dismissal without reason code/text.
+    - 413 on oversized content payload (>20,000 characters).
+    - 429 on rate limit exceeded (>60 reviews/hour).
+    - Agency user clearance restricted to public tier only.
+    - Zero confidential entries or seeded secrets present in any outbound LLM request.
+    - Code-level guardrails: hallucinated citations dropped, mismatched excerpts dropped, expired facts evaluated in code, low-confidence findings flagged for human review.
+    - Prompt injection sample S5 flagged without altering evaluation behaviour.
+    - Fallback to `rules_only` when daily cap is 0 or admin "no external AI" switch is enabled.
+    - SQLite/Postgres audit log table immutability: UPDATE and DELETE statements raise errors.
+    - Voids approvals on edit: approving an older version after a new draft is rejected with 409.
+    - Backend disconnection resilience: killing backend server triggers accessible `ErrorState` component with retry button, preventing blank screen.

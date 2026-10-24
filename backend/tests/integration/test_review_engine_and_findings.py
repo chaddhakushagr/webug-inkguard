@@ -267,3 +267,50 @@ def test_safety_approval_on_old_version_rejected_after_edit():
     )
     # Status is Draft, not In Review, so approval cannot proceed
     assert appr_old_res.status_code in (400, 403, 409)
+
+
+def test_safety_oversized_content_returns_413():
+    creator_token = get_token("creator.social@lumo.internal")
+    h_creator = {"Authorization": f"Bearer {creator_token}"}
+
+    oversized = "A" * (settings.MAX_CONTENT_CHARS + 50)
+    res = client.post(
+        "/api/v1/submissions",
+        json={"title": "Oversized Test", "channel": "social", "content": oversized},
+        headers=h_creator,
+    )
+    assert res.status_code == 413
+    assert "exceeds limit" in res.json()["message"]
+
+
+def test_safety_review_rate_limit_returns_429():
+    creator_token = get_token("creator.social@lumo.internal")
+    h_creator = {"Authorization": f"Bearer {creator_token}"}
+
+    create_res = client.post(
+        "/api/v1/submissions",
+        json={"title": "Rate Limit Test", "channel": "social", "content": "Clean sample test copy."},
+        headers=h_creator,
+    )
+    assert create_res.status_code == 200
+    sub_id = create_res.json()["id"]
+
+    # Pre-populate rate limiter for this user with 60 timestamps
+    import time
+    from app.api.routers.submissions import _user_review_timestamps
+    # Elena Chen's user ID is u-creator-social or mapped UUID
+    from app.adapters.db.session import SessionLocal
+    from app.adapters.db.models import User
+    db = SessionLocal()
+    u = db.query(User).filter(User.email == "creator.social@lumo.internal").first()
+    user_id = u.id if u else "u-creator-social"
+
+    now_ts = time.time()
+    _user_review_timestamps[user_id] = [now_ts - 100] * settings.RATE_LIMIT_REVIEWS_PER_HOUR
+
+    res = client.post(f"/api/v1/submissions/{sub_id}/review?sync=true", headers=h_creator)
+    assert res.status_code == 429
+    assert "Rate limit exceeded" in res.json()["message"]
+    # Clean up
+    _user_review_timestamps[user_id] = []
+

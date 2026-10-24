@@ -2,62 +2,62 @@
 
 | ID | Feature | Tier | Status | How a Judge Verifies It | Evidence / Notes |
 |---|---|---|---|---|---|
-| F-01 | Email and password login, JWT with short expiry, hashed passwords, `/auth/me` | M | Planned | Log in via API or UI with credentials | |
-| F-02 | One-click demo login per role (DEMO_MODE) and synthetic demo banner | M | Planned | Click role buttons on login page | |
-| F-03 | Server-side RBAC, tier filtering, `allowed_actions` | M | Planned | Inspect `/submissions/{id}` payload for `allowed_actions` | |
-| F-04 | User management by admin | C | Planned | Admin settings tab | |
-| F-05 | Teams | M | Planned | Team assignment on users and submissions | |
-| F-10 | Knowledge-base entries (create, edit, retire) | M | Planned | KB dashboard view and mutations | |
-| F-11 | Immutable versions, history view, review recording | M | Planned | Edit a KB entry and inspect versions table | |
-| F-12 | Classification tiers on every entry | M | Planned | Public writer blocked from confidential entries | |
-| F-13 | Fact validity dates, "expiring soon" and "expired" badges | M | Planned | Badges displayed on KB entry cards | |
-| F-14 | Guideline document import (.txt/.md heuristic) | C | Planned | Heuristic candidate parser | |
-| F-15 | Terminology: banned, preferred, match type, severity | M | Planned | Run review with banned term "serum" | |
-| F-16 | Bulk JSON import and seed loader | M | Planned | `python manage.py seed` loads 50+ entries | |
-| F-20 | Create submission: title, channel, text, auto risk tier | M | Planned | Create post with high-risk channel | |
-| F-21 | Content versions with inline diff | M | Planned | View diff tab on submission screen | |
-| F-22 | State machine with 409 on invalid transitions | M | Planned | Attempt unauthorized status jump | |
-| F-23 | Risk tiers and approvals (1 low/medium, 2 high) | M | Planned | High risk requires 2 distinct approvers | |
-| F-24 | Threaded comments on submission and findings | M | Planned | Post comment on finding span | |
-| F-25 | Reviewer queue with claim | M | Planned | Claim submission in reviewer dashboard | |
-| F-26 | In-app notifications | C | Planned | Alert on state changes | |
-| F-27 | Mark Published by a human, optional URL | M | Planned | Mark published after final approval | |
-| F-28 | Append-only hash-chained audit log with filterable UI | M | Planned | Audit viewer verifying SHA256 chain | |
-| F-29 | Role-specific dashboard | M | Planned | Distinct widgets for Creator, Reviewer, Manager | |
-| F-30 | Review orchestration as background job / polled progress | M | Planned | Polling review status with progress indicator | |
-| F-31 | Sanitise and redact before external call, redaction log | M | Planned | Verify redaction log count and type | |
-| F-32 | Prompt-injection hardening and flagging | M | Planned | Review sample S5 and observe safety flag | |
-| F-33 | Rule checks: terms, disclaimers, regex, confidential leak | M | Planned | Verify rule-based findings badges | |
-| F-34 | Text accessibility & readability metrics | M | Planned | Reading score & ALL-CAPS flagged | |
-| F-35 | Retrieval: in-process BM25 over knowledge base | M | Planned | Tier-filtered guideline relevance ranking | |
-| F-36 | LLM analysis returning strict JSON | M | Planned | Semantic claims & tone evaluation | |
-| F-37 | Guardrails in code (citations & substring check) | M | Planned | Hallucinated citation pruned by engine | |
-| F-38 | Minimal-edit suggestions with change cap | M | Planned | Suggestion diff < 60% span replacement | |
-| F-39 | LLM adapter (live, cached, mock, rules_only) | M | Planned | Switch modes via settings or env | |
-| F-40 | Response cache table and `warm-cache` command | M | Planned | Cache hit flag on repeated queries | |
-| F-41 | Data-boundary log per external call | M | Planned | Review boundary tab reveals payload metadata | |
-| F-42 | Versioned prompt files | M | Planned | Prompts saved in `prompts/` | |
-| F-43 | Findings model with rich classification | M | Planned | Cards with type, severity, confidence | |
-| F-44 | Finding actions: accept, dismiss, escalate | M | Planned | Accept applies fix, dismiss logs reason | |
-| F-45 | Re-check carrying over dismissed findings | C | Planned | Fingerprint preserved across runs | |
-| F-46 | Highlighted findings in content, keyboard operable | M | Planned | Click text highlight to focus finding card | |
-| F-50 | Recurring issues analytics by type, rule, team, week | M | Planned | Visual trend charts on Insights page | |
-| F-51 | Dismissal and override reasons breakdown | M | Planned | Pie/bar breakdown of dismissal rationales | |
-| F-52 | Per-rule raw counters | S | Planned | Rule trigger frequency counts | |
-| F-53 | Synthetic history seed (80 reviews, 8 weeks) | M | Planned | Pre-populated historical trendlines | |
-| F-60 | AI-disclosure badge and "About AI" page | M | Planned | Header badge and dedicated disclosure route | |
-| F-61 | Rule findings and AI findings visually distinct | M | Planned | Green/Blue badge styling distinction | |
-| F-62 | Data-boundary panel on review screen | M | Planned | Dedicated boundary telemetry tab | |
-| F-63 | Admin egress policy and "no external AI" switch | M | Planned | Instant killswitch to `rules_only` | |
-| F-64 | Security basics (CSP, rate limiting, escaping) | M | Planned | HTTP security headers and sanitization | |
-| F-66 | Daily cap on live LLM calls with automatic fallback | M | Planned | Cap counter threshold triggers fallback | |
-| F-67 | Admin "reset demo data" | C | Planned | One-click seed restoration | |
-| F-70 | First-run guide, 5 sample submissions, empty states | M | Planned | Samples S1..S5 one-click loader | |
-| F-71 | Accessible, responsive UI (WCAG 2.1 AA) | M | Planned | Screen-reader friendly, 4.5:1 contrast | |
-| F-72 | Loading, empty and error states everywhere | M | Planned | Verified across all feature screens | |
-| F-73 | Status page: version, AI mode, health | S | Planned | `/system/status` diagnostic view | |
-| F-80 | Tests: domain unit, API integration, golden-path e2e | M | Planned | `python manage.py test` passes | |
-| F-82 | Local run via `python manage.py` | M | Planned | Zero make/docker setup works | |
-| F-83 | Health endpoint, request ids, structured logs | S | Planned | `/health` endpoint & UUID correlation ids | |
-| F-85 | Architecture tests with import-linter | M | Planned | `python manage.py arch` passes | |
-| F-86 | Free-cloud deployment (Neon + Render) | M | Planned | Public URL live verification | |
+| F-01 | Email and password login, JWT with short expiry, hashed passwords, `/auth/me` | M | Working | Log in with Elena Chen (`elena@lumo.skincare` / `demo123`), inspect JWT token and user payload | `backend/tests/integration/test_auth.py`, `docs/evidence/gp-01-login-creator.png` |
+| F-02 | One-click demo login per role (DEMO_MODE) and synthetic demo banner | M | Working | Open `/login`, click any of the 5 demo role cards (Creator, Reviewer, Approver, Manager, Agency) | `docs/evidence/fe-login.png`, `docs/evidence/gp-01-login-creator.png` |
+| F-03 | Server-side RBAC, tier filtering, `allowed_actions` | M | Working | Inspect `/submissions/{id}` and `/findings` JSON payloads for dynamic `allowed_actions` list | `backend/tests/unit/test_permissions.py`, `backend/tests/integration/test_users_and_rbac.py` |
+| F-04 | User management by admin | C | Working | Log in as Admin (`sarah@lumo.skincare`), manage roles and teams in `/settings` or via `/users` API | `backend/tests/integration/test_users_and_rbac.py` |
+| F-05 | Teams assignment | M | Working | Inspect user and submission records assigned to Growth, Brand, Social, or PR teams | `backend/tests/integration/test_users_and_rbac.py`, `backend/app/seed/loader.py` |
+| F-10 | Knowledge-base entries (create, edit, retire) | M | Working | Navigate to `/kb`, create or view facts/rules/terms/tone/assets, toggle active/retired state | `backend/tests/integration/test_kb.py`, `docs/evidence/fe-kb-list.png` |
+| F-11 | Immutable versions, history view, review recording | M | Working | Edit fact `FACT-001`, observe Version 2 creation, inspect version history with diff | `docs/evidence/g1-05-kb-facts-admin.png`, `backend/tests/integration/test_kb.py` |
+| F-12 | Classification tiers on every entry (Public, Internal, Confidential) | M | Working | Log in as Agency Creator (`alex@agency.external`), open `/kb`, verify zero internal/confidential entries visible | `docs/evidence/g1-06-kb-agency-public-only.png`, `backend/tests/integration/test_kb.py` |
+| F-13 | Fact validity dates, "expiring soon" and "expired" badges | M | Working | View `/kb` facts; observe "Expired" on FACT-003 and "Expiring soon" on FACT-004 | `docs/evidence/fe-kb-list.png`, `backend/tests/unit/test_ai_domain.py` |
+| F-14 | Guideline document import (.txt/.md heuristic) | C | Not built | Automated .txt/.md unstructured parser deferred to Round 3; structured bulk JSON seeding supported | Documented in `docs/KNOWN_LIMITATIONS.md` |
+| F-15 | Terminology: banned, preferred, match type, severity | M | Working | Run review on text containing banned term "serum" or ambiguous superlative; check rule finding | `backend/tests/unit/test_ai_domain.py`, `docs/evidence/gp-02-sample-review.png` |
+| F-16 | Bulk JSON import and seed loader | M | Working | Run `python manage.py seed`; populates 15 terms, 10 rules, 12 facts, 3 assets, 8 users, 5 samples | `backend/app/seed/loader.py` |
+| F-20 | Create submission: title, channel, text, auto risk tier | M | Working | Click "New Submission" on `/submissions/new`, select channel "Press Release", observe High Risk tier | `docs/evidence/fe-submissions-new.png`, `docs/evidence/gp-02-sample-review.png` |
+| F-21 | Content versions with inline diff | M | Working | Edit submission content or accept a fix; click "Versions" tab to see side-by-side / unified diff | `docs/evidence/gp-05-version-diff-and-approvals.png` |
+| F-22 | State machine with 409 on invalid transitions | M | Working | Attempt to jump directly from Draft to Approved; API rejects with 409 Conflict | `backend/tests/unit/test_state_machine.py`, `backend/tests/integration/test_submissions_and_workflow.py` |
+| F-23 | Risk tiers and approvals (1 low/medium, 2 high) | M | Working | Submit high-risk item; Reviewer 1 approves (1/2, stays In Review); Reviewer 2 approves (2/2 -> Approved) | `backend/tests/unit/test_state_machine.py`, `docs/evidence/gp-05-version-diff-and-approvals.png` |
+| F-24 | Threaded comments on submission and findings | M | Working | Add review comment on submission or expand finding card to post targeted comment | `docs/evidence/gp-04-reviewer-changes-requested.png` |
+| F-25 | Reviewer queue with claim | M | Working | Log in as Reviewer (`marcus@lumo.skincare`), open `/queue`, click "Claim" to assign and start review | `docs/evidence/fe-reviewer-queue.png`, `docs/evidence/gp-04-reviewer-changes-requested.png` |
+| F-26 | In-app notifications | C | Not built | Live websocket/push notification system deferred to Round 3; state change communicated via UI stepper and dashboard | Documented in `docs/KNOWN_LIMITATIONS.md` |
+| F-27 | Mark Published by a human, optional URL | M | Working | Once Approved, Creator clicks "Mark Published" and inputs live URL; status advances to Marked Published | `docs/evidence/gp-06-published-live.png`, `backend/tests/integration/test_submissions_and_workflow.py` |
+| F-28 | Append-only hash-chained audit log with filterable UI | M | Working | Open `/audit`, view SHA-256 hash chaining, filter by actor/action, verify cryptographic verification passes | `docs/evidence/fe-audit.png`, `docs/evidence/g1-07-audit-trail-chained.png` |
+| F-29 | Role-specific dashboard | M | Working | Log in as Creator, Reviewer, Manager, Admin; view custom KPI cards, queues, and action checklists | `docs/evidence/fe-dashboard-creator.png`, `fe-dashboard-reviewer.png`, `fe-dashboard-manager.png` |
+| F-30 | Review orchestration as background job / polled progress | M | Working | Click "Run Brand Review", observe 5-stage progress (extracting -> rule checks -> retrieving -> analysing -> finalising) | `docs/evidence/gp-02-sample-review.png`, `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-31 | Sanitise and redact before external call, redaction log | M | Working | Review text with emails, phone numbers, API keys; verify redacted in boundary log | `backend/tests/unit/test_ai_domain.py`, `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-32 | Prompt-injection hardening and flagging | M | Working | Review sample S5 containing injection payload; flagged safely without altering evaluation behaviour | `backend/tests/unit/test_ai_domain.py`, `docs/evidence/findings-s5.png` |
+| F-33 | Rule checks: terms, disclaimers, regex, confidential leak | M | Working | Review sample S1 or S4; observe flagged banned terms, missing FTC disclaimers, and confidential leaks | `docs/evidence/gp-02-sample-review.png`, `docs/evidence/findings-s4.png` |
+| F-34 | Text accessibility & readability metrics | M | Working | Inspect a11y findings: Flesch-Kincaid score, sentences >30 words, runs of ALL CAPS, missing alt text | `backend/tests/unit/test_ai_domain.py` |
+| F-35 | Retrieval: in-process BM25 over knowledge base | M | Working | Review claims; BM25 lexical retriever fetches top 5 relevant guidelines/facts matching submission terms | `backend/tests/unit/test_ai_domain.py`, `backend/app/adapters/retrieval/bm25.py` |
+| F-36 | LLM analysis returning strict JSON | M | Working | Structured schema validation ensures LLM responses parse deterministically into FindingItem models | `backend/tests/unit/test_ai_domain.py`, `backend/app/prompts/analysis.v1.md` |
+| F-37 | Guardrails in code (citations & substring check) | M | Working | Engine validates citation existence and excerpt presence in submission text, dropping hallucinations | `backend/tests/unit/test_ai_domain.py` |
+| F-38 | Minimal-edit suggestions with change cap | M | Working | Suggestion validator strictly enforces $\le 60\%$ character edit distance and forbids ungrounded claims | `backend/tests/unit/test_ai_domain.py` |
+| F-39 | LLM adapter (live, cached, mock, rules_only) | M | Working | Switch modes via `LLM_MODE`; verify offline mock execution returns deterministic fixtures with 0 egress | `docs/evidence/gp-02-sample-review.png`, `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-40 | Response cache table and `warm-cache` command | M | Working | Repeated identical reviews hit SQLite/Postgres cache; verify with `python manage.py warm-cache` | `backend/app/adapters/llm/cached.py` |
+| F-41 | Data-boundary log per external call | M | Working | Click "Data Boundary" tab on review; view provider, characters sent (0 in mock), and redaction summary | `docs/evidence/gp-02-sample-review.png`, `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-42 | Versioned prompt files | M | Working | Inspect `backend/app/prompts/analysis.v1.md` and `suggest.v1.md` with explicit variable slots | `backend/app/prompts/` |
+| F-43 | Findings model with rich classification | M | Working | Finding cards show issue type, severity badge, confidence %, cited rule/fact code, and suggested fix | `docs/evidence/gp-02-sample-review.png` |
+| F-44 | Finding actions: accept, dismiss, escalate | M | Working | Accept fix creates v2 in Draft; Dismiss requires reason code and explanation; Escalate links to manager | `docs/evidence/gp-03-triage-actions.png`, `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-45 | Re-check carrying over dismissed findings | Partial | Working | Triage fingerprinting persists dismissal records across review revisions | `backend/app/domain/review/` |
+| F-46 | Highlighted findings in content, keyboard operable | M | Working | Inline highlights with solid underline (Rule) vs wavy dotted underline (AI); clicking scrolls to card | `docs/evidence/gp-02-sample-review.png`, `frontend/src/components/ui/HighlightedText.tsx` |
+| F-50 | Recurring issues analytics by type, rule, team, week | M | Working | Open `/insights`, observe issue frequency by type, top rule triggers, and weekly trendlines | `docs/evidence/fe-insights.png` |
+| F-51 | Dismissal and override reasons breakdown | M | Working | View Dismissal Reasons chart on `/insights` showing breakdown of brand exceptions vs false positives | `docs/evidence/fe-insights.png` |
+| F-52 | Per-rule raw counters | S | Working | Inspect top-triggered rule counters in `/insights` summary cards | `docs/evidence/fe-insights.png` |
+| F-53 | Synthetic history seed (80 reviews, 8 weeks) | M | Working | Seed generates 80 historical reviews across 4 teams with realistic dismissal distributions | `backend/app/seed/synthetic_history.py` |
+| F-60 | AI-disclosure badge and "About AI" page | M | Working | Click "AI Disclosure" badge in top bar; navigates to `/about-ai` with system architecture & telemetry | `frontend/src/app/about-ai/page.tsx` |
+| F-61 | Rule findings and AI findings visually distinct | M | Working | Rule findings render with solid underlines and Teal icons; AI findings render with dotted underlines and Violet badges | `docs/evidence/gp-02-sample-review.png` |
+| F-62 | Data-boundary panel on review screen | M | Working | Open Data Boundary drawer on `/submission?id=...`; confirms zero egress in mock mode | `docs/evidence/gp-02-sample-review.png` |
+| F-63 | Admin egress policy and "no external AI" switch | M | Working | Toggle "No external AI" in admin settings; engine forces immediate fallback to `rules_only` | `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-64 | Security basics (CSP, rate limiting, escaping) | M | Working | Strict CSP headers configured; HTML escaping in HighlightedText; 413 on >20k chars; 429 on >60 reviews/hr | `backend/app/main.py`, `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-66 | Daily cap on live LLM calls with automatic fallback | M | Working | When daily cap reached, reviews complete via `rules_only` and display warning banner | `backend/tests/integration/test_review_engine_and_findings.py` |
+| F-67 | Admin "reset demo data" | C | Working | Execute `python manage.py seed` or call `/api/v1/system/reset-demo` to restore pristine baseline | `backend/app/seed/loader.py` |
+| F-70 | First-run guide, 5 sample submissions, empty states | M | Working | Creator dashboard features 4-step checklist; new submission offers one-click S1-S5 loaders | `docs/evidence/fe-dashboard-creator.png`, `docs/evidence/fe-submissions-new.png` |
+| F-71 | Accessible, responsive UI (WCAG 2.1 AA) | M | Working | Verified $\ge 4.5:1$ contrast ratio, keyboard navigation, aria-live announcements, skip-to-content | `docs/evidence/ui-gallery.png` |
+| F-72 | Loading, empty and error states everywhere | M | Working | Skeleton loaders during fetch, EmptyState cards when queues are empty, ErrorState on offline server | `frontend/src/components/ui/ErrorState.tsx`, `EmptyState.tsx` |
+| F-73 | Status page: version, AI mode, health | S | Working | Inspect `/api/v1/health`; returns `{status: "ok", ai_mode: "mock", version: "0.2.0"}` | `backend/tests/integration/test_health_and_stubs.py` |
+| F-80 | Tests: domain unit, API integration, golden-path e2e | M | Working | 61 tests passing covering domain, permissions, state machine, audit chaining, and negative safety | `backend/tests/` |
+| F-82 | Local run via `python manage.py` | M | Working | `python manage.py dev` boots FastAPI on :8000 and Next.js on :3000 with zero Docker/make | `manage.py` |
+| F-83 | Health endpoint, request ids, structured logs | S | Working | `/api/v1/health` verified; middleware attaches `X-Request-ID` to all responses | `backend/app/main.py`, `backend/tests/integration/test_health_and_stubs.py` |
+| F-85 | Architecture tests with import-linter | M | Working | `python manage.py arch` enforces Domain layer purity and Application isolation (2 kept, 0 broken) | `manage.py arch` |
+| F-86 | Free-cloud deployment (Neon + Render) | M | Planned | Scheduled for Gate G3 (Neon Postgres + Render Web Service) | `docs/SPEC.md` Section 14 |
