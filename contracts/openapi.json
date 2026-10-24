@@ -138,64 +138,6 @@
         ]
       }
     },
-    "/api/v1/settings": {
-      "get": {
-        "tags": [
-          "Auth & System"
-        ],
-        "summary": "Get Settings",
-        "operationId": "get_settings_api_v1_settings_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Auth & System"
-        ],
-        "summary": "Update Settings",
-        "operationId": "update_settings_api_v1_settings_put",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "type": "object",
-                "title": "Payload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/teams": {
       "get": {
         "tags": [
@@ -1685,6 +1627,16 @@
               "type": "string",
               "title": "Submission Id"
             }
+          },
+          {
+            "name": "sync",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Sync"
+            }
           }
         ],
         "responses": {
@@ -1812,6 +1764,11 @@
         ],
         "summary": "Get Submission Findings",
         "operationId": "get_submission_findings_api_v1_submissions__submission_id__findings_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1820,6 +1777,22 @@
             "schema": {
               "type": "string",
               "title": "Submission Id"
+            }
+          },
+          {
+            "name": "version_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Version Id"
             }
           }
         ],
@@ -1858,6 +1831,11 @@
         ],
         "summary": "Accept Finding",
         "operationId": "accept_finding_api_v1_findings__finding_id__accept_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "finding_id",
@@ -1900,6 +1878,11 @@
         ],
         "summary": "Dismiss Finding",
         "operationId": "dismiss_finding_api_v1_findings__finding_id__dismiss_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "finding_id",
@@ -1952,6 +1935,11 @@
         ],
         "summary": "Escalate Finding",
         "operationId": "escalate_finding_api_v1_findings__finding_id__escalate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "finding_id",
@@ -1964,11 +1952,18 @@
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FindingEscalateRequest"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/FindingEscalateRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Req"
               }
             }
           }
@@ -2440,6 +2435,82 @@
           }
         ]
       }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Get Settings",
+        "operationId": "get_settings_api_v1_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Settings Api V1 Settings Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Update Settings",
+        "operationId": "update_settings_api_v1_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Updates"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Update Settings Api V1 Settings Put"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2678,14 +2749,16 @@
               "type": "integer"
             },
             "type": "object",
-            "title": "Redaction Summary"
+            "title": "Redaction Summary",
+            "default": {}
           },
           "tiers_sent": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Tiers Sent"
+            "title": "Tiers Sent",
+            "default": []
           },
           "confidential_data_sent": {
             "type": "boolean",
@@ -2694,11 +2767,13 @@
           },
           "tokens_in": {
             "type": "integer",
-            "title": "Tokens In"
+            "title": "Tokens In",
+            "default": 0
           },
           "tokens_out": {
             "type": "integer",
-            "title": "Tokens Out"
+            "title": "Tokens Out",
+            "default": 0
           },
           "provider": {
             "type": "string",
@@ -2707,16 +2782,51 @@
           "model": {
             "type": "string",
             "title": "Model"
+          },
+          "purpose": {
+            "type": "string",
+            "title": "Purpose",
+            "default": "policy_and_claim_verification"
+          },
+          "entry_codes_included": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Entry Codes Included",
+            "default": []
+          },
+          "characters_sent": {
+            "type": "integer",
+            "title": "Characters Sent",
+            "default": 0
+          },
+          "highest_tier_sent": {
+            "type": "string",
+            "title": "Highest Tier Sent",
+            "default": "public"
+          },
+          "cache_hit": {
+            "type": "boolean",
+            "title": "Cache Hit",
+            "default": false
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
           }
         },
         "type": "object",
         "required": [
           "review_id",
           "external_calls_count",
-          "redaction_summary",
-          "tiers_sent",
-          "tokens_in",
-          "tokens_out",
           "provider",
           "model"
         ],
@@ -2987,6 +3097,14 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
+          },
+          "allowed_actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Actions",
+            "default": []
           }
         },
         "type": "object",
@@ -3457,7 +3575,30 @@
           "stats": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Stats"
+            "title": "Stats",
+            "default": {}
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "fallback_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback Reason"
           },
           "started_at": {
             "type": "string",
@@ -3491,7 +3632,6 @@
           "provider",
           "model",
           "prompt_version",
-          "stats",
           "started_at"
         ],
         "title": "ReviewResponse"

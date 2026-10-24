@@ -186,30 +186,3 @@ def get_me(current_user: AuthenticatedUser = Depends(get_current_user)):
         "team": current_user.team,
         "is_active": True,
     }
-
-
-@router.get("/settings")
-def get_settings():
-    return {
-        "egress_policy": "redact_pii_no_confidential",
-        "no_external_ai": False,
-        "daily_cap": settings.LLM_DAILY_CAP,
-        "daily_calls_used": 14,
-        "risk_tier_mapping": {
-            "social": "low",
-            "email": "medium",
-            "blog": "medium",
-            "web": "medium",
-            "press_release": "high",
-        },
-        "thresholds": {
-            "confidence_cutoff": 0.6,
-            "change_cap_percent": 60,
-            "max_content_chars": settings.MAX_CONTENT_CHARS,
-        },
-    }
-
-
-@router.put("/settings")
-def update_settings(payload: Dict[str, Any]):
-    return {"status": "updated", "settings": payload}

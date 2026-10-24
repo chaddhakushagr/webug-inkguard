@@ -1,9 +1,9 @@
 # Project State: Inkguard
 
-**Current Phase:** Phase 1 Complete / Transition to Phase 2 (Review Orchestrator & Triage)  
-**Last Updated:** Sat 24 Oct 2026, 19:30 IST  
+**Current Phase:** Phase 2A Complete / Hand-off to Phase 2B (Findings UI & Interactive Triage)  
+**Last Updated:** Sat 24 Oct 2026, 19:45 IST  
 **Current Gate:** Gate G1 Complete (Target: Gate G2 - Sat 22:00 IST)  
-**Lane Active:** ALL (Sparsh [BE], Kushagra [AI], Apurrv [FE])
+**Lane Active:** BE (Sparsh) & AI (Kushagra) complete; handing off to FE (Apurrv)
 
 ## Active Milestones
 - [x] Initial repository audit and folder isolation under `WeBug/`
@@ -18,9 +18,10 @@
 - [x] Prompt 1B: AI domain, seed data, adapters (Lumo seed content, synthetic history, Sanitise/Rules/A11y/Guardrails/Suggest, BM25 retriever, Mock/OpenAI/Cached LLM adapters) [AI]
 - [x] Prompt 1C: Core screens on the design system (KB, Submissions, Reviewer Queue, Submission Detail shell) [FE]
 - [x] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
-- [ ] Phase 2A: Review Orchestrator, findings API & persistence, action endpoints [BE + AI]
+- [x] Phase 2A: Review Orchestrator, findings API & persistence, action endpoints, safety tests [BE + AI]
 - [ ] Phase 2B: Findings UI, inline highlighting, interactive triage & escalation [FE]
 - [ ] Gate G2: Golden path GP-1..GP-6 local with full findings review & evidence screenshots [ALL]
+
 
 ## Completed Verification
 - `manage.py setup`: Virtualenv creation, dependency installation, Alembic migration, and seeding verified.
@@ -80,5 +81,24 @@
     13. Self-approval blocked: Creator attempting to approve own submission refused with `403 Forbidden`.
     14. Cryptographic audit log: 11 hash-chained rows verified with SHA-256 integrity intact.
   - Evidence screenshots: captured into `docs/evidence/g1-*.png`.
+- Phase 2A Verification:
+  - Command output: `python manage.py test` passed 59/59 tests (added 5 safety and end-to-end review engine tests).
+  - Command output: `python manage.py arch` verified clean architecture (2 kept, 0 broken).
+  - Background Review Pipeline: `ReviewOrchestrator` runs asynchronously in background tasks, persisting stage progression (`extracting`, `rule_checks`, `retrieving`, `analysing`, `finalising`, `completed`), returning review ID immediately, and setting submission to `Checked` on completion.
+  - Modes & Offline Mock: Default `mock` mode executes 100% offline with zero keys and zero network.
+  - Safety & Boundary:
+    - Egress policy strictly asserts zero confidential entries or seeded secrets are transmitted.
+    - Daily cap on live LLM calls stored in settings, with automatic fallback to `rules_only` and reasons logged on review record.
+    - Admin "no external AI" switch honored: zero outbound calls with fallback.
+    - `GET /reviews/{id}/boundary` returns comprehensive telemetry; explicitly confirms offline zero-egress in mock mode.
+  - Findings Triage Endpoints:
+    - `GET /submissions/{id}/findings` returns context-sensitive `allowed_actions`.
+    - `POST /findings/{id}/accept` applies replacement as a new content version, voids prior approvals, resets workflow to Draft, supersedes older findings, and raises 409 Conflict if text span changed.
+    - `POST /findings/{id}/dismiss` strictly enforces non-empty `reason_code` and `reason_text` (422 Unprocessable Entity otherwise).
+    - `POST /findings/{id}/escalate` records `FindingAction`, logs audit row, and posts escalation comment.
+    - Voids approvals on edit: approving an older version after a new draft is rejected (409 Conflict).
+  - OpenAPI 3.1 specification regenerated (`contracts/openapi.json`) with zero duplicate operation IDs or warnings.
+  - Sample S1 verified through API in mock mode, generating full Review, Findings (31 findings), and Boundary JSON.
+
 
 

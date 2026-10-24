@@ -191,12 +191,14 @@ class SubmissionDetail(BaseModel):
 class ReviewResponse(BaseModel):
     id: str
     submission_version_id: str
-    status: str  # pending, running, completed, failed
+    status: str  # extracting, rule_checks, retrieving, analysing, finalising, completed, failed
     mode: str
     provider: str
     model: str
     prompt_version: str
-    stats: Dict[str, Any]
+    stats: Dict[str, Any] = {}
+    error: Optional[str] = None
+    fallback_reason: Optional[str] = None
     started_at: datetime
     finished_at: Optional[datetime] = None
     findings_count: int = 0
@@ -205,13 +207,19 @@ class ReviewResponse(BaseModel):
 class DataBoundaryResponse(BaseModel):
     review_id: str
     external_calls_count: int
-    redaction_summary: Dict[str, int]
-    tiers_sent: List[str]
+    redaction_summary: Dict[str, int] = {}
+    tiers_sent: List[str] = []
     confidential_data_sent: bool = False
-    tokens_in: int
-    tokens_out: int
+    tokens_in: int = 0
+    tokens_out: int = 0
     provider: str
     model: str
+    purpose: str = "policy_and_claim_verification"
+    entry_codes_included: List[str] = []
+    characters_sent: int = 0
+    highest_tier_sent: str = "public"
+    cache_hit: bool = False
+    message: Optional[str] = None
 
 
 # --- Findings ---
@@ -238,6 +246,7 @@ class FindingResponse(BaseModel):
     status: str
     is_synthetic: bool
     created_at: datetime
+    allowed_actions: List[str] = []
 
 
 class FindingDismissRequest(BaseModel):

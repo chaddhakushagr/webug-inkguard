@@ -45,6 +45,18 @@ def test_full_workflow_lifecycle():
     sub_res = client.get(f"/api/v1/submissions/{sub_id}", headers=h_creator)
     assert sub_res.json()["status"] == "Checked"
 
+    # Step 2b: Resolve open high severity findings before submission (Invariant from SPEC)
+    findings_res = client.get(f"/api/v1/submissions/{sub_id}/findings", headers=h_creator)
+    assert findings_res.status_code == 200
+    for f in findings_res.json():
+        if f["severity"] == "high":
+            dismiss_res = client.post(
+                f"/api/v1/findings/{f['id']}/dismiss",
+                json={"reason_code": "editorial_exception", "reason_text": "Authorized marketing exception for campaign launch."},
+                headers=h_creator,
+            )
+            assert dismiss_res.status_code == 200
+
     # Step 3: Creator submits -> moves to Submitted
     submit_res = client.post(f"/api/v1/submissions/{sub_id}/submit", headers=h_creator)
     assert submit_res.status_code == 200

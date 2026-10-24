@@ -35,26 +35,27 @@ All API routes are served under `/api/v1`. Consistent error response format:
   - `POST /api/v1/submissions`: Create submission
   - `GET /api/v1/submissions`: List submissions (role-filtered)
   - `GET /api/v1/submissions/{id}`: Detail view + `allowed_actions`
-  - `PUT /api/v1/submissions/{id}/content`: Update text (creates new version)
+  - `PUT /api/v1/submissions/{id}/content`: Update text (creates new version, voids approvals, resets to Draft)
   - `GET /api/v1/submissions/{id}/versions`: Version list
   - `GET /api/v1/submissions/{id}/diff`: Diff two versions
-  - `POST /api/v1/submissions/{id}/review`: Trigger review pipeline
-  - `GET /api/v1/reviews/{id}`: Review progress and stats
-  - `GET /api/v1/reviews/{id}/boundary`: Data boundary telemetry
+  - `POST /api/v1/submissions/{id}/review`: Trigger review pipeline in background (supports `?sync=true` for testing). Returns review record immediately with progress status (`extracting`). Automatically transitions submission to `Checked` upon completion.
+  - `GET /api/v1/reviews/{id}`: Fetch review progress, latency, findings count, error details, and `fallback_reason`.
+  - `GET /api/v1/reviews/{id}/boundary`: Data boundary telemetry (provider, model, purpose, characters sent, redaction summary, entry codes included, highest tier sent, cache hit, and offline transparency notice).
   - `POST /api/v1/submissions/{id}/submit`: Submit to reviewer queue
   - `POST /api/v1/submissions/{id}/claim`: Reviewer claims submission
-  - `POST /api/v1/submissions/{id}/approve`: Reviewer approves version
+  - `POST /api/v1/submissions/{id}/approve`: Reviewer approves version (high-risk requires 2 approvals; returns 409 if not in `In Review`)
   - `POST /api/v1/submissions/{id}/request-changes`: Reviewer requests edits
   - `POST /api/v1/submissions/{id}/mark-published`: Mark content as published
-- **Findings**:
-  - `GET /api/v1/submissions/{id}/findings`: List findings for active version
-  - `POST /api/v1/findings/{id}/accept`: Apply suggested fix (creates new version)
-  - `POST /api/v1/findings/{id}/dismiss`: Dismiss finding (reason required)
-  - `POST /api/v1/findings/{id}/escalate`: Escalate finding to brand manager
+- **Findings Triage**:
+  - `GET /api/v1/submissions/{id}/findings`: List findings for submission active version with context-sensitive `allowed_actions` (`accept`, `dismiss`, `escalate`).
+  - `POST /api/v1/findings/{id}/accept`: Apply suggested replacement. Creates a new submission content version, resets workflow state to `Draft`, voids prior approvals, and supersedes findings from older versions. Returns `409 Conflict` if the text span changed or if no suggestion exists.
+  - `POST /api/v1/findings/{id}/dismiss`: Dismiss finding. Requires `reason_code` and `reason_text` in payload; returns `422 Unprocessable Entity` if either is omitted or empty.
+  - `POST /api/v1/findings/{id}/escalate`: Escalate finding with a note. Posts a finding action, links an escalation comment, and updates finding status to `escalated`.
 - **Comments & Insights & Audit**:
   - `GET/POST /api/v1/submissions/{id}/comments`: Threaded discussions
   - `GET /api/v1/insights/summary`: Executive governance metrics
   - `GET /api/v1/insights/recurring`: Recurring issues by type/team/week
   - `GET /api/v1/insights/dismissals`: Dismissal & override breakdown
   - `GET /api/v1/insights/rules`: Raw per-rule counter analytics
-  - `GET /api/v1/audit`: Append-only audit logs with hash chain verification
+  - `GET /api/v1/audit`: Append-only audit logs with SHA-256 hash chain verification
+

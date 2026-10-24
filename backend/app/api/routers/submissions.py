@@ -1,6 +1,7 @@
 import hashlib
+import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, Depends, status, Query
+from fastapi import APIRouter, HTTPException, Depends, status, Query, BackgroundTasks
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -16,7 +17,7 @@ from app.api.schemas import (
     NoteRequest,
     PublishRequest,
 )
-from app.adapters.db.session import get_db
+from app.adapters.db.session import get_db, SessionLocal
 from app.adapters.db.models import (
     Submission,
     SubmissionVersion,
@@ -26,6 +27,11 @@ from app.adapters.db.models import (
     AICall,
 )
 from app.adapters.db.audit import record_audit
+from app.adapters.retrieval.bm25 import BM25Retriever
+from app.adapters.llm import get_llm_adapter
+from app.adapters.db.review_store import SqlAlchemyReviewStore
+from app.application.review import ReviewOrchestrator
+from app.config import settings
 from app.api.dependencies import get_current_user, require_role, AuthenticatedUser
 from app.domain.workflow.permissions import (
     compute_submission_allowed_actions,
@@ -592,6 +598,13 @@ def approve_submission(
     if not sub:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
 
+    # Invariant: Must be in 'In Review' state to approve
+    if sub.status != "In Review":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Cannot approve submission in '{sub.status}' state; must be 'In Review'",
+        )
+
     # Invariant: Self-approval prohibited!
     if sub.creator_id == current_user.id:
         raise HTTPException(
@@ -748,11 +761,13 @@ def delete_submission(
     return {"status": "deleted", "id": submission_id}
 
 
-# --- Review Endpoints (Mock / Fallback) ---
+# --- Review Endpoints (Review Orchestrator Integration) ---
 
 @router.post("/submissions/{submission_id}/review", response_model=ReviewResponse)
 def trigger_review(
     submission_id: str,
+    background_tasks: BackgroundTasks,
+    sync: bool = False,
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
 ):
@@ -761,48 +776,81 @@ def trigger_review(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
 
     now = datetime.now(timezone.utc)
+    rev_id = str(uuid.uuid4())
     rev = Review(
-        submission_version_id=sub.current_version_id,
-        status="completed",
-        mode="mock",
-        provider="Offline Mock Engine",
-        model="mock-pipeline-v1",
+        id=rev_id,
+        submission_version_id=sub.current_version_id or "v1",
+        status="extracting",
+        mode=settings.LLM_MODE,
+        provider="Offline Mock Engine" if settings.LLM_MODE == "mock" else "Google AI Studio",
+        model="mock-pipeline-v1" if settings.LLM_MODE == "mock" else settings.LLM_MODEL,
         prompt_version="v1",
-        stats={"rules_evaluated": 12, "claims_checked": 3, "latency_ms": 110},
+        stats={},
         started_at=now,
-        finished_at=now,
     )
     db.add(rev)
-
-    # Invariant: Completed review moves submission from Draft to Checked
-    if sub.status == "Draft":
-        sub.status = "Checked"
-
     db.commit()
     db.refresh(rev)
-    db.refresh(sub)
 
-    record_audit(
-        db=db,
-        action="review_run",
-        entity_type="review",
-        entity_id=rev.id,
-        actor_id=current_user.id,
-        actor_role=current_user.role,
-        details={"mode": "mock", "submission_id": sub.id},
+    # Initialize store, retriever, and orchestrator
+    retriever = BM25Retriever()
+    llm_adapter = get_llm_adapter()
+    store = SqlAlchemyReviewStore(SessionLocal)
+    orchestrator = ReviewOrchestrator(
+        store=store,
+        retriever=retriever,
+        llm_adapter=llm_adapter,
+        default_mode=settings.LLM_MODE,
+        daily_cap=settings.LLM_DAILY_CAP,
+        model_name=settings.LLM_MODEL,
+    )
+
+    if sync:
+        orchestrator.run_review(
+            review_id=rev.id,
+            submission_id=sub.id,
+            user_id=current_user.id,
+            user_role=current_user.role,
+            user_max_tier=current_user.max_tier,
+        )
+        db.refresh(rev)
+        count = db.query(Finding).filter(Finding.review_id == rev.id).count()
+        return ReviewResponse(
+            id=rev.id,
+            submission_version_id=rev.submission_version_id,
+            status=rev.status,
+            mode=rev.mode,
+            provider=rev.provider,
+            model=rev.model,
+            prompt_version=rev.prompt_version,
+            stats=rev.stats or {},
+            error=rev.error,
+            fallback_reason=rev.stats.get("fallback_reason") if rev.stats else rev.error,
+            started_at=rev.started_at,
+            finished_at=rev.finished_at,
+            findings_count=count,
+        )
+
+    # Background asynchronous task execution
+    background_tasks.add_task(
+        orchestrator.run_review,
+        review_id=rev.id,
+        submission_id=sub.id,
+        user_id=current_user.id,
+        user_role=current_user.role,
+        user_max_tier=current_user.max_tier,
     )
 
     return ReviewResponse(
         id=rev.id,
         submission_version_id=rev.submission_version_id,
-        status=rev.status,
+        status="extracting",
         mode=rev.mode,
         provider=rev.provider,
         model=rev.model,
         prompt_version=rev.prompt_version,
-        stats=rev.stats or {},
+        stats={},
         started_at=rev.started_at,
-        finished_at=rev.finished_at,
         findings_count=0,
     )
 
@@ -815,22 +863,15 @@ def get_review(
 ):
     rev = db.query(Review).filter(Review.id == review_id).first()
     if not rev:
-        now = datetime.now(timezone.utc)
-        return ReviewResponse(
-            id=review_id,
-            submission_version_id="ver-s1-1",
-            status="completed",
-            mode="mock",
-            provider="Offline Mock Engine",
-            model="mock-pipeline-v1",
-            prompt_version="v1",
-            stats={"rules_evaluated": 12, "claims_checked": 3, "latency_ms": 110},
-            started_at=now,
-            finished_at=now,
-            findings_count=0,
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
 
     count = db.query(Finding).filter(Finding.review_id == rev.id).count()
+    fallback_reason = None
+    if rev.stats and "fallback_reason" in rev.stats:
+        fallback_reason = rev.stats["fallback_reason"]
+    elif rev.error and ("fallback" in rev.error.lower() or "admin" in rev.error.lower() or "cap" in rev.error.lower()):
+        fallback_reason = rev.error
+
     return ReviewResponse(
         id=rev.id,
         submission_version_id=rev.submission_version_id,
@@ -840,6 +881,8 @@ def get_review(
         model=rev.model,
         prompt_version=rev.prompt_version,
         stats=rev.stats or {},
+        error=rev.error,
+        fallback_reason=fallback_reason,
         started_at=rev.started_at,
         finished_at=rev.finished_at,
         findings_count=count,
@@ -852,9 +895,19 @@ def get_review_boundary(
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
 ):
+    rev = db.query(Review).filter(Review.id == review_id).first()
+    if not rev:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+
     ai_calls = db.query(AICall).filter(AICall.review_id == review_id).all()
-    if not ai_calls:
-        # Mock mode transparency
+    is_mock = (rev.mode == "mock" or rev.mode == "rules_only" or (ai_calls and ai_calls[0].provider == "mock"))
+
+    if not ai_calls or is_mock:
+        # Mock mode transparency: plain statement that nothing was sent to external services
+        retrieved_codes = []
+        if ai_calls and ai_calls[0].kb_entry_ids:
+            retrieved_codes = ai_calls[0].kb_entry_ids
+
         return DataBoundaryResponse(
             review_id=review_id,
             external_calls_count=0,
@@ -865,11 +918,23 @@ def get_review_boundary(
             tokens_out=0,
             provider="Offline Mock Engine (zero external egress)",
             model="mock",
+            purpose="Offline rule and policy verification",
+            entry_codes_included=retrieved_codes,
+            characters_sent=0,
+            highest_tier_sent="public",
+            cache_hit=False,
+            message="Offline mock mode: zero data sent to external services.",
         )
 
     total_chars = sum(c.chars_sent for c in ai_calls)
     tokens_in = sum(c.tokens_in for c in ai_calls)
     tokens_out = sum(c.tokens_out for c in ai_calls)
+    all_codes = []
+    for c in ai_calls:
+        if c.kb_entry_ids:
+            all_codes.extend(c.kb_entry_ids)
+    unique_codes = sorted(list(set(all_codes)))
+
     max_tier = "public"
     for c in ai_calls:
         if c.max_tier_sent == "confidential":
@@ -880,11 +945,17 @@ def get_review_boundary(
     return DataBoundaryResponse(
         review_id=review_id,
         external_calls_count=len(ai_calls),
-        redaction_summary={"calls": len(ai_calls), "chars_sent": total_chars},
+        redaction_summary=ai_calls[0].redaction_summary if ai_calls and ai_calls[0].redaction_summary else {},
         tiers_sent=[max_tier],
         confidential_data_sent=(max_tier == "confidential"),
         tokens_in=tokens_in,
         tokens_out=tokens_out,
-        provider=ai_calls[0].provider if ai_calls else "mock",
-        model=ai_calls[0].model if ai_calls else "mock",
+        provider=ai_calls[0].provider if ai_calls else "Google AI Studio",
+        model=ai_calls[0].model if ai_calls else settings.LLM_MODEL,
+        purpose=ai_calls[0].purpose if ai_calls else "policy_and_claim_verification",
+        entry_codes_included=unique_codes,
+        characters_sent=total_chars,
+        highest_tier_sent=max_tier,
+        cache_hit=any(c.cache_hit for c in ai_calls),
+        message="Live external review call audited and logged.",
     )

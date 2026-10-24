@@ -71,3 +71,54 @@ graph TD
 - **No Superlatives**: Rejects suggestions introducing terms like `best`, `miracle`, `flawless`, `unbeatable`.
 - **No Banned Terms**: Rejects suggestions re-introducing terms like `serum` or `cure`.
 - If rejected, clears `suggested_fix = None` ("no safe suggestion, needs a human edit").
+
+---
+
+## 9. Review Orchestrator & Application Layer (`app.application.review`)
+
+The `ReviewOrchestrator` coordinates the domain pipeline within the web application:
+- **Port/Adapter Decoupling**: Application interacts with storage strictly through `ReviewStorePort` (`backend/app/ports/review_store.py`), implemented by `SqlAlchemyReviewStore` (`backend/app/adapters/db/review_store.py`).
+- **Progress Tracking**: Reviews are executed in background tasks (`BackgroundTasks`). Status progression is persisted in the database:
+  - `extracting` $\rightarrow$ `rule_checks` $\rightarrow$ `retrieving` $\rightarrow$ `analysing` $\rightarrow$ `finalising` $\rightarrow$ `completed`.
+- **Partial Results Survival**: If the LLM analysis stage encounters a network error, timeout, or quota exhaustion, partial rule and accessibility findings are preserved. The review transitions to `completed` with `fallback_reason` and error notes recorded.
+- **Workflow State Transition**: Upon review completion, the submission is automatically updated to `Checked`, unlocking creator actions.
+
+---
+
+## 10. Execution Modes & Fallback Matrix
+
+The review engine operates in 4 distinct execution modes:
+1. **`mock` (Default)**:
+   - Zero outbound HTTP/network calls.
+   - Requires no API key.
+   - Deterministic findings for test samples S1-S5 and offline heuristic checks.
+2. **`rules_only`**:
+   - Executes deterministic regex, terminology, disclaimer, and accessibility checks only.
+   - Completely skips the LLM retrieval and analysis stages.
+3. **`cached`**:
+   - Keys call hashes by `sha256(content | kb_codes | prompt_version | model)`.
+   - Returns cached LLM completions if present; invokes live LLM on cache misses.
+4. **`live`**:
+   - Calls external LLM provider (e.g., Gemini via OpenAI-compatible endpoint).
+   - Enforces daily quota caps and egress boundary policies.
+
+### Automatic Fallback Matrix
+- **Daily Cap Exhaustion**: If today's live LLM calls reach `llm_daily_cap` (stored in settings), the orchestrator automatically falls back to `rules_only`, logging `"Daily LLM quota cap reached; executed deterministic rules only"` in `review.fallback_reason`.
+- **Admin "No External AI" Switch**: When enabled in system settings, live calls are immediately blocked, forcing fallback with `"Admin toggle 'no_external_ai' active; executed deterministic rules only"`.
+- **Model Timeout / Network Failure**: If an external provider call fails or times out, the review recovers gracefully, recording partial findings and logging the timeout details.
+
+---
+
+## 11. Data Boundary & Telemetry (`GET /reviews/{id}/boundary`)
+
+Every review logs detailed boundary metrics in the `ai_calls` table:
+- **Provider & Model**: Actual provider and model invoked.
+- **Purpose**: e.g., `"Claims verification and brand tone audit"`.
+- **Redaction Summary**: Exact count of masked emails, phone numbers, API keys, and launch secrets.
+- **Entry Codes Included**: List of knowledge base codes supplied in the prompt context.
+- **Characters Sent**: Exact character count of the prompt payload transmitted out of the network boundary.
+- **Highest Tier Sent**: Highest classification tier of content sent (strictly never exceeds `public` or `internal`; `confidential` entries are forbidden from egress).
+- **Cache Hit**: Boolean indicating cache reuse.
+- **Offline Transparency**: In `mock` mode, the boundary response states plainly:
+  `"Offline mock mode: zero data sent to external services."` with `characters_sent = 0` and `external_calls_count = 0`.
+
