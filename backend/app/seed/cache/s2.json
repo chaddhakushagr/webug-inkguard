@@ -1,0 +1,38 @@
+{
+  "claims": [
+    {
+      "excerpt": "erases all your flaws overnight",
+      "claim_text": "The product erases all flaws overnight.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-009",
+      "confidence": 0.95,
+      "explanation": "Pores and skin structures cannot be erased or deleted, contradicting the claim of erasing flaws."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TERM-015",
+      "excerpt": "genius quantum magic elixir",
+      "assessment": "off_tone",
+      "confidence": 0.99,
+      "explanation": "The text uses whimsical 'magic elixir' terminology which is explicitly rejected in formal copy.",
+      "cited_entry_code": "TERM-015"
+    },
+    {
+      "attribute_code": "RULE-A11Y-01",
+      "excerpt": "Click here",
+      "assessment": "off_tone",
+      "confidence": 0.99,
+      "explanation": "Uses non-informative 'click here' instead of a descriptive hyperlink destination.",
+      "cited_entry_code": "RULE-A11Y-01"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Your damaged face is crying out for an urgent intervention.",
+      "note": "Negative or alarming phrasing should be avoided to maintain a supportive brand tone.",
+      "kind": "clarity"
+    }
+  ]
+}

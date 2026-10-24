@@ -117,9 +117,28 @@ def cmd_build_frontend(args):
 
 def cmd_warm_cache(args):
     py = get_python()
-    print("[Inkguard Cache] Warming cache fixtures for samples S1-S5...")
+    print("[Inkguard Cache] Warming cache fixtures for samples S1-S5 using live LLM...")
     script = (
-        "print('Cache warmed for demo samples S1-S5.'); "
+        "import sys, os, json, hashlib; "
+        "sys.path.insert(0, 'backend'); "
+        "from app.config import settings; "
+        "from app.adapters.llm.openai_compatible import OpenAICompatibleLLMAdapter; "
+        "from app.adapters.retrieval.bm25 import BM25Retriever; "
+        "from app.seed.lumo_brand import SEED_FACTS, SEED_RULES, SEED_TERMS, SEED_TONE, SEED_SAMPLES; "
+        "from app.adapters.llm.cached import generate_cache_key; "
+        "adapter = OpenAICompatibleLLMAdapter(); "
+        "retriever = BM25Retriever(); "
+        "all_kb = SEED_FACTS + SEED_RULES + SEED_TERMS + SEED_TONE; "
+        "cache_dir = os.path.abspath('backend/app/seed/cache'); "
+        "os.makedirs(cache_dir, exist_ok=True); "
+        "for i, s in enumerate(SEED_SAMPLES, 1): "
+        "    retrieved = retriever.retrieve(s['content'], all_kb, limit=10); "
+        "    res = adapter.analyze(s['content'], retrieved, channel=s.get('channel', 'social')); "
+        "    key = generate_cache_key(s['content'], retrieved, 'v1', settings.LLM_MODEL); "
+        "    with open(os.path.join(cache_dir, f'{key}.json'), 'w', encoding='utf-8') as f: json.dump(res, f, indent=2); "
+        "    with open(os.path.join(cache_dir, f's{i}.json'), 'w', encoding='utf-8') as f: json.dump(res, f, indent=2); "
+        "    print(f'  Warmed S{i} -> cache key {key[:12]}...'); "
+        "print('All demo samples S1-S5 warmed successfully.')"
     )
     run_cmd([py, "-c", script], cwd=ROOT_DIR)
 

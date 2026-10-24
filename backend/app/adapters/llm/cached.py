@@ -43,9 +43,32 @@ class CachedLLMAdapter:
             self.last_cache_hit = True
             return self.cache[key]
 
+        # Check disk cache in seed/cache
+        import os
+        disk_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "seed", "cache"))
+        disk_file = os.path.join(disk_dir, f"{key}.json")
+        if os.path.exists(disk_file):
+            try:
+                with open(disk_file, "r", encoding="utf-8") as f:
+                    cached_data = json.load(f)
+                    self.cache[key] = cached_data
+                    self.last_cache_hit = True
+                    return cached_data
+            except Exception:
+                pass
+
         self.last_cache_hit = False
         res = self.inner.analyze(sanitised_text, kb_entries, channel=channel, prompt_version=prompt_version)
         self.cache[key] = res
+
+        # Persist to disk cache
+        if os.path.isdir(disk_dir):
+            try:
+                with open(disk_file, "w", encoding="utf-8") as f:
+                    json.dump(res, f, indent=2)
+            except Exception:
+                pass
+
         return res
 
     def suggest_fixes(

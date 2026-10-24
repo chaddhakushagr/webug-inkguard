@@ -26,7 +26,7 @@ class OpenAICompatibleLLMAdapter:
         max_retries: int = 3,
     ):
         self.base_url = (base_url or settings.LLM_BASE_URL).rstrip("/")
-        self.api_key = api_key or settings.LLM_API_KEY
+        self.api_key = api_key or settings.effective_api_key
         self.model = model or settings.LLM_MODEL
         self.timeout = timeout
         self.max_retries = max_retries

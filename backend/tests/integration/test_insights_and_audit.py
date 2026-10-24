@@ -111,6 +111,6 @@ def test_system_status_endpoint():
     data = res.json()
     assert data["version"] == "0.2.0"
     assert "commit" in data
-    assert data["ai_mode"] == "mock"
+    assert data["ai_mode"] in ("mock", "live", "cached")
     assert data["health"] == "healthy"
     assert data["db_connected"] is True

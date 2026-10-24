@@ -25,7 +25,7 @@ def get_llm_adapter(mode: Optional[str] = None) -> LLMPort:
     if target_mode == "mock":
         return MockLLMAdapter()
     elif target_mode == "cached":
-        inner = OpenAICompatibleLLMAdapter() if settings.LLM_API_KEY else MockLLMAdapter()
+        inner = OpenAICompatibleLLMAdapter() if settings.effective_api_key else MockLLMAdapter()
         return CachedLLMAdapter(inner_adapter=inner, cache_store=_global_cache)
     elif target_mode == "live":
         return OpenAICompatibleLLMAdapter()

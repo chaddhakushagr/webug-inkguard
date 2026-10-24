@@ -1,0 +1,38 @@
+{
+  "claims": [
+    {
+      "excerpt": "erases all your flaws overnight",
+      "claim_text": "The product eliminates all skin flaws overnight.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": null,
+      "confidence": 0.95,
+      "explanation": "There are no approved facts in the knowledge base supporting overnight elimination of skin flaws."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "Competitors are completely useless compared to our genius quantum magic elixir",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Dismissing competitors as 'completely useless' and using hyperbolic phrasing like 'genius quantum magic elixir' directly violates TONE-003 guidance against aggressive supremacy claims and arrogant chest-beating.",
+      "cited_entry_code": "TONE-003"
+    },
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "Your damaged face is crying out for an urgent intervention.",
+      "assessment": "off_tone",
+      "confidence": 0.9,
+      "explanation": "Addressing the audience with negative skin-shaming language ('damaged face') violates TONE-004, which mandates an inclusive voice that welcomes all skin types and celebrates natural skin texture.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Click here to buy.",
+      "note": "Per RULE-A11Y-01, link anchor text should be descriptive of the destination rather than generic phrases like 'Click here'.",
+      "kind": "clarity"
+    }
+  ]
+}

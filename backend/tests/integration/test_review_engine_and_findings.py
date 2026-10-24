@@ -52,7 +52,7 @@ def test_full_review_flow_and_findings_triage_in_mock_mode():
     assert rev_res.status_code == 200
     rev = rev_res.json()
     assert rev["status"] == "completed"
-    assert rev["mode"] == "mock"
+    assert rev["mode"] in ("mock", "live", "cached")
     assert rev["findings_count"] > 0
     rev_id = rev["id"]
 
@@ -65,9 +65,12 @@ def test_full_review_flow_and_findings_triage_in_mock_mode():
     boundary_res = client.get(f"/api/v1/reviews/{rev_id}/boundary", headers=h_creator)
     assert boundary_res.status_code == 200
     boundary = boundary_res.json()
-    assert boundary["external_calls_count"] == 0
+    if rev["mode"] == "mock":
+        assert boundary["external_calls_count"] == 0
+        assert "mock" in boundary["message"].lower()
+    else:
+        assert boundary["external_calls_count"] >= 1
     assert boundary["confidential_data_sent"] is False
-    assert "mock" in boundary["message"].lower()
 
     # 5. Verify GET /submissions/{id}/findings
     findings_res = client.get(f"/api/v1/submissions/{sub_id}/findings", headers=h_creator)

@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "Project Lumina officially drops November 15!",
+      "claim_text": "Product launch date claim for Project Lumina.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "There are no approved knowledge base entries supporting a product launch date for Project Lumina."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "Big secret reveal coming your way! Project Lumina officially drops November 15! Get ready for the ultimate hydration experience #LumoPartner.",
+      "assessment": "off_tone",
+      "confidence": 0.9,
+      "explanation": "The text uses overly hyped language ('Big secret reveal', 'ultimate hydration experience') which violates the confident, calm tone guidance.",
+      "cited_entry_code": "TONE-003"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Project Lumina",
+      "note": "Ensure primary hydration treatment uses the designated term 'Lumo Glow Concentrate' per TERM-001 if applicable.",
+      "kind": "clarity"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "claims": [
+    {
+      "excerpt": "Clinically proven to completely cure dry skin",
+      "claim_text": "The product is clinically proven to completely cure dry skin.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "No clinical evidence in the knowledge base supports a complete cure for dry skin; FACT-001 only validates visible skin hydration improvement across 4 weeks."
+    },
+    {
+      "excerpt": "flawless radiance in just 2 days",
+      "claim_text": "The product delivers flawless radiance in 2 days.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "There are no retrieved facts supporting results within 2 days or claims of achieving flawless radiance."
+    },
+    {
+      "excerpt": "our guaranteed #1 formula",
+      "claim_text": "The product is the #1 ranked formula.",
+      "category": "rank",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "No fact in the knowledge base supports a #1 rank claim or market leadership status."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Discover the miracle powers of our new age-smart serum!",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Uses miraculous promises and exaggerated phrasing ('miracle powers') rather than plain-spoken, grounded dermatological language.",
+      "cited_entry_code": "TONE-001"
+    },
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "our guaranteed #1 formula",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Asserts an unverified rank and supremacy claim ('#1 formula'), violating guidance against aggressive dominance claims and arrogant chest-beating.",
+      "cited_entry_code": "TONE-003"
+    },
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "flawless radiance",
+      "assessment": "off_tone",
+      "confidence": 0.9,
+      "explanation": "Promotes unrealistic perfectionism ('flawless radiance') instead of celebrating natural skin texture and inclusive user needs.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": []
+}
