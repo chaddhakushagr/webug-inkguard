@@ -25,3 +25,9 @@ This document records key technical decisions, rationale, alternatives considere
 - **Decision:** Standardize external LLM calls using the OpenAI-compatible endpoint format provided by Google AI Studio (`https://generativelanguage.googleapis.com/v1beta/openai/`) using model `gemini-2.5-flash` (with fallback to `mock` when no key is present).
 - **Rationale:** Google AI Studio provides free RPM/RPD API keys for prototyping. OpenAI protocol allows dropping in local Ollama (`http://localhost:11434/v1`) without changing code.
 - **Free Tier Justification:** Google AI Studio free tier tier is used with strict in-app daily caps (100 calls/day) and cache persistence to protect quotas.
+
+## Decision 005: Lucide React Icons for Accessible Governance UI
+- **Date:** 2026-10-24
+- **Decision:** Use `lucide-react` for lightweight, tree-shakeable SVG icons across the design system.
+- **Rationale:** Strictly avoids external icon fonts or CDN image requests. Required to satisfy the accessibility constraint "never color alone" by providing distinct iconography for findings, statuses, verdicts, and source types.
+- **Free Tier Justification:** Open-source MIT package bundled locally.

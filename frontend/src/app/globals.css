@@ -1,12 +1,94 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
+  /* Proofreader's Desk Color Palette */
+  --ink: #1F2A44;
+  --teal: #0F766E;
+  --teal-hover: #0D655E;
+  --paper: #F7F7F4;
+  --surface: #FFFFFF;
+  --border: #E2E5EA;
+  --border-dark: #CBD2DC;
+  --muted: #5B6475;
+
+  /* Severity / Status Colors (All WCAG AA Verified >= 4.5:1) */
+  --sev-high: #B42318;
+  --sev-high-bg: #FEF3F2;
+  --sev-high-border: #FECDCA;
+
+  --sev-medium: #B45309;
+  --sev-medium-bg: #FFFBEB;
+  --sev-medium-border: #FDE68A;
+
+  --sev-low: #175CD3;
+  --sev-low-bg: #EFF8FF;
+  --sev-low-border: #B2DDFF;
+
+  --sev-success: #067647;
+  --sev-success-bg: #ECFDF3;
+  --sev-success-border: #A6F4C5;
 }
 
+/* Base Body Styling (Light Theme Only) */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Accessible Tabular Numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Universal Visible Focus Indicator */
+:focus-visible {
+  outline: 2px solid var(--teal) !important;
+  outline-offset: 2px !important;
+}
+
+/* 150ms Motion with prefers-reduced-motion override */
+*, ::before, ::after {
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Proofreader Markup: Rule Findings vs AI Findings */
+.finding-mark-rule {
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.finding-mark-ai {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.finding-card-rule {
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.finding-card-ai {
+  border-left-width: 4px;
+  border-left-style: dashed;
 }

@@ -13,10 +13,11 @@
 - [x] Phase 0: Next.js static export frontend setup, layout shell, and demo login page
 - [x] Phase 0: Architecture validation (`manage.py arch`), 11 passing tests, and CLI wiring
 - [x] Phase 0: Tag `p0` verified and committed
-- [ ] Phase 1: Real database repositories, seed loader, and RBAC / workflow enforcement [BE]
-- [ ] Phase 1: In-process BM25 retrieval, review pipeline stages, guardrails & mock LLM adapter [AI]
-- [ ] Phase 1: Dynamic review studio, highlighting, submission diffs, queue and actions [FE]
-- [ ] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy
+- [x] Prompt 0: UI design system, "proofreader's desk" palette, typed UI components, AppShell, login overhaul, /dev/ui component gallery, and evidence screenshots (`docs/evidence/ui-*.png`) [FE]
+- [ ] Prompt 1A: Backend real implementation (Auth, RBAC, KB CRUD & versioning, Submissions & diff, State machine & queue, Audit hash chaining, Seed loader) [BE]
+- [ ] Prompt 1B: AI domain, seed data, adapters (Lumo seed content, synthetic history, Sanitise/Rules/A11y/Guardrails/Suggest, BM25 retriever, Mock/OpenAI/Cached LLM adapters) [AI]
+- [ ] Prompt 1C: Core screens on the design system (KB, Submissions, Reviewer Queue, Submission Detail shell) [FE]
+- [ ] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
 
 ## Completed Verification
 - `manage.py setup`: Virtualenv creation, dependency installation, Alembic migration, and seeding verified.
@@ -24,3 +25,8 @@
 - `manage.py arch`: 2 import-linter contracts kept (domain purity, application isolation).
 - `manage.py build-frontend`: Static export compilation successful with 0 warnings.
 - `manage.py e2e`: Live server `/api/v1/health` connectivity verified.
+- Prompt 0 Verification:
+  - Contrast check: All text/background pairs $\ge 4.5:1$ (WCAG 2.1 AA).
+  - Component gallery: `/dev/ui` displaying all components and variants.
+  - Screenshots: `docs/evidence/ui-login.png`, `docs/evidence/ui-gallery.png`, `docs/evidence/ui-dashboard.png`.
+
