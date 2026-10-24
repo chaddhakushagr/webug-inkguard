@@ -94,8 +94,8 @@ def get_current_user(
     token = credentials.credentials
 
     # Support mock token prefixes in DEMO_MODE for backwards compatibility
-    if settings.DEMO_MODE and token.startswith("mock-jwt-token-"):
-        user_key = token.replace("mock-jwt-token-", "")
+    if settings.DEMO_MODE and (token.startswith("mock-jwt-token-") or token.startswith("demo-token-")):
+        user_key = token.replace("mock-jwt-token-", "").replace("demo-token-", "")
         # Map user_key
         if user_key in FALLBACK_USERS:
             info = FALLBACK_USERS[user_key]

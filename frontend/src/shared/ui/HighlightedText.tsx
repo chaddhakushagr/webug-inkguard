@@ -83,6 +83,7 @@ export const HighlightedText: React.FC<HighlightedTextProps> = ({
         return (
           <mark
             key={finding.id || idx}
+            id={`highlight-${finding.id}`}
             tabIndex={0}
             role="button"
             aria-pressed={isSelected}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -12,8 +12,11 @@ import {
   DiffView,
   EmptyState,
   ErrorState,
+  HighlightedText,
+  ModeChip,
   Skeleton,
   StatusStepper,
+  Banner,
 } from "@/shared/ui";
 import { api } from "@/shared/api/client";
 import {
@@ -25,6 +28,12 @@ import {
   User,
 } from "@/shared/api/types";
 import { AuthGuard } from "@/features/auth/AuthGuard";
+import { FindingCard } from "@/features/findings/FindingCard";
+import { DismissDialog } from "@/features/findings/DismissDialog";
+import { EscalateDialog } from "@/features/findings/EscalateDialog";
+import { KBCitationDialog } from "@/features/findings/KBCitationDialog";
+import { ReviewProgressBanner } from "@/features/findings/ReviewProgressBanner";
+import { DataBoundaryView } from "@/features/submissions/DataBoundaryView";
 import {
   PenTool,
   Clock,
@@ -43,6 +52,9 @@ import {
   X,
   AlertTriangle,
   Lock,
+  Filter,
+  RotateCw,
+  Search,
 } from "lucide-react";
 
 export default function SubmissionDetailPage() {
@@ -68,32 +80,60 @@ function SubmissionDetailContent() {
   const [versions, setVersions] = useState<SubmissionVersion[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [findings, setFindings] = useState<Finding[]>([]);
+  const [review, setReview] = useState<Review | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // Review Engine execution state
+  const [isReviewRunning, setIsReviewRunning] = useState(false);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Mobile / Narrow screen pane toggle: "content" vs "findings"
+  const [mobilePane, setMobilePane] = useState<"content" | "findings">("content");
+
+  // Selection & Bi-directional focus
+  const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
+
+  // Findings Filters
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterSeverity, setFilterSeverity] = useState<string>("all");
+  const [filterSource, setFilterSource] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
 
   // Edit Mode state
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState("");
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  // Tab State
+  // Left Pane Tabs: versions, comments, approvals, boundary
   const [activeTab, setActiveTab] = useState<"versions" | "comments" | "approvals" | "boundary">("versions");
 
   // Version Diff state
   const [diffFromV, setDiffFromV] = useState<number>(1);
   const [diffToV, setDiffToV] = useState<number>(1);
 
-  // Comment submission
+  // Comment submission (Submission-level)
   const [newCommentBody, setNewCommentBody] = useState("");
   const [isPostingComment, setIsPostingComment] = useState(false);
 
-  // Action dialog states (Approve / Request Changes Note)
+  // Workflow Dialog states (Approve / Request Changes Note)
   const [noteModalOpen, setNoteModalOpen] = useState(false);
   const [noteModalType, setNoteModalType] = useState<"approve" | "request_changes">("approve");
   const [actionNote, setActionNote] = useState("");
   const [isActionPending, setIsActionPending] = useState(false);
 
+  // Triage Dialogs state
+  const [dismissFinding, setDismissFinding] = useState<Finding | null>(null);
+  const [escalateFinding, setEscalateFinding] = useState<Finding | null>(null);
+  const [citationDialog, setCitationDialog] = useState<{
+    isOpen: boolean;
+    code: string | null;
+    version?: number | null;
+  }>({ isOpen: false, code: null });
+
+  // Load User from Session
   useEffect(() => {
     if (typeof window !== "undefined") {
       const raw = sessionStorage.getItem("inkguard_user");
@@ -107,13 +147,21 @@ function SubmissionDetailContent() {
     }
   }, []);
 
-  const loadData = async () => {
+  // Clean up polling interval
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, []);
+
+  // Main data loader
+  const loadData = async (silent = false) => {
     if (!submissionId) {
       setError("No submission ID provided in query parameters.");
       setIsLoading(false);
       return;
     }
-    setIsLoading(true);
+    if (!silent) setIsLoading(true);
     setError(null);
     try {
       const [submissionData, versionsData, commentsData, findingsData] = await Promise.all([
@@ -136,10 +184,18 @@ function SubmissionDetailContent() {
         setDiffFromV(versionsData[0].version_no);
         setDiffToV(versionsData[0].version_no);
       }
+
+      // If findings exist and we have a review_id, load the review record
+      if (findingsData && findingsData.length > 0 && findingsData[0].review_id) {
+        api
+          .getReview(findingsData[0].review_id)
+          .then((rev) => setReview(rev))
+          .catch(() => {});
+      }
     } catch (err: any) {
       setError(err.message || "Failed to load submission details");
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   };
 
@@ -147,47 +203,165 @@ function SubmissionDetailContent() {
     loadData();
   }, [submissionId]);
 
-  // Primary Actions Handlers
-  const handleSaveEdit = async () => {
+  // Bi-directional selection handler
+  const handleSelectFinding = (findingId: string) => {
+    setSelectedFindingId(findingId);
+
+    // Scroll to finding card in right pane
+    setTimeout(() => {
+      const cardEl = document.getElementById(`finding-card-${findingId}`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // Also scroll to highlighted text span
+      const highlightEl = document.getElementById(`highlight-${findingId}`);
+      if (highlightEl) {
+        highlightEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 50);
+  };
+
+  // Review Trigger & Live Polling (5 Stages)
+  const handleTriggerReview = async () => {
     if (!sub) return;
-    setIsSavingEdit(true);
+    setIsReviewRunning(true);
+    setActionError(null);
+    setActionSuccess(null);
+
     try {
-      const updated = await api.updateContent(sub.id, editContent);
-      setSub(updated);
-      setIsEditing(false);
-      setActionSuccess("Content updated. Submission reverted to Draft for new verification.");
-      await loadData();
+      const initialRev = await api.triggerReview(sub.id);
+      setReview(initialRev);
+
+      // Start polling review progress
+      const revId = initialRev.id;
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+
+      pollIntervalRef.current = setInterval(async () => {
+        try {
+          const currentRev = await api.getReview(revId);
+          setReview(currentRev);
+
+          if (currentRev.status === "completed" || currentRev.status === "failed") {
+            if (pollIntervalRef.current) {
+              clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
+            }
+            setIsReviewRunning(false);
+            await loadData(true);
+
+            if (currentRev.status === "completed") {
+              setActionSuccess(
+                `Brand review completed (${currentRev.findings_count} findings detected). Submission status updated to Checked.`
+              );
+            } else {
+              setActionError(currentRev.error || "Review pipeline failed during execution");
+            }
+          }
+        } catch (pollErr: any) {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          setIsReviewRunning(false);
+          setActionError(pollErr.message || "Lost connection to review orchestrator");
+        }
+      }, 450);
     } catch (err: any) {
-      alert(err.message || "Failed to update content");
-    } finally {
-      setIsSavingEdit(false);
+      setIsReviewRunning(false);
+      setActionError(err.message || "Failed to initiate brand review");
     }
   };
 
-  const handleTriggerReview = async () => {
-    if (!sub) return;
+  // Finding Triage Actions
+  const handleAcceptFinding = async (findingId: string) => {
     setIsActionPending(true);
+    setActionError(null);
     try {
-      await api.triggerReview(sub.id);
-      setActionSuccess("Brand review completed in mock mode.");
-      await loadData();
+      await api.acceptFinding(findingId);
+      setActionSuccess(
+        "Suggested fix accepted! New content version created, approvals reset, and status reverted to Draft."
+      );
+      await loadData(true);
     } catch (err: any) {
-      alert(err.message || "Review failed");
+      setActionError(err.message || "Failed to accept fix. Underlying copy may have changed.");
     } finally {
       setIsActionPending(false);
     }
   };
 
+  const handleConfirmDismiss = async (reasonCode: string, reasonText: string) => {
+    if (!dismissFinding) return;
+    setIsActionPending(true);
+    setActionError(null);
+    try {
+      await api.dismissFinding(dismissFinding.id, reasonCode, reasonText);
+      setActionSuccess("Finding dismissed and recorded in the append-only audit trail.");
+      await loadData(true);
+    } catch (err: any) {
+      setActionError(err.message || "Failed to dismiss finding");
+      throw err;
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
+  const handleConfirmEscalate = async (note: string) => {
+    if (!escalateFinding) return;
+    setIsActionPending(true);
+    setActionError(null);
+    try {
+      await api.escalateFinding(escalateFinding.id, note);
+      setActionSuccess("Finding escalated to brand manager. Revision ticket attached.");
+      await loadData(true);
+    } catch (err: any) {
+      setActionError(err.message || "Failed to escalate finding");
+      throw err;
+    } finally {
+      setIsActionPending(false);
+    }
+  };
+
+  const handlePostFindingComment = async (body: string, findingId: string) => {
+    if (!sub) return;
+    try {
+      const created = await api.postComment(sub.id, body, findingId);
+      setComments((prev) => [...prev, created]);
+    } catch (err: any) {
+      alert(err.message || "Failed to post finding comment");
+    }
+  };
+
+  // Content Edit Handler
+  const handleSaveEdit = async () => {
+    if (!sub) return;
+    setIsSavingEdit(true);
+    setActionError(null);
+    try {
+      const updated = await api.updateContent(sub.id, editContent);
+      setSub(updated);
+      setIsEditing(false);
+      setActionSuccess("Content updated. Submission reverted to Draft. Run Re-check to verify.");
+      await loadData(true);
+    } catch (err: any) {
+      setActionError(err.message || "Failed to update copy");
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  // Workflow Action Handlers
   const handleSubmitForApproval = async () => {
     if (!sub) return;
     setIsActionPending(true);
+    setActionError(null);
     try {
       const updated = await api.submit(sub.id);
       setSub(updated);
       setActionSuccess("Submission forwarded to the reviewer queue.");
-      await loadData();
+      await loadData(true);
     } catch (err: any) {
-      alert(err.message || "Submit failed");
+      setActionError(err.message || "Submit failed");
     } finally {
       setIsActionPending(false);
     }
@@ -196,33 +370,23 @@ function SubmissionDetailContent() {
   const handleClaim = async () => {
     if (!sub) return;
     setIsActionPending(true);
+    setActionError(null);
     try {
       const updated = await api.claim(sub.id);
       setSub(updated);
       setActionSuccess("Submission claimed and transitioned to In Review.");
-      await loadData();
+      await loadData(true);
     } catch (err: any) {
-      alert(err.message || "Claim failed");
+      setActionError(err.message || "Claim failed");
     } finally {
       setIsActionPending(false);
     }
   };
 
-  const openApproveModal = () => {
-    setNoteModalType("approve");
-    setActionNote("Verified against Lumo tone, term, and clinical fact guidelines.");
-    setNoteModalOpen(true);
-  };
-
-  const openRequestChangesModal = () => {
-    setNoteModalType("request_changes");
-    setActionNote("");
-    setNoteModalOpen(true);
-  };
-
   const executeModalAction = async () => {
     if (!sub) return;
     setIsActionPending(true);
+    setActionError(null);
     try {
       if (noteModalType === "approve") {
         const updated = await api.approve(sub.id, actionNote);
@@ -239,9 +403,9 @@ function SubmissionDetailContent() {
         setActionSuccess("Changes requested. Creator notified.");
       }
       setNoteModalOpen(false);
-      await loadData();
+      await loadData(true);
     } catch (err: any) {
-      alert(err.message || "Action failed");
+      setActionError(err.message || "Action failed");
     } finally {
       setIsActionPending(false);
     }
@@ -251,25 +415,26 @@ function SubmissionDetailContent() {
     if (!sub) return;
     if (!confirm("Confirm that this approved marketing copy has been published to live channels?")) return;
     setIsActionPending(true);
+    setActionError(null);
     try {
       const updated = await api.markPublished(sub.id, "https://brand.lumo.skincare/campaign-live");
       setSub(updated);
       setActionSuccess("Submission marked published with timestamp and immutable audit row.");
-      await loadData();
+      await loadData(true);
     } catch (err: any) {
-      alert(err.message || "Publish action failed");
+      setActionError(err.message || "Publish action failed");
     } finally {
       setIsActionPending(false);
     }
   };
 
-  const handlePostComment = async (e: React.FormEvent) => {
+  const handlePostSubmissionComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sub || !newCommentBody.trim()) return;
     setIsPostingComment(true);
     try {
       const created = await api.postComment(sub.id, newCommentBody.trim());
-      setComments([...comments, created]);
+      setComments((prev) => [...prev, created]);
       setNewCommentBody("");
     } catch (err: any) {
       alert(err.message || "Failed to post comment");
@@ -283,9 +448,9 @@ function SubmissionDetailContent() {
       <AppShell pageTitle="Submission Details">
         <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-16 w-full rounded-xl" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Skeleton className="h-96 lg:col-span-2 rounded-xl" />
-            <Skeleton className="h-96 rounded-xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <Skeleton className="h-96 lg:col-span-7 rounded-xl" />
+            <Skeleton className="h-96 lg:col-span-5 rounded-xl" />
           </div>
         </div>
       </AppShell>
@@ -296,7 +461,7 @@ function SubmissionDetailContent() {
     return (
       <AppShell pageTitle="Submission Not Found">
         <div className="max-w-2xl mx-auto my-12">
-          <ErrorState message={error || "Submission could not be located"} onRetry={loadData} />
+          <ErrorState message={error || "Submission could not be located"} onRetry={() => loadData()} />
           <div className="mt-4 text-center">
             <Link href="/submissions/">
               <Button variant="secondary" size="sm">
@@ -310,26 +475,67 @@ function SubmissionDetailContent() {
   }
 
   const allowed = sub.allowed_actions || [];
+  const openHighSeverityCount = findings.filter(
+    (f) => f.severity === "high" && f.status === "open"
+  ).length;
+
+  // Filtered Findings
+  const filteredFindings = findings.filter((f) => {
+    if (filterType !== "all" && f.issue_type !== filterType) return false;
+    if (filterSeverity !== "all" && f.severity !== filterSeverity) return false;
+    if (filterSource !== "all" && f.source !== filterSource) return false;
+    if (filterStatus !== "all" && f.status !== filterStatus) return false;
+    return true;
+  });
+
+  const totalOpen = findings.filter((f) => f.status === "open").length;
+  const totalRule = findings.filter((f) => f.source === "rule").length;
+  const totalAI = findings.filter((f) => f.source === "ai").length;
+
+  const isReviewer = user?.role === "reviewer";
 
   return (
     <AuthGuard>
       <AppShell pageTitle={sub.title}>
         <div className="space-y-6">
-          {/* Action Success Banner */}
+          {/* Action Success / Error Notifications */}
           {actionSuccess && (
-            <div className="p-3 bg-[#ECFDF3] border border-[#ABEFC6] text-xs font-semibold text-[#067647] rounded-lg flex items-center justify-between">
-              <span>{actionSuccess}</span>
-              <button
-                type="button"
-                onClick={() => setActionSuccess(null)}
-                className="text-[#067647] hover:underline text-[11px]"
-              >
-                Dismiss
-              </button>
-            </div>
+            <Banner
+              type="success"
+              title="Success"
+              action={
+                <button
+                  type="button"
+                  onClick={() => setActionSuccess(null)}
+                  className="text-[#067647] hover:underline text-xs font-semibold"
+                >
+                  Dismiss
+                </button>
+              }
+            >
+              {actionSuccess}
+            </Banner>
           )}
 
-          {/* Header Card with StatusStepper & Context-Sensitive Action */}
+          {actionError && (
+            <Banner
+              type="error"
+              title="Action Alert"
+              action={
+                <button
+                  type="button"
+                  onClick={() => setActionError(null)}
+                  className="text-[#B42318] hover:underline text-xs font-semibold"
+                >
+                  Dismiss
+                </button>
+              }
+            >
+              {actionError}
+            </Banner>
+          )}
+
+          {/* Submission Header Card */}
           <div className="bg-white rounded-xl border border-[#CBD2DC] p-6 shadow-xs">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#E2E5EA]">
               <div>
@@ -342,8 +548,8 @@ function SubmissionDetailContent() {
                       sub.risk_tier === "high"
                         ? "bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]"
                         : sub.risk_tier === "medium"
-                        ? "bg-[#FFFBEB] text-[#B45309] border border-[#FDE68A]"
-                        : "bg-[#ECFDF3] text-[#067647] border border-[#ABEFC6]"
+                        ? "bg-[#FFFBEB] text-[#B45309] border-[#FDE68A]"
+                        : "bg-[#ECFDF3] text-[#067647] border-[#ABEFC6]"
                     }`}
                   >
                     {sub.risk_tier} Risk
@@ -351,6 +557,7 @@ function SubmissionDetailContent() {
                   <span className="font-mono text-xs text-[#5B6475]">
                     Version v{sub.version_no}
                   </span>
+                  {review && <ModeChip mode={review.mode} />}
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold text-[#1F2A44] tracking-tight">
                   {sub.title}
@@ -361,32 +568,44 @@ function SubmissionDetailContent() {
                 </p>
               </div>
 
-              {/* Context-Sensitive Primary Action (Driven strictly by allowed_actions from API) */}
+              {/* Header Action Buttons */}
               <div className="flex flex-wrap items-center gap-2">
-                {allowed.includes("review") && (
+                {/* Run / Re-check Review Button */}
+                {(allowed.includes("review") || sub.status === "Draft" || sub.status === "Checked") && (
                   <Button
                     variant="primary"
                     size="md"
                     onClick={handleTriggerReview}
-                    isLoading={isActionPending}
+                    isLoading={isReviewRunning}
+                    disabled={isReviewRunning}
                     leftIcon={<Sparkles className="w-4 h-4" />}
                   >
-                    Run Brand Review
+                    {sub.status === "Draft" && versions.length > 1 ? "Re-check Copy" : "Run Brand Review"}
                   </Button>
                 )}
 
+                {/* Submit for Review (Creator) */}
                 {allowed.includes("submit") && (
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={handleSubmitForApproval}
-                    isLoading={isActionPending}
-                    rightIcon={<Send className="w-4 h-4" />}
-                  >
-                    Submit for Approval
-                  </Button>
+                  <div className="relative inline-block">
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={handleSubmitForApproval}
+                      isLoading={isActionPending}
+                      disabled={isActionPending || openHighSeverityCount > 0}
+                      rightIcon={<Send className="w-4 h-4" />}
+                      title={
+                        openHighSeverityCount > 0
+                          ? "Submit disabled: Resolve open high-severity findings first"
+                          : undefined
+                      }
+                    >
+                      Submit for Approval
+                    </Button>
+                  </div>
                 )}
 
+                {/* Claim Review (Reviewer) */}
                 {allowed.includes("claim") && (
                   <Button
                     variant="primary"
@@ -399,11 +618,16 @@ function SubmissionDetailContent() {
                   </Button>
                 )}
 
+                {/* Request Changes (Reviewer) */}
                 {allowed.includes("request_changes") && (
                   <Button
                     variant="danger"
                     size="md"
-                    onClick={openRequestChangesModal}
+                    onClick={() => {
+                      setNoteModalType("request_changes");
+                      setActionNote("");
+                      setNoteModalOpen(true);
+                    }}
                     isLoading={isActionPending}
                     leftIcon={<AlertCircle className="w-4 h-4" />}
                   >
@@ -411,11 +635,16 @@ function SubmissionDetailContent() {
                   </Button>
                 )}
 
+                {/* Approve (Reviewer) */}
                 {allowed.includes("approve") && (
                   <Button
                     variant="primary"
                     size="md"
-                    onClick={openApproveModal}
+                    onClick={() => {
+                      setNoteModalType("approve");
+                      setActionNote("Verified against Lumo tone, term, and clinical fact guidelines.");
+                      setNoteModalOpen(true);
+                    }}
                     isLoading={isActionPending}
                     leftIcon={<Check className="w-4 h-4" />}
                   >
@@ -423,6 +652,7 @@ function SubmissionDetailContent() {
                   </Button>
                 )}
 
+                {/* Mark Published */}
                 {allowed.includes("mark_published") && (
                   <Button
                     variant="primary"
@@ -435,18 +665,29 @@ function SubmissionDetailContent() {
                   </Button>
                 )}
 
-                {allowed.includes("edit") && !isEditing && (
+                {/* Edit Copy (Creator only when allowed) */}
+                {allowed.includes("edit") && !isReviewer && !isEditing && (
                   <Button
                     variant="secondary"
                     size="md"
                     onClick={() => setIsEditing(true)}
                     leftIcon={<Edit3 className="w-4 h-4" />}
                   >
-                    Edit Content
+                    Edit Copy
                   </Button>
                 )}
               </div>
             </div>
+
+            {/* High-severity blocker notice for creator */}
+            {openHighSeverityCount > 0 && sub.status === "Checked" && (
+              <div className="mt-4 p-3 bg-[#FEF3F2] border border-[#FECDCA] rounded-lg text-xs text-[#B42318] flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <strong>Workflow Blocked:</strong> Submission cannot be submitted to reviewers while {openHighSeverityCount} open high-severity finding(s) remain. Accept suggested fixes or dismiss with evidence.
+                </span>
+              </div>
+            )}
 
             {/* Status Stepper Progression */}
             <div className="pt-6">
@@ -457,24 +698,61 @@ function SubmissionDetailContent() {
             </div>
           </div>
 
-          {/* Main Workspace Layout: 2 Columns */}
+          {/* Review Progress Banner (5 stages, fallback banner, completed stats) */}
+          <ReviewProgressBanner
+            review={review}
+            isRunning={isReviewRunning}
+            onRunReview={handleTriggerReview}
+            canRunReview={allowed.includes("review") || sub.status === "Draft" || sub.status === "Checked"}
+            buttonLabel={sub.status === "Draft" && versions.length > 1 ? "Re-check Copy" : "Run Brand Review"}
+          />
+
+          {/* Narrow Screen Pane Switcher (Tabs on narrow screens) */}
+          <div className="lg:hidden flex items-center bg-[#E2E5EA] p-1 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setMobilePane("content")}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                mobilePane === "content" ? "bg-white text-[#1F2A44] shadow-xs" : "text-[#5B6475]"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Copy &amp; Details
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobilePane("findings")}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                mobilePane === "findings" ? "bg-white text-[#1F2A44] shadow-xs" : "text-[#5B6475]"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Findings ({findings.length})
+            </button>
+          </div>
+
+          {/* Main Two-Pane Workspace Layout (Content Left, Findings Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left 8 Cols: Content & Tabs */}
-            <div className="lg:col-span-8 space-y-6">
-              {/* Content Panel (View vs Edit Mode) */}
+            {/* Left 7 Columns: Content View & Tabs */}
+            <div
+              className={`lg:col-span-7 space-y-6 ${
+                mobilePane === "findings" ? "hidden lg:block" : "block"
+              }`}
+            >
+              {/* Content Panel (HighlightedText vs Edit Form) */}
               <div className="bg-white rounded-xl border border-[#CBD2DC] p-6 shadow-xs">
                 <div className="flex items-center justify-between pb-3 border-b border-[#E2E5EA] mb-4">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-[#0F766E]" />
                     <h2 className="text-xs font-bold uppercase tracking-wider text-[#1F2A44]">
-                      Copy Content (Version v{sub.version_no})
+                      Marketing Copy (Version v{sub.version_no})
                     </h2>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-mono text-[#5B6475]">
                       {isEditing ? editContent.length : sub.content.length} chars
                     </span>
-                    {allowed.includes("edit") && !isEditing && (
+                    {allowed.includes("edit") && !isReviewer && !isEditing && (
                       <button
                         type="button"
                         onClick={() => setIsEditing(true)}
@@ -521,16 +799,30 @@ function SubmissionDetailContent() {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC] text-xs text-[#1F2A44] font-mono leading-relaxed whitespace-pre-wrap">
-                    {sub.content}
+                  <div>
+                    {/* HighlightedText with keyboard focus and bidirectional scrolling */}
+                    <HighlightedText
+                      content={sub.content}
+                      findings={findings.filter((f) => f.status === "open")}
+                      selectedFindingId={selectedFindingId}
+                      onSelectFinding={handleSelectFinding}
+                    />
+
+                    <div className="mt-3 flex items-center justify-between text-[11px] text-[#5B6475] pt-2 border-t border-[#E2E5EA]">
+                      <span>
+                        Underlines: <strong className="text-[#1F2A44]">Solid</strong> = Deterministic Rule &middot;{" "}
+                        <strong className="text-[#0F766E]">Wavy</strong> = AI Model Check
+                      </span>
+                      <span>Click any highlight to focus its finding card</span>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Tabs: Versions, Comments, Approvals, Boundary */}
+              {/* Tabs: Versions & Diff, Comments, Approvals, Data Boundary */}
               <div className="bg-white rounded-xl border border-[#CBD2DC] p-6 shadow-xs">
-                {/* Tabs Header */}
-                <div className="flex items-center gap-2 border-b border-[#E2E5EA] pb-3 mb-6">
+                {/* Tabs Switcher */}
+                <div className="flex flex-wrap items-center gap-2 border-b border-[#E2E5EA] pb-3 mb-6">
                   <button
                     type="button"
                     onClick={() => setActiveTab("versions")}
@@ -567,7 +859,7 @@ function SubmissionDetailContent() {
                     }`}
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    Approvals &amp; Timeline
+                    Approvals &amp; Policy
                   </button>
 
                   <button
@@ -587,7 +879,7 @@ function SubmissionDetailContent() {
                 {/* Tab 1: Versions & DiffView */}
                 {activeTab === "versions" && (
                   <div className="space-y-4">
-                    {versions.length === 0 ? (
+                    {versions.length <= 1 ? (
                       <p className="text-xs text-[#5B6475]">Only initial version v1 recorded.</p>
                     ) : (
                       <>
@@ -598,7 +890,7 @@ function SubmissionDetailContent() {
                               aria-label="Compare from version"
                               value={diffFromV}
                               onChange={(e) => setDiffFromV(Number(e.target.value))}
-                              className="px-2 py-1 text-xs rounded border border-[#CBD2DC] bg-white"
+                              className="px-2 py-1 text-xs rounded border border-[#CBD2DC] bg-white text-[#1F2A44]"
                             >
                               {versions.map((v) => (
                                 <option key={v.id} value={v.version_no}>
@@ -614,7 +906,7 @@ function SubmissionDetailContent() {
                               aria-label="Compare to version"
                               value={diffToV}
                               onChange={(e) => setDiffToV(Number(e.target.value))}
-                              className="px-2 py-1 text-xs rounded border border-[#CBD2DC] bg-white"
+                              className="px-2 py-1 text-xs rounded border border-[#CBD2DC] bg-white text-[#1F2A44]"
                             >
                               {versions.map((v) => (
                                 <option key={v.id} value={v.version_no}>
@@ -644,7 +936,7 @@ function SubmissionDetailContent() {
                           );
                         })()}
 
-                        {/* Versions List */}
+                        {/* Versions List Table */}
                         <div className="border border-[#CBD2DC] rounded-lg overflow-hidden mt-4">
                           <table className="w-full text-left text-xs">
                             <thead>
@@ -678,29 +970,31 @@ function SubmissionDetailContent() {
                   </div>
                 )}
 
-                {/* Tab 2: Comments (Threaded submission-level) */}
+                {/* Tab 2: Comments (Submission-level) */}
                 {activeTab === "comments" && (
                   <div className="space-y-4">
-                    {comments.length === 0 ? (
-                      <p className="text-xs text-[#5B6475]">No review comments posted yet.</p>
+                    {comments.filter((c) => !c.finding_id).length === 0 ? (
+                      <p className="text-xs text-[#5B6475]">No submission-level notes posted yet.</p>
                     ) : (
                       <div className="space-y-3">
-                        {comments.map((c) => (
-                          <div key={c.id} className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-xs text-[#1F2A44]">{c.author_name}</span>
-                              <span className="text-[10px] text-[#5B6475]">
-                                {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                              </span>
+                        {comments
+                          .filter((c) => !c.finding_id)
+                          .map((c) => (
+                            <div key={c.id} className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="font-bold text-xs text-[#1F2A44]">{c.author_name}</span>
+                                <span className="text-[10px] text-[#5B6475]">
+                                  {new Date(c.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </span>
+                              </div>
+                              <p className="text-xs text-[#1F2A44] whitespace-pre-wrap">{c.body}</p>
                             </div>
-                            <p className="text-xs text-[#1F2A44] whitespace-pre-wrap">{c.body}</p>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     )}
 
-                    {/* New Comment Input */}
-                    <form onSubmit={handlePostComment} className="pt-3 border-t border-[#E2E5EA]">
+                    {/* New Submission Comment Form */}
+                    <form onSubmit={handlePostSubmissionComment} className="pt-3 border-t border-[#E2E5EA]">
                       <label htmlFor="new-comment" className="block text-xs font-bold text-[#1F2A44] mb-1">
                         Add Review Note or Comment
                       </label>
@@ -718,6 +1012,7 @@ function SubmissionDetailContent() {
                           variant="primary"
                           size="sm"
                           isLoading={isPostingComment}
+                          disabled={!newCommentBody.trim()}
                           leftIcon={<Send className="w-3.5 h-3.5" />}
                         >
                           Post Comment
@@ -727,7 +1022,7 @@ function SubmissionDetailContent() {
                   </div>
                 )}
 
-                {/* Tab 3: Approvals Timeline */}
+                {/* Tab 3: Approvals Policy & Timeline */}
                 {activeTab === "approvals" && (
                   <div className="space-y-4">
                     <div className="p-4 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
@@ -808,100 +1103,213 @@ function SubmissionDetailContent() {
 
                 {/* Tab 4: Data Boundary Panel */}
                 {activeTab === "boundary" && (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-[#ECFDF3] border border-[#ABEFC6] rounded-lg">
-                      <div className="flex items-center gap-2 text-[#067647] font-bold text-xs mb-1">
-                        <ShieldCheck className="w-4 h-4" /> Zero Confidential Data Leak Invariant Maintained
-                      </div>
-                      <p className="text-xs text-[#067647]">
-                        Retriever and LLM adapter assertions confirmed zero confidential entries or unredacted secrets left the process boundary.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
-                        <span className="text-[10px] font-bold uppercase text-[#5B6475] block">AI Provider</span>
-                        <span className="text-xs font-bold text-[#1F2A44] mt-1 block">Offline Mock Engine</span>
-                      </div>
-                      <div className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
-                        <span className="text-[10px] font-bold uppercase text-[#5B6475] block">External Calls</span>
-                        <span className="text-xs font-bold text-[#1F2A44] mt-1 block">0 (Zero external network)</span>
-                      </div>
-                      <div className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
-                        <span className="text-[10px] font-bold uppercase text-[#5B6475] block">Max Tier Sent</span>
-                        <span className="text-xs font-mono font-bold text-[#0F766E] uppercase mt-1 block">public</span>
-                      </div>
-                      <div className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
-                        <span className="text-[10px] font-bold uppercase text-[#5B6475] block">Tokens In/Out</span>
-                        <span className="text-xs font-bold text-[#1F2A44] mt-1 block">0 / 0</span>
-                      </div>
-                    </div>
-                  </div>
+                  <DataBoundaryView reviewId={review?.id || (findings[0]?.review_id ?? null)} />
                 )}
               </div>
             </div>
 
-            {/* Right 4 Cols: Findings Panel Placeholder (Active in Prompt 2B) */}
-            <div className="lg:col-span-4 space-y-4">
-              <div className="bg-white rounded-xl border border-[#CBD2DC] p-5 shadow-xs">
-                <div className="flex items-center justify-between pb-3 border-b border-[#E2E5EA] mb-4">
+            {/* Right 5 Columns: Findings Panel (Triage, Filters, Finding Cards) */}
+            <div
+              className={`lg:col-span-5 space-y-4 ${
+                mobilePane === "content" ? "hidden lg:block" : "block"
+              }`}
+            >
+              <div className="bg-white rounded-xl border border-[#CBD2DC] p-5 shadow-xs space-y-4">
+                {/* Findings Header & Summary Badges */}
+                <div className="flex items-center justify-between pb-3 border-b border-[#E2E5EA]">
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#0F766E]" />
                     <h2 className="text-xs font-bold uppercase tracking-wider text-[#1F2A44]">
-                      Findings Panel
+                      Brand Governance Findings
                     </h2>
                   </div>
                   <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-[#F7F7F4] text-[#1F2A44] border border-[#CBD2DC]">
-                    {findings.length} findings
+                    {findings.length} total
                   </span>
                 </div>
 
-                <div className="p-4 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC] text-center space-y-3">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-white border border-[#CBD2DC] flex items-center justify-center text-[#0F766E]">
-                    <Sparkles className="w-5 h-5" />
+                {/* Summary Pill Counts */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                  <div className="p-2 rounded-lg bg-[#F7F7F4] border border-[#E2E5EA]">
+                    <span className="text-[10px] uppercase font-bold text-[#5B6475] block">Open</span>
+                    <span className="font-bold text-[#1F2A44] tabular-nums">{totalOpen}</span>
                   </div>
-                  <h3 className="text-xs font-bold text-[#1F2A44]">
-                    Interactive Findings Triage Placeholder
-                  </h3>
-                  <p className="text-[11px] text-[#5B6475] leading-relaxed">
-                    Full findings triage with minimal-edit suggestion diffs, Accept, Dismiss (with mandatory reasons), and Escalate actions will be connected in Prompt 2B.
-                  </p>
-                  <div className="pt-2 border-t border-[#E2E5EA] text-[10px] font-mono text-[#5B6475]">
-                    Pipeline: Extract &rarr; Sanitise &rarr; RuleChecks &rarr; A11y &rarr; Retrieve &rarr; Analyse &rarr; Guardrails
+                  <div className="p-2 rounded-lg bg-[#FEF3F2] border border-[#FECDCA]">
+                    <span className="text-[10px] uppercase font-bold text-[#B42318] block">High Risk</span>
+                    <span className="font-bold text-[#B42318] tabular-nums">{openHighSeverityCount}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#F7F7F4] border border-[#E2E5EA]">
+                    <span className="text-[10px] uppercase font-bold text-[#5B6475] block">Rule Checks</span>
+                    <span className="font-bold text-[#1F2A44] tabular-nums">{totalRule}</span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#F0FDFA] border border-[#ABEFC6]">
+                    <span className="text-[10px] uppercase font-bold text-[#0F766E] block">AI Assisted</span>
+                    <span className="font-bold text-[#0F766E] tabular-nums">{totalAI}</span>
                   </div>
                 </div>
 
-                {findings.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#5B6475] block">
-                      Preliminary Issues Preview
-                    </span>
-                    {findings.slice(0, 3).map((f) => (
-                      <div key={f.id} className="p-2.5 bg-white rounded-lg border border-[#E2E5EA] text-xs">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-mono text-[10px] font-bold text-[#0F766E] uppercase">
-                            {f.issue_type}
-                          </span>
-                          <span
-                            className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${
-                              f.severity === "high" ? "bg-[#FEF3F2] text-[#B42318]" : "bg-[#F7F7F4] text-[#1F2A44]"
-                            }`}
-                          >
-                            {f.severity}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-[#1F2A44] line-clamp-1">&ldquo;{f.excerpt}&rdquo;</p>
-                        <p className="text-[11px] text-[#5B6475] line-clamp-2 mt-0.5">{f.explanation}</p>
-                      </div>
-                    ))}
+                {/* Filter Controls */}
+                <div className="p-3 bg-[#F7F7F4] rounded-lg border border-[#CBD2DC] space-y-2 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold text-[#1F2A44] text-[11px]">
+                    <Filter className="w-3.5 h-3.5 text-[#0F766E]" />
+                    <span>Filter Findings</span>
                   </div>
-                )}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label htmlFor="filter-type" className="block text-[10px] font-bold text-[#5B6475] mb-0.5">
+                        Issue Type
+                      </label>
+                      <select
+                        id="filter-type"
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="w-full p-1.5 text-xs rounded border border-[#CBD2DC] bg-white text-[#1F2A44]"
+                      >
+                        <option value="all">All Types</option>
+                        <option value="claim">Claim Substantiation</option>
+                        <option value="terminology">Terminology &amp; Banned</option>
+                        <option value="missing_disclaimer">Disclaimers</option>
+                        <option value="confidential_leak">Confidential Leaks</option>
+                        <option value="accessibility">Accessibility &amp; Grade</option>
+                        <option value="readability">Readability</option>
+                        <option value="tone">Tone Guidelines</option>
+                        <option value="general_note">General Notes</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="filter-severity" className="block text-[10px] font-bold text-[#5B6475] mb-0.5">
+                        Severity
+                      </label>
+                      <select
+                        id="filter-severity"
+                        value={filterSeverity}
+                        onChange={(e) => setFilterSeverity(e.target.value)}
+                        className="w-full p-1.5 text-xs rounded border border-[#CBD2DC] bg-white text-[#1F2A44]"
+                      >
+                        <option value="all">All Severities</option>
+                        <option value="high">High Severity</option>
+                        <option value="medium">Medium Severity</option>
+                        <option value="low">Low Severity</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="filter-source" className="block text-[10px] font-bold text-[#5B6475] mb-0.5">
+                        Source
+                      </label>
+                      <select
+                        id="filter-source"
+                        value={filterSource}
+                        onChange={(e) => setFilterSource(e.target.value)}
+                        className="w-full p-1.5 text-xs rounded border border-[#CBD2DC] bg-white text-[#1F2A44]"
+                      >
+                        <option value="all">All Sources</option>
+                        <option value="rule">Rule Only</option>
+                        <option value="ai">AI Assisted Only</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="filter-status" className="block text-[10px] font-bold text-[#5B6475] mb-0.5">
+                        Status
+                      </label>
+                      <select
+                        id="filter-status"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="w-full p-1.5 text-xs rounded border border-[#CBD2DC] bg-white text-[#1F2A44]"
+                      >
+                        <option value="all">All Statuses</option>
+                        <option value="open">Open</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="dismissed">Dismissed</option>
+                        <option value="escalated">Escalated</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Finding Cards List */}
+                <div className="space-y-3">
+                  {findings.length === 0 ? (
+                    review?.status === "completed" ? (
+                      /* Clean Bill of Health State */
+                      <div className="p-6 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl text-center space-y-2">
+                        <div className="w-10 h-10 mx-auto rounded-full bg-[#067647] text-white flex items-center justify-center font-bold">
+                          ✓
+                        </div>
+                        <h3 className="text-sm font-bold text-[#067647]">
+                          Clean Bill of Brand Health
+                        </h3>
+                        <p className="text-xs text-[#067647] leading-relaxed">
+                          No policy violations, tone deviations, or unverified claims detected. Marketing copy complies with all brand standards.
+                        </p>
+                      </div>
+                    ) : (
+                      /* Not yet reviewed state */
+                      <div className="p-6 bg-[#F7F7F4] border border-[#CBD2DC] rounded-xl text-center space-y-2 text-xs text-[#5B6475]">
+                        <p>No findings recorded yet. Run a brand review above to scan this content.</p>
+                      </div>
+                    )
+                  ) : filteredFindings.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-[#5B6475] bg-[#F7F7F4] rounded-lg border border-[#CBD2DC]">
+                      No findings match the selected filter criteria.
+                    </div>
+                  ) : (
+                    filteredFindings.map((finding) => (
+                      <FindingCard
+                        key={finding.id}
+                        finding={finding}
+                        isSelected={selectedFindingId === finding.id}
+                        onSelect={handleSelectFinding}
+                        onOpenCitation={(code, ver) =>
+                          setCitationDialog({ isOpen: true, code, version: ver })
+                        }
+                        onAccept={handleAcceptFinding}
+                        onOpenDismiss={(f) => setDismissFinding(f)}
+                        onOpenEscalate={(f) => setEscalateFinding(f)}
+                        comments={comments.filter((c) => c.finding_id === finding.id)}
+                        onPostComment={handlePostFindingComment}
+                        isActionPending={isActionPending}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Action Note Modal (Approve / Request Changes) */}
+        {/* Dismiss Dialog (Mandatory Reason Code + Text) */}
+        {dismissFinding && (
+          <DismissDialog
+            isOpen={!!dismissFinding}
+            onClose={() => setDismissFinding(null)}
+            onConfirm={handleConfirmDismiss}
+            findingExcerpt={dismissFinding.excerpt}
+          />
+        )}
+
+        {/* Escalate Dialog (Manager note) */}
+        {escalateFinding && (
+          <EscalateDialog
+            isOpen={!!escalateFinding}
+            onClose={() => setEscalateFinding(null)}
+            onConfirm={handleConfirmEscalate}
+            findingExcerpt={escalateFinding.excerpt}
+          />
+        )}
+
+        {/* Knowledge Base Citation Inspector Dialog */}
+        <KBCitationDialog
+          isOpen={citationDialog.isOpen}
+          onClose={() => setCitationDialog({ isOpen: false, code: null })}
+          entryCode={citationDialog.code}
+          entryVersion={citationDialog.version}
+        />
+
+        {/* Reviewer Note Modal (Approve / Request Changes) */}
         <Dialog
           isOpen={noteModalOpen}
           onClose={() => setNoteModalOpen(false)}

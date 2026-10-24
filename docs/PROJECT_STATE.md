@@ -1,9 +1,9 @@
 # Project State: Inkguard
 
-**Current Phase:** Phase 2A Complete / Hand-off to Phase 2B (Findings UI & Interactive Triage)  
-**Last Updated:** Sat 24 Oct 2026, 19:45 IST  
+**Current Phase:** Phase 2 Complete (2A Review Engine & 2B Findings UI) / Ready for Gate G2  
+**Last Updated:** Sat 24 Oct 2026, 20:00 IST  
 **Current Gate:** Gate G1 Complete (Target: Gate G2 - Sat 22:00 IST)  
-**Lane Active:** BE (Sparsh) & AI (Kushagra) complete; handing off to FE (Apurrv)
+**Lane Active:** FE (Apurrv), BE (Sparsh), AI (Kushagra)
 
 ## Active Milestones
 - [x] Initial repository audit and folder isolation under `WeBug/`
@@ -19,8 +19,9 @@
 - [x] Prompt 1C: Core screens on the design system (KB, Submissions, Reviewer Queue, Submission Detail shell) [FE]
 - [x] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
 - [x] Phase 2A: Review Orchestrator, findings API & persistence, action endpoints, safety tests [BE + AI]
-- [ ] Phase 2B: Findings UI, inline highlighting, interactive triage & escalation [FE]
+- [x] Phase 2B: Findings UI, inline highlighting, interactive triage & escalation [FE]
 - [ ] Gate G2: Golden path GP-1..GP-6 local with full findings review & evidence screenshots [ALL]
+
 
 
 ## Completed Verification
@@ -99,6 +100,33 @@
     - Voids approvals on edit: approving an older version after a new draft is rejected (409 Conflict).
   - OpenAPI 3.1 specification regenerated (`contracts/openapi.json`) with zero duplicate operation IDs or warnings.
   - Sample S1 verified through API in mock mode, generating full Review, Findings (31 findings), and Boundary JSON.
+- Phase 2B Verification (Submission Details & Interactive Findings Triage):
+  - Two-Pane Responsive Layout: Wide screens feature copy content on left (7 cols) and findings panel on right (5 cols); narrow screens feature tab toggle between Copy & Details and Findings.
+  - Review Execution & Live Progression: "Run Brand Review" and "Re-check Copy" buttons trigger background review pipeline with live 5-stage progression (`extracting`, `rule_checks`, `retrieving`, `analysing`, `finalising`), `aria-live` announcement, ModeChip indicator, and automatic fallback warning banner when daily cap or admin switch is active.
+  - Inline Highlighting & Bidirectional Focus: `HighlightedText` renders rule checks with solid underlines and AI checks with wavy underlines; color-coded by severity (high=red, medium=amber, low=blue). Clicking highlights scrolls to and focuses corresponding finding cards in right pane and vice-versa.
+  - Findings Panel & Triage Workflow:
+    - Filters: Issue Type, Severity, Source (Rule vs AI), and Status (Open, Accepted, Dismissed, Escalated).
+    - Summary counts: Total, Open, High Risk, Rule checks, and AI assisted.
+    - Clean bill state: Renders "Clean Bill of Brand Health" when review passes with 0 findings.
+    - Each Finding Card: Type tag, severity badge, `AIBadge` with confidence %, plain explanation, claim verdict badge, "Needs Human Judgment" flag, and `DiffView` showing proposed replacement.
+    - "No safe suggestion" fallback state displayed when `suggested_fix` is null.
+    - Accept Fix: Applies fix, increments content version, reverts status to Draft, voids prior approvals, and prompts for Re-check.
+    - Dismiss Finding: `DismissDialog` enforces mandatory reason dropdown code and detailed text justification.
+    - Escalate Finding: `EscalateDialog` prompts for managerial note and links escalation ticket.
+    - Knowledge Base Inspector: `KBCitationDialog` opens on clicking cited entry codes (e.g. `FACT-001`, `TERM-005`), displaying full policy text and study references.
+    - Inline Finding Comments: Collapsible threaded comments per finding.
+  - Data Boundary Telemetry: Dedicated panel/drawer displaying characters sent, redaction breakdown (emails, phones, API keys, secrets), included entry codes, highest tier sent, and explicit mock mode zero-egress notice.
+  - Role-Based Guardrails:
+    - Submit for Approval is disabled with warning while any open high-severity findings exist.
+    - Reviewers receive editorial view (no edit mode, comment per finding, required note for change requests, approvals progress tracker).
+  - Samples S1–S5 Browser Run Verification (Mock Mode):
+    - Sample S1 (`sub-sample-s1`): Spring Hydration Campaign — 32 findings flagged (contradicted cure claims, miracle superlative, FTC disclaimer missing). Submit disabled until high-severity issues resolved.
+    - Sample S2 (`sub-sample-s2`): Product Teaser Email — 2 findings flagged for off-tone aggressive marketing language and missing unsubscribe requirement.
+    - Sample S3 (`sub-sample-s3`): Blog Announcement — Clean, fully compliant brand announcement. Displays Clean Bill of Brand Health card.
+    - Sample S4 (`sub-sample-s4`): Social Teaser — 5 findings flagged including confidential launch codename leak ("Project Aurora") on external channel.
+    - Sample S5 (`sub-sample-s5`): Security Test — 3 findings flagged; prompt injection attempt ("ignore previous instructions") flagged in context while review completes safely without behavior alteration.
+  - Build & Static Export: `npm run build` succeeds cleanly with all 16 static routes prerendered.
+
 
 
 

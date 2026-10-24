@@ -105,17 +105,26 @@ export interface Finding {
   status: "open" | "accepted" | "dismissed" | "escalated";
   is_synthetic: boolean;
   created_at: string;
+  allowed_actions?: string[];
 }
 
 export interface Review {
   id: string;
   submission_version_id: string;
-  status: "pending" | "running" | "completed" | "failed";
+  status: "pending" | "extracting" | "rule_checks" | "retrieving" | "analysing" | "finalising" | "completed" | "failed";
   mode: "live" | "cached" | "mock" | "rules_only";
   provider: string;
   model: string;
   prompt_version: string;
-  stats: Record<string, any>;
+  stats?: {
+    rules_evaluated?: number;
+    kb_retrieved_count?: number;
+    findings_count?: number;
+    latency_ms?: number;
+    [key: string]: any;
+  };
+  error?: string | null;
+  fallback_reason?: string | null;
   started_at: string;
   finished_at?: string | null;
   findings_count: number;
@@ -131,6 +140,12 @@ export interface DataBoundary {
   tokens_out: number;
   provider: string;
   model: string;
+  purpose?: string | null;
+  characters_sent?: number;
+  entry_codes_included?: string[];
+  highest_tier_sent?: string;
+  cache_hit?: boolean;
+  message?: string;
 }
 
 export interface Comment {
