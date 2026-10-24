@@ -1,17 +1,32 @@
 """
 Idempotent seed data loader for Inkguard.
-Populates teams, demo users, and initial Lumo brand knowledge base.
+Populates teams, demo users, initial Lumo brand knowledge base, and sample submissions S1-S5.
 Safe to run repeatedly without duplicate key errors or data drift.
 """
 
-import os
+import hashlib
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.adapters.db.session import engine, SessionLocal, Base
-from app.adapters.db.models import Team, User, KBEntry, KBEntryVersion
+from app.adapters.db.models import (
+    Team,
+    User,
+    KBEntry,
+    KBEntryVersion,
+    Submission,
+    SubmissionVersion,
+)
 from app.adapters.db.audit import record_audit
 from app.adapters.security import hash_password
 from app.config import settings
+from app.seed.lumo_brand import (
+    SEED_TONE,
+    SEED_TERMS,
+    SEED_RULES,
+    SEED_FACTS,
+    SEED_ASSETS,
+    SEED_SAMPLES,
+)
 
 SEED_TEAMS = [
     {"id": "team-social", "name": "Team Social"},
@@ -38,6 +53,14 @@ SEED_USERS = [
         "role": "creator",
         "max_tier": "internal",
         "team_id": "team-web",
+    },
+    {
+        "id": "u-creator-maya",
+        "name": "Maya Patel",
+        "email": "creator.maya@lumo.internal",
+        "role": "creator",
+        "max_tier": "internal",
+        "team_id": "team-social",
     },
     {
         "id": "u-creator-agency",
@@ -81,129 +104,6 @@ SEED_USERS = [
     },
 ]
 
-SEED_KB_ENTRIES = [
-    {
-        "code": "TERM-001",
-        "type": "term",
-        "title": "Approved Product Naming: Lumo Glow Concentrate",
-        "body": "The primary hydration treatment must always be referred to as 'Lumo Glow Concentrate', never as a 'serum'.",
-        "classification": "internal",
-        "data": {
-            "banned": "serum",
-            "preferred": "Lumo Glow Concentrate",
-            "match_type": "exact",
-            "severity": "high",
-            "reason": "Standardizes formulation terminology",
-            "exceptions": ["hair serum"],
-        },
-    },
-    {
-        "code": "TERM-002",
-        "type": "term",
-        "title": "Clinical Ingredient: Cold-Pressed Rosehip Extract",
-        "body": "Rosehip active ingredient must always specify 'cold-pressed rosehip seed extract' to preserve organic sourcing attribution.",
-        "classification": "public",
-        "data": {
-            "banned": "rosehip oil",
-            "preferred": "cold-pressed rosehip seed extract",
-            "match_type": "exact",
-            "severity": "medium",
-            "reason": "Accurate extraction method compliance",
-        },
-    },
-    {
-        "code": "FACT-001",
-        "type": "fact",
-        "title": "Clinical Trial L-12 Hydration Study",
-        "body": "Clinical study L-12 demonstrated visible skin hydration improvement within 4 weeks across 94% of tested subjects.",
-        "classification": "internal",
-        "data": {
-            "statement": "Visible skin hydration improvement in 4 weeks across 94% of tested subjects",
-            "source": "Clinical Study L-12",
-            "valid_from": "2024-01-01",
-            "valid_until": "2026-12-31",
-        },
-    },
-    {
-        "code": "FACT-002",
-        "type": "fact",
-        "title": "2023 Consumer Perception Panel (Expired)",
-        "body": "98% reported softer morning feel in 7 days (Panel CP-08, expired June 2025). Cannot be cited in active 2026 campaigns.",
-        "classification": "internal",
-        "data": {
-            "statement": "98% reported softer morning feel in 7 days",
-            "source": "Consumer Panel CP-08",
-            "valid_from": "2023-01-01",
-            "valid_until": "2025-06-30",
-        },
-    },
-    {
-        "code": "FACT-003",
-        "type": "fact",
-        "title": "Barrier Function Study BF-04 (Expiring Soon)",
-        "body": "Demonstrates 35% reduction in trans-epidermal water loss over 14 days. Recertification pending end of this quarter.",
-        "classification": "internal",
-        "data": {
-            "statement": "35% reduction in trans-epidermal water loss over 14 days",
-            "source": "Barrier Function Study BF-04",
-            "valid_from": "2025-01-01",
-            "valid_until": "2026-11-15",
-        },
-    },
-    {
-        "code": "CONF-001",
-        "type": "rule",
-        "title": "Project Lumina Unreleased Launch Date",
-        "body": "Project Lumina product line launch on November 15, 2026 is strictly confidential. Never leak launch date in public marketing.",
-        "classification": "confidential",
-        "data": {
-            "rule_type": "confidential_term",
-            "pattern": r"Project Lumina|November 15",
-            "severity": "high",
-            "message": "Confidential product launch date cannot appear in public channels",
-        },
-    },
-    {
-        "code": "TONE-001",
-        "type": "tone",
-        "title": "Brand Voice: Plain-spoken & Grounded",
-        "body": "Avoid hyperbolic superlatives, miraculous claims, and pseudo-scientific buzzwords.",
-        "classification": "public",
-        "data": {
-            "attribute": "Plain-spoken",
-            "guidance": "Explain dermatological benefits plainly without miracle promises.",
-            "good_examples": ["Formulated with cold-pressed botanical oils."],
-            "bad_examples": ["A magical miracle elixir that erases all skin damage."],
-        },
-    },
-    {
-        "code": "RULE-001",
-        "type": "rule",
-        "title": "Mandatory Social Media Disclaimer",
-        "body": "All social channel posts discussing clinical claims must include '#LumoPartner' or standard consumer study notice.",
-        "classification": "public",
-        "data": {
-            "rule_type": "disclaimer",
-            "channel": "social",
-            "required_phrase": "#LumoPartner",
-            "severity": "medium",
-            "message": "Social posts require regulatory sponsorship disclosure",
-        },
-    },
-    {
-        "code": "ASSET-001",
-        "type": "asset",
-        "title": "Lumo Primary Wordmark Clearspace",
-        "body": "The Lumo logo requires a minimum clear space equal to 50% of the wordmark height on all collateral.",
-        "classification": "public",
-        "data": {
-            "asset_type": "logo",
-            "clearspace_ratio": 0.5,
-            "min_width_px": 120,
-        },
-    },
-]
-
 
 def run_seed(db: Session = None):
     close_at_end = False
@@ -221,7 +121,7 @@ def run_seed(db: Session = None):
                 db.add(Team(id=t["id"], name=t["name"], created_at=now))
         db.commit()
 
-        print("[Seed] 2. Loading users...")
+        print("[Seed] 2. Loading users (8 demo personas)...")
         default_hash = hash_password(settings.DEMO_PASSWORD)
         for u in SEED_USERS:
             existing = db.query(User).filter(User.email == u["email"]).first()
@@ -240,11 +140,15 @@ def run_seed(db: Session = None):
                 db.add(user)
         db.commit()
 
-        print("[Seed] 3. Loading knowledge base...")
+        print("[Seed] 3. Loading Lumo brand knowledge base (~45 curated entries)...")
         admin_user = db.query(User).filter(User.role == "admin").first()
         admin_id = admin_user.id if admin_user else "u-admin"
 
-        for k in SEED_KB_ENTRIES:
+        all_kb_entries = (
+            SEED_TONE + SEED_TERMS + SEED_RULES + SEED_FACTS + SEED_ASSETS
+        )
+
+        for k in all_kb_entries:
             existing = db.query(KBEntry).filter(KBEntry.code == k["code"]).first()
             if not existing:
                 entry = KBEntry(
@@ -281,6 +185,46 @@ def run_seed(db: Session = None):
                 db.add(v1)
         db.commit()
 
+        print("[Seed] 4. Loading sample submissions (S1 to S5)...")
+        creator_user = db.query(User).filter(User.role == "creator").first()
+        creator_id = creator_user.id if creator_user else "u-creator-social"
+
+        for s in SEED_SAMPLES:
+            existing_sub = db.query(Submission).filter(Submission.id == s["id"]).first()
+            if not existing_sub:
+                content_text = s["content"].strip()
+                content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()
+
+                sub = Submission(
+                    id=s["id"],
+                    title=s["title"],
+                    channel=s["channel"],
+                    risk_tier=s["risk_tier"],
+                    status="Draft",
+                    creator_id=creator_id,
+                    team_id="team-social",
+                    is_synthetic=True,
+                    created_at=now,
+                    updated_at=now,
+                )
+                db.add(sub)
+                db.flush()
+
+                ver = SubmissionVersion(
+                    submission_id=sub.id,
+                    version_no=1,
+                    content=content_text,
+                    content_hash=content_hash,
+                    created_by=creator_id,
+                    source="creator",
+                    created_at=now,
+                )
+                db.add(ver)
+                db.flush()
+
+                sub.current_version_id = ver.id
+        db.commit()
+
         record_audit(
             db=db,
             action="system_seed_loaded",
@@ -288,9 +232,14 @@ def run_seed(db: Session = None):
             entity_id="root",
             actor_id=admin_id,
             actor_role="admin",
-            details={"teams": len(SEED_TEAMS), "users": len(SEED_USERS), "kb_entries": len(SEED_KB_ENTRIES)},
+            details={
+                "teams": len(SEED_TEAMS),
+                "users": len(SEED_USERS),
+                "kb_entries": len(all_kb_entries),
+                "samples": len(SEED_SAMPLES),
+            },
         )
-        print("[Seed] Completed successfully! All data idempotent and verified.")
+        print(f"[Seed] Successfully seeded {len(all_kb_entries)} KB entries and 5 samples S1-S5.")
     finally:
         if close_at_end:
             db.close()

@@ -1,0 +1,58 @@
+"""
+Cached LLM adapter wrapping any LLMPort implementation.
+Keys cache entries by content hash, KB snapshot hash, prompt version, and model id.
+"""
+
+import hashlib
+import json
+from datetime import datetime, timezone
+from typing import List, Dict, Any, Optional
+from app.ports.llm import LLMPort
+
+
+def generate_cache_key(
+    content: str,
+    kb_entries: List[Dict[str, Any]],
+    prompt_version: str,
+    model: str,
+) -> str:
+    kb_summary = sorted([e.get("code", "") for e in kb_entries])
+    raw = f"{content.strip()}|{','.join(kb_summary)}|{prompt_version}|{model}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+class CachedLLMAdapter:
+    """Caching wrapper for LLM adapters."""
+
+    def __init__(self, inner_adapter: LLMPort, cache_store: Optional[Dict[str, Any]] = None):
+        self.inner = inner_adapter
+        self.cache: Dict[str, Any] = cache_store if cache_store is not None else {}
+        self.last_cache_hit: bool = False
+
+    def analyze(
+        self,
+        sanitised_text: str,
+        kb_entries: List[Dict[str, Any]],
+        channel: str = "social",
+        prompt_version: str = "v1",
+    ) -> Dict[str, Any]:
+        model = getattr(self.inner, "model", "mock")
+        key = generate_cache_key(sanitised_text, kb_entries, prompt_version, model)
+
+        if key in self.cache:
+            self.last_cache_hit = True
+            return self.cache[key]
+
+        self.last_cache_hit = False
+        res = self.inner.analyze(sanitised_text, kb_entries, channel=channel, prompt_version=prompt_version)
+        self.cache[key] = res
+        return res
+
+    def suggest_fixes(
+        self,
+        sanitised_text: str,
+        findings: List[Dict[str, Any]],
+        kb_entries: List[Dict[str, Any]],
+        prompt_version: str = "v1",
+    ) -> List[Dict[str, Any]]:
+        return self.inner.suggest_fixes(sanitised_text, findings, kb_entries, prompt_version=prompt_version)
