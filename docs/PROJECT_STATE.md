@@ -14,14 +14,14 @@
 - [x] Phase 0: Architecture validation (`manage.py arch`), 11 passing tests, and CLI wiring
 - [x] Phase 0: Tag `p0` verified and committed
 - [x] Prompt 0: UI design system, "proofreader's desk" palette, typed UI components, AppShell, login overhaul, /dev/ui component gallery, and evidence screenshots (`docs/evidence/ui-*.png`) [FE]
-- [ ] Prompt 1A: Backend real implementation (Auth, RBAC, KB CRUD & versioning, Submissions & diff, State machine & queue, Audit hash chaining, Seed loader) [BE]
+- [x] Prompt 1A: Backend real implementation (Auth, RBAC, KB CRUD & versioning, Submissions & diff, State machine & queue, Audit hash chaining, Seed loader) [BE]
 - [ ] Prompt 1B: AI domain, seed data, adapters (Lumo seed content, synthetic history, Sanitise/Rules/A11y/Guardrails/Suggest, BM25 retriever, Mock/OpenAI/Cached LLM adapters) [AI]
 - [ ] Prompt 1C: Core screens on the design system (KB, Submissions, Reviewer Queue, Submission Detail shell) [FE]
 - [ ] Gate G1: Full Draft -> Approved -> Marked Published walkthrough & tracer deploy [ALL]
 
 ## Completed Verification
 - `manage.py setup`: Virtualenv creation, dependency installation, Alembic migration, and seeding verified.
-- `manage.py test`: 11 passing tests (domain unit tests, API integration tests, architecture contract tests).
+- `manage.py test`: 44 passing tests (domain unit tests, API integration tests, architecture contract tests, table-driven state transitions).
 - `manage.py arch`: 2 import-linter contracts kept (domain purity, application isolation).
 - `manage.py build-frontend`: Static export compilation successful with 0 warnings.
 - `manage.py e2e`: Live server `/api/v1/health` connectivity verified.
@@ -29,4 +29,18 @@
   - Contrast check: All text/background pairs $\ge 4.5:1$ (WCAG 2.1 AA).
   - Component gallery: `/dev/ui` displaying all components and variants.
   - Screenshots: `docs/evidence/ui-login.png`, `docs/evidence/ui-gallery.png`, `docs/evidence/ui-dashboard.png`.
+- Prompt 1A Verification:
+  - JWT login with bcrypt, token expiry, 401 handling, `/auth/me`.
+  - RBAC domain policy, tier clearance gating, `allowed_actions`.
+  - Immutable KB versioning with snapshot history and fact validity checks.
+  - Submissions lifecycle (Draft -> Checked -> Submitted -> In Review -> Approved -> Marked Published).
+  - Table-driven workflow unit tests for all roles across all state transitions.
+  - Self-approval blocked (403 Forbidden).
+  - High-risk 2-approver requirement enforced.
+  - Content edit voids approvals and resets to Draft.
+  - Content diff endpoint (`difflib.unified_diff`) between arbitrary versions.
+  - Threaded comments at submission and finding levels.
+  - Cryptographic append-only audit trail with SHA-256 hash chaining, SQLite/Postgres immutability guards, and CSV export.
+  - Idempotent seed loader (`manage.py seed`) safe to run repeatedly.
+  - OpenAPI 3.1 specification regenerated (`contracts/openapi.json`).
 

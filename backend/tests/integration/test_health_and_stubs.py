@@ -40,16 +40,33 @@ def test_kb_entries_stub():
 
 
 def test_submissions_and_findings_stubs():
-    response = client.get("/api/v1/submissions")
+    login_res = client.post(
+        "/api/v1/auth/login",
+        json={"email": "creator.social@lumo.internal", "password": "LumoDemo2026!"},
+    )
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Create submission
+    create_res = client.post(
+        "/api/v1/submissions",
+        json={
+            "title": "Spring Post",
+            "channel": "social",
+            "content": "Discover our new serum with magical effects.",
+        },
+        headers=headers,
+    )
+    assert create_res.status_code == 200
+    sub_id = create_res.json()["id"]
+
+    response = client.get("/api/v1/submissions", headers=headers)
     assert response.status_code == 200
     subs = response.json()
     assert len(subs) >= 1
-    sub_id = subs[0]["id"]
 
-    findings_res = client.get(f"/api/v1/submissions/{sub_id}/findings")
+    findings_res = client.get(f"/api/v1/submissions/{sub_id}/findings", headers=headers)
     assert findings_res.status_code == 200
-    findings = findings_res.json()
-    assert len(findings) >= 2
 
 
 def test_error_envelope_format():

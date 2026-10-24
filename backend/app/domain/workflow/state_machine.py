@@ -77,8 +77,8 @@ class WorkflowStateMachine:
         if current_state == WorkflowState.DRAFT and target_state == WorkflowState.CHECKED:
             return
 
-        # Content edit resets to Draft
-        if current_state in {WorkflowState.CHECKED, WorkflowState.APPROVED, WorkflowState.CHANGES_REQUESTED} and target_state == WorkflowState.DRAFT:
+        # Content edit resets to Draft from any pre-published state
+        if current_state in {WorkflowState.CHECKED, WorkflowState.SUBMITTED, WorkflowState.IN_REVIEW, WorkflowState.CHANGES_REQUESTED, WorkflowState.APPROVED} and target_state == WorkflowState.DRAFT:
             if not is_creator and actor_role not in {"admin", "brand_manager"}:
                 raise PermissionDeniedError("Only creator or brand manager can edit draft content")
             return

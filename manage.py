@@ -73,10 +73,8 @@ def cmd_seed(args):
     py = get_python()
     print("[Inkguard] Loading idempotent seed data...")
     script = (
-        "from app.adapters.db.session import engine, Base; "
-        "from app.adapters.db.models import *; "
-        "Base.metadata.create_all(bind=engine); "
-        "print('Seed initialized successfully.')"
+        "from app.seed.loader import run_seed; "
+        "run_seed(); "
     )
     run_cmd([py, "-c", script], cwd=ROOT_DIR)
 

@@ -130,7 +130,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/settings": {
@@ -213,7 +218,56 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Users & Teams"
+        ],
+        "summary": "Create Team",
+        "operationId": "create_team_api_v1_teams_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamSchema"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/users": {
@@ -238,7 +292,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -277,16 +336,71 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/users/{user_id}": {
+      "get": {
+        "tags": [
+          "Users & Teams"
+        ],
+        "summary": "Get User",
+        "operationId": "get_user_api_v1_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSchema"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "tags": [
           "Users & Teams"
         ],
         "summary": "Update User",
         "operationId": "update_user_api_v1_users__user_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "user_id",
@@ -339,6 +453,11 @@
         ],
         "summary": "List Kb Entries",
         "operationId": "list_kb_entries_api_v1_kb_entries_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "type",
@@ -354,6 +473,49 @@
                 }
               ],
               "title": "Type"
+            }
+          },
+          {
+            "name": "classification",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Classification"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": "active",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "expiring_soon_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Expiring Soon Only"
             }
           }
         ],
@@ -390,6 +552,11 @@
         ],
         "summary": "Create Kb Entry",
         "operationId": "create_kb_entry_api_v1_kb_entries_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -431,6 +598,11 @@
         ],
         "summary": "Get Kb Entry",
         "operationId": "get_kb_entry_api_v1_kb_entries__entry_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "entry_id",
@@ -471,6 +643,11 @@
         ],
         "summary": "Update Kb Entry",
         "operationId": "update_kb_entry_api_v1_kb_entries__entry_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "entry_id",
@@ -523,6 +700,11 @@
         ],
         "summary": "Retire Kb Entry",
         "operationId": "retire_kb_entry_api_v1_kb_entries__entry_id__retire_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "entry_id",
@@ -565,6 +747,11 @@
         ],
         "summary": "Get Kb Entry Versions",
         "operationId": "get_kb_entry_versions_api_v1_kb_entries__entry_id__versions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "entry_id",
@@ -640,7 +827,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/submissions": {
@@ -650,6 +842,11 @@
         ],
         "summary": "List Submissions",
         "operationId": "list_submissions_api_v1_submissions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "status",
@@ -665,6 +862,38 @@
                 }
               ],
               "title": "Status"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Channel"
+            }
+          },
+          {
+            "name": "risk_tier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Risk Tier"
             }
           }
         ],
@@ -701,6 +930,11 @@
         ],
         "summary": "Create Submission",
         "operationId": "create_submission_api_v1_submissions_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -735,6 +969,98 @@
         }
       }
     },
+    "/api/v1/submissions/queue": {
+      "get": {
+        "tags": [
+          "Submissions & Workflow"
+        ],
+        "summary": "Get Reviewer Queue",
+        "operationId": "get_reviewer_queue_api_v1_submissions_queue_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "mine_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Mine Only"
+            }
+          },
+          {
+            "name": "risk_tier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Risk Tier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SubmissionDetail"
+                  },
+                  "title": "Response Get Reviewer Queue Api V1 Submissions Queue Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/dashboard-counts": {
+      "get": {
+        "tags": [
+          "Submissions & Workflow"
+        ],
+        "summary": "Get Dashboard Counts",
+        "operationId": "get_dashboard_counts_api_v1_submissions_dashboard_counts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/submissions/{submission_id}": {
       "get": {
         "tags": [
@@ -742,6 +1068,11 @@
         ],
         "summary": "Get Submission",
         "operationId": "get_submission_api_v1_submissions__submission_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -775,6 +1106,49 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Submissions & Workflow"
+        ],
+        "summary": "Delete Submission",
+        "operationId": "delete_submission_api_v1_submissions__submission_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/submissions/{submission_id}/content": {
@@ -784,6 +1158,11 @@
         ],
         "summary": "Update Submission Content",
         "operationId": "update_submission_content_api_v1_submissions__submission_id__content_put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -836,6 +1215,11 @@
         ],
         "summary": "Get Submission Versions",
         "operationId": "get_submission_versions_api_v1_submissions__submission_id__versions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -882,6 +1266,11 @@
         ],
         "summary": "Get Submission Diff",
         "operationId": "get_submission_diff_api_v1_submissions__submission_id__diff_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -897,8 +1286,14 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "default": 1,
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "From"
             }
           },
@@ -907,8 +1302,14 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "default": 2,
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "To"
             }
           }
@@ -944,6 +1345,11 @@
         ],
         "summary": "Submit Submission",
         "operationId": "submit_submission_api_v1_submissions__submission_id__submit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -986,6 +1392,11 @@
         ],
         "summary": "Claim Submission",
         "operationId": "claim_submission_api_v1_submissions__submission_id__claim_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1021,6 +1432,110 @@
         }
       }
     },
+    "/api/v1/submissions/{submission_id}/unclaim": {
+      "post": {
+        "tags": [
+          "Submissions & Workflow"
+        ],
+        "summary": "Unclaim Submission",
+        "operationId": "unclaim_submission_api_v1_submissions__submission_id__unclaim_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/{submission_id}/request-changes": {
+      "post": {
+        "tags": [
+          "Submissions & Workflow"
+        ],
+        "summary": "Request Changes",
+        "operationId": "request_changes_api_v1_submissions__submission_id__request_changes_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Submission Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/submissions/{submission_id}/approve": {
       "post": {
         "tags": [
@@ -1028,6 +1543,11 @@
         ],
         "summary": "Approve Submission",
         "operationId": "approve_submission_api_v1_submissions__submission_id__approve_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1080,58 +1600,6 @@
         }
       }
     },
-    "/api/v1/submissions/{submission_id}/request-changes": {
-      "post": {
-        "tags": [
-          "Submissions & Workflow"
-        ],
-        "summary": "Request Changes",
-        "operationId": "request_changes_api_v1_submissions__submission_id__request_changes_post",
-        "parameters": [
-          {
-            "name": "submission_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Submission Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NoteRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SubmissionDetail"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/submissions/{submission_id}/mark-published": {
       "post": {
         "tags": [
@@ -1139,6 +1607,11 @@
         ],
         "summary": "Mark Published",
         "operationId": "mark_published_api_v1_submissions__submission_id__mark_published_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1198,6 +1671,11 @@
         ],
         "summary": "Trigger Review",
         "operationId": "trigger_review_api_v1_submissions__submission_id__review_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1240,6 +1718,11 @@
         ],
         "summary": "Get Review",
         "operationId": "get_review_api_v1_reviews__review_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "review_id",
@@ -1282,6 +1765,11 @@
         ],
         "summary": "Get Review Boundary",
         "operationId": "get_review_boundary_api_v1_reviews__review_id__boundary_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "review_id",
@@ -1514,8 +2002,13 @@
         "tags": [
           "Comments"
         ],
-        "summary": "Get Comments",
-        "operationId": "get_comments_api_v1_submissions__submission_id__comments_get",
+        "summary": "Get Submission Comments",
+        "operationId": "get_submission_comments_api_v1_submissions__submission_id__comments_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1524,6 +2017,22 @@
             "schema": {
               "type": "string",
               "title": "Submission Id"
+            }
+          },
+          {
+            "name": "finding_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Finding Id"
             }
           }
         ],
@@ -1537,7 +2046,7 @@
                   "items": {
                     "$ref": "#/components/schemas/CommentResponse"
                   },
-                  "title": "Response Get Comments Api V1 Submissions  Submission Id  Comments Get"
+                  "title": "Response Get Submission Comments Api V1 Submissions  Submission Id  Comments Get"
                 }
               }
             }
@@ -1558,8 +2067,13 @@
         "tags": [
           "Comments"
         ],
-        "summary": "Post Comment",
-        "operationId": "post_comment_api_v1_submissions__submission_id__comments_post",
+        "summary": "Post Submission Comment",
+        "operationId": "post_submission_comment_api_v1_submissions__submission_id__comments_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "submission_id",
@@ -1588,6 +2102,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CommentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/findings/{finding_id}/comments": {
+      "get": {
+        "tags": [
+          "Comments"
+        ],
+        "summary": "Get Finding Comments",
+        "operationId": "get_finding_comments_api_v1_findings__finding_id__comments_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finding Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommentResponse"
+                  },
+                  "title": "Response Get Finding Comments Api V1 Findings  Finding Id  Comments Get"
                 }
               }
             }
@@ -1708,22 +2273,172 @@
         ],
         "summary": "Get Audit Log",
         "operationId": "get_audit_log_api_v1_audit_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actor Id"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Date"
+            }
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Date"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/AuditLogResponse"
                   },
-                  "type": "array",
                   "title": "Response Get Audit Log Api V1 Audit Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
         }
+      }
+    },
+    "/api/v1/audit/export": {
+      "get": {
+        "tags": [
+          "Audit Log"
+        ],
+        "summary": "Export Audit Log Csv",
+        "operationId": "export_audit_log_csv_api_v1_audit_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     }
   },
@@ -3120,8 +3835,16 @@
             "title": "Name"
           },
           "password": {
-            "type": "string",
-            "title": "Password"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password",
+            "default": "LumoDemo2026!"
           },
           "role": {
             "type": "string",
@@ -3148,7 +3871,6 @@
         "required": [
           "email",
           "name",
-          "password",
           "role"
         ],
         "title": "UserCreate"
@@ -3302,6 +4024,12 @@
           "type"
         ],
         "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

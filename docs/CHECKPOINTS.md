@@ -5,7 +5,8 @@
 | Gate | Target Time (IST) | Status | Commit / Tag | Summary & Evidence |
 |---|---|---|---|---|
 | **Phase 0 (Exit)** | Sat 13:45 | **DONE** | `p0` | Monolith scaffold, contracts/openapi.json, 15 models, stubs, 11 tests, Next.js static export |
-| **Prompt 0 (UI)** | Sat 14:15 | **DONE** | commit pending | Proofreader design system, typed UI components, AppShell, login overhaul, gallery, evidence screenshots |
+| **Prompt 0 (UI)** | Sat 14:15 | **DONE** | `839cece` | Proofreader design system, typed UI components, AppShell, login overhaul, gallery, evidence screenshots |
+| **Prompt 1A (BE)** | Sat 14:50 | **DONE** | commit pending | Real JWT auth, RBAC domain, immutable KB versioning, Submissions & diff, Table-driven workflow, Hash-chained audit, Seed loader |
 | **G1** | Sat 17:30 | In Progress | `g1` (target) | Core workflow end-to-end, domain rules, tracer deploy |
 | **G2** | Sat 22:00 | Planned | `g2` | Review engine integrated, golden path GP-1..GP-6 local, screenshots |
 | **G3** | Sun 01:00 | Planned | `g3` | Free-cloud deployment verified, GP-1..GP-8 live incognito, insights |
