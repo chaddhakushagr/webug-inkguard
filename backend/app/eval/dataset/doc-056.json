@@ -1,0 +1,18 @@
+{
+  "id": "doc-056",
+  "channel": "press_release",
+  "title": "Contradicted Trial Size: 10 Volunteers",
+  "text": "Evaluated on only 10 healthy volunteers with minimal safety monitoring.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-006",
+      "span_start": 0,
+      "span_end": 39,
+      "excerpt": "Evaluated on only 10 healthy volunteers",
+      "issue_type": "claim",
+      "verdict": "Contradicted",
+      "severity": "high"
+    }
+  ],
+  "notes": "Contradicted claim: FACT-006 evaluated 120 sensitive skin subjects"
+}

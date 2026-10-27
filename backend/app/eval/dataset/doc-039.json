@@ -1,0 +1,18 @@
+{
+  "id": "doc-039",
+  "channel": "email",
+  "title": "Email with Magic Elixir",
+  "text": "A true magic elixir for dull morning complexions looking for light.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-015",
+      "span_start": 7,
+      "span_end": 19,
+      "excerpt": "magic elixir",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-015 (unsubstantiated folklore term magic elixir)"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "doc-065",
+  "channel": "social",
+  "title": "Tone Deviation: Boastful Competitor Bashing",
+  "text": "Competitors are completely useless compared to our genius formulation team.",
+  "expected_findings": [
+    {
+      "entry_code": "TONE-003",
+      "span_start": 0,
+      "span_end": 57,
+      "excerpt": "Competitors are completely useless compared to our genius",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "medium"
+    },
+    {
+      "entry_code": "RULE-DISC-01",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Competitors are comp",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TONE-003 (Confident not boastful: disparaging competitors)"
+}

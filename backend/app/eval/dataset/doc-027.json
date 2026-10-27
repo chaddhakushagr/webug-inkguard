@@ -1,0 +1,18 @@
+{
+  "id": "doc-027",
+  "channel": "email",
+  "title": "Email with Banned Miracle",
+  "text": "Experience the miracle transformation that brings dull skin back to life.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-003",
+      "span_start": 15,
+      "span_end": 22,
+      "excerpt": "miracle",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-003 (miracle claim)"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "doc-076",
+  "channel": "web",
+  "title": "Supported Hydration Claim: HA-01",
+  "text": "Our multi-molecular hyaluronic complex binds surface and epidermal moisture throughout the day. Individual results may vary.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-011",
+      "span_start": 4,
+      "span_end": 75,
+      "excerpt": "multi-molecular hyaluronic complex binds surface and epidermal moisture",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported hydration claim matching in-vitro study FACT-011"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "doc-061",
+  "channel": "blog",
+  "title": "Expired Fact Citation: Panel CP-08",
+  "text": "Consumer panel CP-08 demonstrated 98% reported softer morning feel in 7 days.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-002",
+      "span_start": 34,
+      "span_end": 76,
+      "excerpt": "98% reported softer morning feel in 7 days",
+      "issue_type": "claim",
+      "verdict": "Expired",
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-03",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Consumer panel CP-08",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Expired fact citation: FACT-002 expired June 2025, cannot be cited"
+}

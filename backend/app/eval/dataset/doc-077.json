@@ -1,0 +1,18 @@
+{
+  "id": "doc-077",
+  "channel": "press_release",
+  "title": "Confidential Leak: Lumina Dew",
+  "text": "Lumo pre-announces Lumina Dew arriving in select flagship stores this winter season.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CONF-01",
+      "span_start": 19,
+      "span_end": 29,
+      "excerpt": "Lumina Dew",
+      "issue_type": "confidential_leak",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates RULE-CONF-01 (unreleased project product name leak)"
+}

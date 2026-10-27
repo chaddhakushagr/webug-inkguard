@@ -184,6 +184,14 @@ def cmd_dev(args):
             frontend_proc.terminate()
 
 
+def cmd_eval(args):
+    py = get_python()
+    eval_cmd = [py, "-m", "app.eval.cli", "--mode", args.mode, "--verifier", args.verifier]
+    if args.out:
+        eval_cmd.extend(["--out", args.out])
+    run_cmd(eval_cmd, cwd=ROOT_DIR)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Inkguard Management CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -203,6 +211,11 @@ def main():
     e2e_parser = subparsers.add_parser("e2e", help="Run e2e golden path verification")
     e2e_parser.add_argument("--base-url", help="Target URL for e2e tests (default: http://localhost:8000)")
 
+    eval_parser = subparsers.add_parser("eval", help="Run policy precision/recall evaluation harness")
+    eval_parser.add_argument("--mode", choices=["rules_only", "mock", "cached", "live"], default="rules_only", help="Evaluation mode (default: rules_only)")
+    eval_parser.add_argument("--verifier", choices=["on", "off"], default="off", help="Enable or disable verifier pass (default: off)")
+    eval_parser.add_argument("--out", default=None, help="Path to write evaluation JSON report (e.g. docs/evidence/eval_rules_only.json)")
+
     args = parser.parse_args()
 
     commands = {
@@ -215,6 +228,7 @@ def main():
         "build-frontend": cmd_build_frontend,
         "warm-cache": cmd_warm_cache,
         "e2e": cmd_e2e,
+        "eval": cmd_eval,
     }
 
     commands[args.command](args)

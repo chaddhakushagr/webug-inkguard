@@ -1,0 +1,36 @@
+{
+  "id": "doc-072",
+  "channel": "web",
+  "title": "Composite: Eczema + Cure on Web",
+  "text": "This soothing balm treats eczema and works to cure flaking skin.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-HEALTH-01",
+      "span_start": 19,
+      "span_end": 32,
+      "excerpt": "treats eczema",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "TERM-004",
+      "span_start": 46,
+      "span_end": 50,
+      "excerpt": "cure",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-02",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "This soothing balm t",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Composite finding: RULE-HEALTH-01, TERM-004, and RULE-DISC-02"
+}

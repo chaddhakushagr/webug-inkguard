@@ -1,0 +1,18 @@
+{
+  "id": "doc-033",
+  "channel": "social",
+  "title": "Social with Pore-Erasing",
+  "text": "Enjoy instant pore-erasing clarity with two drops each evening. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-009",
+      "span_start": 14,
+      "span_end": 26,
+      "excerpt": "pore-erasing",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-009 (anatomically impossible pore-erasing claim)"
+}

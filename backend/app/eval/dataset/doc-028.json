@@ -1,0 +1,18 @@
+{
+  "id": "doc-028",
+  "channel": "email",
+  "title": "Email with Banned Cure",
+  "text": "Formulated to cure chronic dehydration across all four seasons.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-004",
+      "span_start": 14,
+      "span_end": 18,
+      "excerpt": "cure",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-004 (medical drug claim: cure)"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "doc-081",
+  "channel": "social",
+  "title": "Social with Rosehip Oil",
+  "text": "Cold mornings call for nourishing rosehip oil on temples and cheekbones. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-002",
+      "span_start": 34,
+      "span_end": 45,
+      "excerpt": "rosehip oil",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-002 (rosehip oil instead of cold-pressed extract)"
+}

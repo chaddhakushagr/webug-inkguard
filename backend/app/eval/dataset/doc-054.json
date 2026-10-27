@@ -1,0 +1,36 @@
+{
+  "id": "doc-054",
+  "channel": "social",
+  "title": "Contradicted Medical Claim: Cure Dry Skin",
+  "text": "Proven to completely cure dry skin overnight with just two drops of our concentrate. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-001",
+      "span_start": 10,
+      "span_end": 34,
+      "excerpt": "completely cure dry skin",
+      "issue_type": "claim",
+      "verdict": "Contradicted",
+      "severity": "high"
+    },
+    {
+      "entry_code": "TERM-004",
+      "span_start": 21,
+      "span_end": 25,
+      "excerpt": "cure",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-CLAIM-01",
+      "span_start": 0,
+      "span_end": 9,
+      "excerpt": "Proven to",
+      "issue_type": "claim",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Contradicted claim (FACT-001 refutes cure), TERM-004 (cure), and RULE-CLAIM-01"
+}

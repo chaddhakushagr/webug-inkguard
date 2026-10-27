@@ -1,0 +1,18 @@
+{
+  "id": "doc-049",
+  "channel": "press_release",
+  "title": "Superlative: Unrivaled",
+  "text": "Lumo offers unrivaled skin moisture retention through Patagonian botanical mastery.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-AMBIG-01",
+      "span_start": 12,
+      "span_end": 21,
+      "excerpt": "unrivaled",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Triggers RULE-AMBIG-01 (excessive superlative: unrivaled)"
+}

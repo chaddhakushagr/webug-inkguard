@@ -1,0 +1,27 @@
+{
+  "id": "doc-068",
+  "channel": "blog",
+  "title": "Tone Deviation: Exclusionary Perfectionism",
+  "text": "Achieve porcelain white perfection that hides every natural skin characteristic.",
+  "expected_findings": [
+    {
+      "entry_code": "TONE-004",
+      "span_start": 8,
+      "span_end": 34,
+      "excerpt": "porcelain white perfection",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "medium"
+    },
+    {
+      "entry_code": "RULE-DISC-03",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Achieve porcelain wh",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates TONE-004 (Inclusive: exclusionary perfectionism)"
+}

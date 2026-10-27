@@ -1,0 +1,18 @@
+{
+  "id": "doc-042",
+  "channel": "blog",
+  "title": "Active Blog Missing Patch Test Advisory",
+  "text": "Introducing our active vitamin C ester concentrate designed for radiant barrier brightening.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-DISC-03",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Introducing our acti",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates RULE-DISC-03 (blog active product introduction missing 'Patch test advised')"
+}

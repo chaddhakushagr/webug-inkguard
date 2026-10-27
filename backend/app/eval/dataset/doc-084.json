@@ -1,0 +1,18 @@
+{
+  "id": "doc-084",
+  "channel": "web",
+  "title": "Web with Dermatologist Approved",
+  "text": "Formula is dermatologist approved across clinical panels. Individual results may vary.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-012",
+      "span_start": 11,
+      "span_end": 33,
+      "excerpt": "dermatologist approved",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-012 (dermatologist approved without study citation)"
+}

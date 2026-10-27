@@ -1,0 +1,18 @@
+{
+  "id": "doc-082",
+  "channel": "email",
+  "title": "Email with Anti-Aging",
+  "text": "Start your proactive anti-aging care with pure plant squalane and rosehip actives.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-005",
+      "span_start": 21,
+      "span_end": 31,
+      "excerpt": "anti-aging",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-005 in email marketing"
+}

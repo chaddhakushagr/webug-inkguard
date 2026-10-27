@@ -1,0 +1,18 @@
+{
+  "id": "doc-053",
+  "channel": "email",
+  "title": "Supported Certification: Leaping Bunny",
+  "text": "Certified 100% cruelty-free under Leaping Bunny international standard across all markets.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-012",
+      "span_start": 0,
+      "span_end": 70,
+      "excerpt": "Certified 100% cruelty-free under Leaping Bunny international standard",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported certification claim matching FACT-012"
+}

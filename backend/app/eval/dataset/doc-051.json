@@ -1,0 +1,18 @@
+{
+  "id": "doc-051",
+  "channel": "press_release",
+  "title": "Supported Safety Claim: DS-09",
+  "text": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions in study DS-09.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-006",
+      "span_start": 0,
+      "span_end": 88,
+      "excerpt": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported claim matching FACT-006 dermatologist evaluation"
+}

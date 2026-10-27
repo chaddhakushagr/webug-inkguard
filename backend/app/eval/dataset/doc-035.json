@@ -1,0 +1,18 @@
+{
+  "id": "doc-035",
+  "channel": "email",
+  "title": "Email with Instant Fix",
+  "text": "Need an instant fix for dry patches? Apply Lumo Glow Concentrate directly.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-011",
+      "span_start": 8,
+      "span_end": 19,
+      "excerpt": "instant fix",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-011 (unrealistic instant fix promise)"
+}

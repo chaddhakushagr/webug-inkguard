@@ -1,0 +1,18 @@
+{
+  "id": "doc-050",
+  "channel": "web",
+  "title": "Supported Efficacy Claim: Study L-12",
+  "text": "Clinical study L-12 demonstrated visible skin hydration improvement in 4 weeks across 94% of tested subjects. Individual results may vary.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-001",
+      "span_start": 33,
+      "span_end": 108,
+      "excerpt": "visible skin hydration improvement in 4 weeks across 94% of tested subjects",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported claim matching FACT-001 with active clinical documentation"
+}

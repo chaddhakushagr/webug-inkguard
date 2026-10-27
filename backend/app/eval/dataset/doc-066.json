@@ -1,0 +1,18 @@
+{
+  "id": "doc-066",
+  "channel": "email",
+  "title": "Tone Deviation: Anxiety-Inducing Shame",
+  "text": "Your damaged face is crying out for an urgent intervention right now.",
+  "expected_findings": [
+    {
+      "entry_code": "TONE-002",
+      "span_start": 0,
+      "span_end": 58,
+      "excerpt": "Your damaged face is crying out for an urgent intervention",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TONE-002 (Warm & encouraging: shaming anxiety language)"
+}

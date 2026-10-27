@@ -1,0 +1,27 @@
+{
+  "id": "doc-045",
+  "channel": "web",
+  "title": "Prohibited Medical Claim: Treats Eczema",
+  "text": "Our soothing barrier cream actively treats eczema and calms inflamed patches.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-HEALTH-01",
+      "span_start": 36,
+      "span_end": 49,
+      "excerpt": "treats eczema",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-02",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Our soothing barrier",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates RULE-HEALTH-01 (illegal disease treatment claim) and RULE-DISC-02"
+}

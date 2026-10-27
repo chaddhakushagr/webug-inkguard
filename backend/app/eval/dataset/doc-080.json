@@ -1,0 +1,18 @@
+{
+  "id": "doc-080",
+  "channel": "press_release",
+  "title": "Press Release with Banned Serum",
+  "text": "Lumo launches flagship botanical serum formulated with Chilean Patagonian wild harvest.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-001",
+      "span_start": 33,
+      "span_end": 38,
+      "excerpt": "serum",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-001 in press release copy"
+}

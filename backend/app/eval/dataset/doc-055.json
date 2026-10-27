@@ -1,0 +1,27 @@
+{
+  "id": "doc-055",
+  "channel": "blog",
+  "title": "Contradicted Sourcing: Synthetic Origin",
+  "text": "Synthetically formulated in laboratories rather than cold-pressed Patagonian botanical harvest.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-008",
+      "span_start": 0,
+      "span_end": 40,
+      "excerpt": "Synthetically formulated in laboratories",
+      "issue_type": "claim",
+      "verdict": "Contradicted",
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-03",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Synthetically formul",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Contradicted claim: FACT-008 documents 100% organic cold-pressed extraction"
+}

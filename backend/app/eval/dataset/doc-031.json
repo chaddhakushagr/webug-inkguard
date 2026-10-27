@@ -1,0 +1,18 @@
+{
+  "id": "doc-031",
+  "channel": "press_release",
+  "title": "Press Release with Toxin-Free",
+  "text": "Lumo offers a completely toxin-free alternative to mainstream commercial cleansers.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-007",
+      "span_start": 25,
+      "span_end": 35,
+      "excerpt": "toxin-free",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-007 (fearmongering toxin-free claim)"
+}

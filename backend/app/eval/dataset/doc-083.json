@@ -1,0 +1,18 @@
+{
+  "id": "doc-083",
+  "channel": "blog",
+  "title": "Blog with Toxin-Free",
+  "text": "Why choosing a toxin-free routine brings peace of mind to sensitive skin. Patch test advised.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-007",
+      "span_start": 15,
+      "span_end": 25,
+      "excerpt": "toxin-free",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-007 in blog copy"
+}

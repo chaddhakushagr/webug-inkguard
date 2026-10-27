@@ -1,0 +1,18 @@
+{
+  "id": "doc-037",
+  "channel": "email",
+  "title": "Email with 100% Natural",
+  "text": "Crafted with 100% natural ingredients straight from botanical gardens.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-013",
+      "span_start": 13,
+      "span_end": 25,
+      "excerpt": "100% natural",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-013 (false absolute percentage claim)"
+}

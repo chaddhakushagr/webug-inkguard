@@ -1,0 +1,27 @@
+{
+  "id": "doc-052",
+  "channel": "blog",
+  "title": "Supported Origin Claim: BOS-01",
+  "text": "Sourced from 100% organic cold-pressed extraction from wild Patagonian Rosa Canina harvest.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-008",
+      "span_start": 13,
+      "span_end": 82,
+      "excerpt": "100% organic cold-pressed extraction from wild Patagonian Rosa Canina",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    },
+    {
+      "entry_code": "RULE-DISC-03",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Sourced from 100% or",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported botanical origin claim matching FACT-008 and missing disclaimer"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "doc-025",
+  "channel": "social",
+  "title": "Social Banned Term Serum",
+  "text": "Elevate your morning with our hydrating serum today.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-001",
+      "span_start": 40,
+      "span_end": 45,
+      "excerpt": "serum",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-01",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Elevate your morning",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-001 (serum) and RULE-DISC-01 (missing #LumoPartner)"
+}

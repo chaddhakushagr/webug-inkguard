@@ -1,0 +1,36 @@
+{
+  "id": "doc-071",
+  "channel": "social",
+  "title": "Composite: Miracle + Serum on Social",
+  "text": "Our miracle serum will transform your daily skin glow overnight.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-001",
+      "span_start": 12,
+      "span_end": 17,
+      "excerpt": "serum",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "TERM-003",
+      "span_start": 4,
+      "span_end": 11,
+      "excerpt": "miracle",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-01",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Our miracle serum wi",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Composite finding: TERM-001 (serum), TERM-003 (miracle), and RULE-DISC-01 (missing disclaimer)"
+}

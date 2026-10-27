@@ -1,0 +1,18 @@
+{
+  "id": "doc-078",
+  "channel": "social",
+  "title": "Clinical Claim Trigger: Boosts Collagen",
+  "text": "Our plant botanical blend boosts collagen naturally for supple skin feel! #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CLAIM-01",
+      "span_start": 26,
+      "span_end": 41,
+      "excerpt": "boosts collagen",
+      "issue_type": "claim",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Triggers RULE-CLAIM-01 (clinical efficacy claim requires approved citation)"
+}

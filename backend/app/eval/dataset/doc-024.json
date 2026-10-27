@@ -1,0 +1,18 @@
+{
+  "id": "doc-024",
+  "channel": "blog",
+  "title": "Blog with Advisory but All-Natural",
+  "text": "Why you should switch to an all-natural skincare philosophy today. Patch test advised.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-006",
+      "span_start": 28,
+      "span_end": 39,
+      "excerpt": "all-natural",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Near-miss: blog advisory is present, but TERM-006 all-natural is violated"
+}

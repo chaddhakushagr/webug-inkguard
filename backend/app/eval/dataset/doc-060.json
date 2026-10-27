@@ -1,0 +1,18 @@
+{
+  "id": "doc-060",
+  "channel": "email",
+  "title": "Unverified Guarantee: 100% Satisfaction",
+  "text": "We back every bottle with a 100% satisfaction guarantee or full refund.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CLAIM-02",
+      "span_start": 28,
+      "span_end": 45,
+      "excerpt": "100% satisfaction",
+      "issue_type": "claim",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Triggers RULE-CLAIM-02 (unsubstantiated 100% satisfaction absolute)"
+}

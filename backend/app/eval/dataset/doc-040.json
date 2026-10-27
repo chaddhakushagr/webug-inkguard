@@ -1,0 +1,18 @@
+{
+  "id": "doc-040",
+  "channel": "social",
+  "title": "Promotional Social Missing Disclosure",
+  "text": "Wake up your complexion with cold-pressed rosehip seed extract today!",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-DISC-01",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Wake up your complex",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates RULE-DISC-01 (social promotional post missing #LumoPartner)"
+}

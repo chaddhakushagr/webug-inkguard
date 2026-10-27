@@ -1,0 +1,18 @@
+{
+  "id": "doc-062",
+  "channel": "email",
+  "title": "Expired Fact Citation: Formulation PF-01",
+  "text": "Formulation study PF-01 showed 80% absorption in under 60 seconds.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-009",
+      "span_start": 31,
+      "span_end": 65,
+      "excerpt": "80% absorption in under 60 seconds",
+      "issue_type": "claim",
+      "verdict": "Expired",
+      "severity": "high"
+    }
+  ],
+  "notes": "Expired fact citation: FACT-009 expired Dec 2024"
+}

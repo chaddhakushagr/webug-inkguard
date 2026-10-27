@@ -1,0 +1,27 @@
+{
+  "id": "doc-067",
+  "channel": "email",
+  "title": "Tone Deviation: Miraculous Buzzwords",
+  "text": "Our miracle elixir uses magical quantum formulation to completely cure wrinkles.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-003",
+      "span_start": 4,
+      "span_end": 11,
+      "excerpt": "miracle",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "TERM-004",
+      "span_start": 66,
+      "span_end": 70,
+      "excerpt": "cure",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-003 (miracle) and TERM-004 (cure)"
+}

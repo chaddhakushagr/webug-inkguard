@@ -1,0 +1,18 @@
+{
+  "id": "doc-036",
+  "channel": "press_release",
+  "title": "Press Release with Dermatologist Approved",
+  "text": "Our gentle formula is dermatologist approved for all skin types.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-012",
+      "span_start": 22,
+      "span_end": 44,
+      "excerpt": "dermatologist approved",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates TERM-012 (unsubstantiated expert endorsement without DS-09 cite)"
+}

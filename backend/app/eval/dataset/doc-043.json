@@ -1,0 +1,18 @@
+{
+  "id": "doc-043",
+  "channel": "social",
+  "title": "Confidential Code Name Leak",
+  "text": "Get ready for Project Lumina dropping soon with groundbreaking formulas. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CONF-01",
+      "span_start": 14,
+      "span_end": 28,
+      "excerpt": "Project Lumina",
+      "issue_type": "confidential_leak",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates RULE-CONF-01 (strict leak of confidential unreleased project code name)"
+}

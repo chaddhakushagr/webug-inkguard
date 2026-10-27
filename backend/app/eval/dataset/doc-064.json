@@ -1,0 +1,27 @@
+{
+  "id": "doc-064",
+  "channel": "web",
+  "title": "Expired Fact in Web Copy",
+  "text": "Our benchmark demonstrated 80% absorption in under 60 seconds across test subjects.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-009",
+      "span_start": 27,
+      "span_end": 61,
+      "excerpt": "80% absorption in under 60 seconds",
+      "issue_type": "claim",
+      "verdict": "Expired",
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-02",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Our benchmark demons",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Web copy citing expired benchmark PF-01 (FACT-009)"
+}

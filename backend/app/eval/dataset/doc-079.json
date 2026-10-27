@@ -1,0 +1,18 @@
+{
+  "id": "doc-079",
+  "channel": "email",
+  "title": "Absolutes Claim Trigger: Unbeatable",
+  "text": "Experience unbeatable daily moisture that outperforms ordinary department store creams.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CLAIM-02",
+      "span_start": 11,
+      "span_end": 21,
+      "excerpt": "unbeatable",
+      "issue_type": "claim",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Triggers RULE-CLAIM-02 (unsubstantiated superlative rank trigger)"
+}

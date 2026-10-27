@@ -1,0 +1,18 @@
+{
+  "id": "doc-075",
+  "channel": "blog",
+  "title": "Supported Clarity Claim: NB-03",
+  "text": "In double-blind testing, formula showed visible skin tone balance improvement over 6 weeks. Patch test advised.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-010",
+      "span_start": 40,
+      "span_end": 90,
+      "excerpt": "visible skin tone balance improvement over 6 weeks",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported claim matching clinical trial FACT-010 with advisory present"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "doc-030",
+  "channel": "email",
+  "title": "Email with Banned All-natural",
+  "text": "Trust our all-natural botanical formulas for your daily skincare routine.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-006",
+      "span_start": 10,
+      "span_end": 21,
+      "excerpt": "all-natural",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-006 (all-natural claim)"
+}

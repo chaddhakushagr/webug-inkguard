@@ -1,0 +1,18 @@
+{
+  "id": "doc-074",
+  "channel": "email",
+  "title": "Supported Potency Claim: VC-02",
+  "text": "Stability testing confirms 85% active antioxidant potency maintained at 6 months at room temperature.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-007",
+      "span_start": 27,
+      "span_end": 80,
+      "excerpt": "85% active antioxidant potency maintained at 6 months",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported claim matching stability report FACT-007"
+}

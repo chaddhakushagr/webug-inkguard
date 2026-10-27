@@ -1,0 +1,27 @@
+{
+  "id": "doc-059",
+  "channel": "web",
+  "title": "Unverified Wrinkle Claim",
+  "text": "Our concentrate is clinically proven to reduce wrinkles by 90% in two weeks.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CLAIM-01",
+      "span_start": 19,
+      "span_end": 36,
+      "excerpt": "clinically proven",
+      "issue_type": "claim",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-02",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Our concentrate is c",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Triggers RULE-CLAIM-01 (unsubstantiated clinical claim) and missing disclaimer"
+}

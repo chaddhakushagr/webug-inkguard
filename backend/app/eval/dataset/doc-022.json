@@ -1,0 +1,18 @@
+{
+  "id": "doc-022",
+  "channel": "social",
+  "title": "Social with Disclaimer but Banned Serum",
+  "text": "Discover our radiant summer serum for dehydrated skin. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-001",
+      "span_start": 28,
+      "span_end": 33,
+      "excerpt": "serum",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Near-miss: disclaimer is present, but terminology rule TERM-001 is violated"
+}

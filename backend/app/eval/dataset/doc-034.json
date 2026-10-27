@@ -1,0 +1,18 @@
+{
+  "id": "doc-034",
+  "channel": "email",
+  "title": "Email with Flawless Promise",
+  "text": "Unlock flawless glass skin with our multi-step morning routine.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-010",
+      "span_start": 7,
+      "span_end": 15,
+      "excerpt": "flawless",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates TERM-010 (flawless skin promise)"
+}

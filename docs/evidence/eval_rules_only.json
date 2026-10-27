@@ -1,0 +1,509 @@
+{
+  "summary": {
+    "total_documents": 84,
+    "clean_documents": 21,
+    "clean_documents_passed": 13,
+    "clean_pass_rate": 0.619,
+    "overall": {
+      "tp": 64,
+      "fp": 11,
+      "fn": 21,
+      "precision": 0.8533,
+      "recall": 0.7529,
+      "f1": 0.8
+    }
+  },
+  "by_issue_type": {
+    "terminology": {
+      "tp": 32,
+      "fp": 5,
+      "fn": 0,
+      "precision": 0.8649,
+      "recall": 1.0,
+      "f1": 0.9275
+    },
+    "readability": {
+      "tp": 0,
+      "fp": 4,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "missing_disclaimer": {
+      "tp": 18,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "confidential_leak": {
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "tone": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 3,
+      "precision": 1.0,
+      "recall": 0.625,
+      "f1": 0.7692
+    },
+    "accessibility": {
+      "tp": 0,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "claim": {
+      "tp": 6,
+      "fp": 1,
+      "fn": 17,
+      "precision": 0.8571,
+      "recall": 0.2609,
+      "f1": 0.4
+    }
+  },
+  "by_claim_verdict": {
+    "Supported": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "Contradicted": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "Unverified": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "Expired": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "false_positives_count": 11,
+  "false_negatives_count": 21,
+  "false_positives": [
+    {
+      "document_id": "doc-001",
+      "channel": "social",
+      "cited_entry_code": "TERM-014",
+      "issue_type": "terminology",
+      "excerpt": "Lumo Glow",
+      "span": [
+        31,
+        40
+      ],
+      "claim_verdict": null,
+      "explanation": "Consistent trademark representation"
+    },
+    {
+      "document_id": "doc-006",
+      "channel": "email",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Our dropper bottles are crafte",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 14.6 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-007",
+      "channel": "email",
+      "cited_entry_code": "TERM-014",
+      "issue_type": "terminology",
+      "excerpt": "Lumo Glow",
+      "span": [
+        84,
+        93
+      ],
+      "claim_verdict": null,
+      "explanation": "Consistent trademark representation"
+    },
+    {
+      "document_id": "doc-013",
+      "channel": "web",
+      "cited_entry_code": "TERM-014",
+      "issue_type": "terminology",
+      "excerpt": "Lumo Glow",
+      "span": [
+        0,
+        9
+      ],
+      "claim_verdict": null,
+      "explanation": "Consistent trademark representation"
+    },
+    {
+      "document_id": "doc-014",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Our ingredient integrity: 98% ",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.0 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-017",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Lumo announces completion of i",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.7 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-018",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Lumo transitions packaging acr",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.2 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-019",
+      "channel": "social",
+      "cited_entry_code": "TERM-014",
+      "issue_type": "terminology",
+      "excerpt": "Lumo Glow",
+      "span": [
+        16,
+        25
+      ],
+      "claim_verdict": null,
+      "explanation": "Consistent trademark representation"
+    },
+    {
+      "document_id": "doc-035",
+      "channel": "email",
+      "cited_entry_code": "TERM-014",
+      "issue_type": "terminology",
+      "excerpt": "Lumo Glow",
+      "span": [
+        43,
+        52
+      ],
+      "claim_verdict": null,
+      "explanation": "Consistent trademark representation"
+    },
+    {
+      "document_id": "doc-047",
+      "channel": "blog",
+      "cited_entry_code": null,
+      "issue_type": "accessibility",
+      "excerpt": "[click here]",
+      "span": [
+        64,
+        76
+      ],
+      "claim_verdict": null,
+      "explanation": "Vague link text 'click here' hinders screen reader navigation; use descriptive anchor text explaining the destination."
+    },
+    {
+      "document_id": "doc-051",
+      "channel": "press_release",
+      "cited_entry_code": "RULE-CLAIM-01",
+      "issue_type": "claim",
+      "excerpt": "Dermatologist tested",
+      "span": [
+        0,
+        20
+      ],
+      "claim_verdict": null,
+      "explanation": "Clinical efficacy claims require approved evidence citation"
+    }
+  ],
+  "false_negatives": [
+    {
+      "document_id": "doc-047",
+      "channel": "blog",
+      "entry_code": "RULE-A11Y-01",
+      "issue_type": "accessibility",
+      "excerpt": "[click here]",
+      "span": [
+        64,
+        76
+      ],
+      "verdict": null
+    },
+    {
+      "document_id": "doc-050",
+      "channel": "web",
+      "entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "visible skin hydration improvement in 4 weeks across 94% of tested subjects",
+      "span": [
+        33,
+        108
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-051",
+      "channel": "press_release",
+      "entry_code": "FACT-006",
+      "issue_type": "claim",
+      "excerpt": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions",
+      "span": [
+        0,
+        88
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-052",
+      "channel": "blog",
+      "entry_code": "FACT-008",
+      "issue_type": "claim",
+      "excerpt": "100% organic cold-pressed extraction from wild Patagonian Rosa Canina",
+      "span": [
+        13,
+        82
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-053",
+      "channel": "email",
+      "entry_code": "FACT-012",
+      "issue_type": "claim",
+      "excerpt": "Certified 100% cruelty-free under Leaping Bunny international standard",
+      "span": [
+        0,
+        70
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-054",
+      "channel": "social",
+      "entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "completely cure dry skin",
+      "span": [
+        10,
+        34
+      ],
+      "verdict": "Contradicted"
+    },
+    {
+      "document_id": "doc-055",
+      "channel": "blog",
+      "entry_code": "FACT-008",
+      "issue_type": "claim",
+      "excerpt": "Synthetically formulated in laboratories",
+      "span": [
+        0,
+        40
+      ],
+      "verdict": "Contradicted"
+    },
+    {
+      "document_id": "doc-056",
+      "channel": "press_release",
+      "entry_code": "FACT-006",
+      "issue_type": "claim",
+      "excerpt": "Evaluated on only 10 healthy volunteers",
+      "span": [
+        0,
+        39
+      ],
+      "verdict": "Contradicted"
+    },
+    {
+      "document_id": "doc-057",
+      "channel": "email",
+      "entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "guaranteed #1 formula",
+      "span": [
+        4,
+        25
+      ],
+      "verdict": "Unverified"
+    },
+    {
+      "document_id": "doc-058",
+      "channel": "social",
+      "entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "flawless radiance in just 2 days",
+      "span": [
+        7,
+        39
+      ],
+      "verdict": "Unverified"
+    },
+    {
+      "document_id": "doc-061",
+      "channel": "blog",
+      "entry_code": "FACT-002",
+      "issue_type": "claim",
+      "excerpt": "98% reported softer morning feel in 7 days",
+      "span": [
+        34,
+        76
+      ],
+      "verdict": "Expired"
+    },
+    {
+      "document_id": "doc-062",
+      "channel": "email",
+      "entry_code": "FACT-009",
+      "issue_type": "claim",
+      "excerpt": "80% absorption in under 60 seconds",
+      "span": [
+        31,
+        65
+      ],
+      "verdict": "Expired"
+    },
+    {
+      "document_id": "doc-063",
+      "channel": "social",
+      "entry_code": "FACT-002",
+      "issue_type": "claim",
+      "excerpt": "98% reported softer morning feel in 7 days",
+      "span": [
+        5,
+        47
+      ],
+      "verdict": "Expired"
+    },
+    {
+      "document_id": "doc-064",
+      "channel": "web",
+      "entry_code": "FACT-009",
+      "issue_type": "claim",
+      "excerpt": "80% absorption in under 60 seconds",
+      "span": [
+        27,
+        61
+      ],
+      "verdict": "Expired"
+    },
+    {
+      "document_id": "doc-065",
+      "channel": "social",
+      "entry_code": "TONE-003",
+      "issue_type": "tone",
+      "excerpt": "Competitors are completely useless compared to our genius",
+      "span": [
+        0,
+        57
+      ],
+      "verdict": null
+    },
+    {
+      "document_id": "doc-066",
+      "channel": "email",
+      "entry_code": "TONE-002",
+      "issue_type": "tone",
+      "excerpt": "Your damaged face is crying out for an urgent intervention",
+      "span": [
+        0,
+        58
+      ],
+      "verdict": null
+    },
+    {
+      "document_id": "doc-068",
+      "channel": "blog",
+      "entry_code": "TONE-004",
+      "issue_type": "tone",
+      "excerpt": "porcelain white perfection",
+      "span": [
+        8,
+        34
+      ],
+      "verdict": null
+    },
+    {
+      "document_id": "doc-073",
+      "channel": "web",
+      "entry_code": "FACT-003",
+      "issue_type": "claim",
+      "excerpt": "35% reduction in trans-epidermal water loss over 14 days",
+      "span": [
+        33,
+        89
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-074",
+      "channel": "email",
+      "entry_code": "FACT-007",
+      "issue_type": "claim",
+      "excerpt": "85% active antioxidant potency maintained at 6 months",
+      "span": [
+        27,
+        80
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-075",
+      "channel": "blog",
+      "entry_code": "FACT-010",
+      "issue_type": "claim",
+      "excerpt": "visible skin tone balance improvement over 6 weeks",
+      "span": [
+        40,
+        90
+      ],
+      "verdict": "Supported"
+    },
+    {
+      "document_id": "doc-076",
+      "channel": "web",
+      "entry_code": "FACT-011",
+      "issue_type": "claim",
+      "excerpt": "multi-molecular hyaluronic complex binds surface and epidermal moisture",
+      "span": [
+        4,
+        75
+      ],
+      "verdict": "Supported"
+    }
+  ]
+}

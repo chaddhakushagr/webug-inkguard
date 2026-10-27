@@ -1,0 +1,27 @@
+{
+  "id": "doc-057",
+  "channel": "email",
+  "title": "Unverified Rank Claim: Guaranteed #1",
+  "text": "Our guaranteed #1 formula beats every other luxury moisturizer on store shelves.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-001",
+      "span_start": 4,
+      "span_end": 25,
+      "excerpt": "guaranteed #1 formula",
+      "issue_type": "claim",
+      "verdict": "Unverified",
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-CLAIM-02",
+      "span_start": 4,
+      "span_end": 14,
+      "excerpt": "guaranteed",
+      "issue_type": "claim",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Unverified supremacy claim and RULE-CLAIM-02 trigger"
+}

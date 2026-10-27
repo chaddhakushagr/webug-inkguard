@@ -1,0 +1,27 @@
+{
+  "id": "doc-058",
+  "channel": "social",
+  "title": "Unverified Efficacy: 2-Day Radiance",
+  "text": "Unlock flawless radiance in just 2 days with our rapid botanical infusion. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-001",
+      "span_start": 7,
+      "span_end": 39,
+      "excerpt": "flawless radiance in just 2 days",
+      "issue_type": "claim",
+      "verdict": "Unverified",
+      "severity": "high"
+    },
+    {
+      "entry_code": "TERM-010",
+      "span_start": 7,
+      "span_end": 15,
+      "excerpt": "flawless",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Unverified rapid efficacy claim (FACT-001 is 4 weeks) and TERM-010"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "doc-032",
+  "channel": "web",
+  "title": "Web Page with Chemical-Free",
+  "text": "Our purest treatment provides 100% chemical-free barrier hydration.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-008",
+      "span_start": 35,
+      "span_end": 48,
+      "excerpt": "chemical-free",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "high"
+    },
+    {
+      "entry_code": "RULE-DISC-02",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Our purest treatment",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates TERM-008 (chemical-free myth) and RULE-DISC-02"
+}

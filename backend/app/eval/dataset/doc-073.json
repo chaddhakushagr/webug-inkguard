@@ -1,0 +1,18 @@
+{
+  "id": "doc-073",
+  "channel": "web",
+  "title": "Supported Efficacy Claim: BF-04",
+  "text": "Barrier study BF-04 demonstrated 35% reduction in trans-epidermal water loss over 14 days. Individual results may vary.",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-003",
+      "span_start": 33,
+      "span_end": 89,
+      "excerpt": "35% reduction in trans-epidermal water loss over 14 days",
+      "issue_type": "claim",
+      "verdict": "Supported",
+      "severity": "low"
+    }
+  ],
+  "notes": "Supported claim matching FACT-003 with active fact validity"
+}

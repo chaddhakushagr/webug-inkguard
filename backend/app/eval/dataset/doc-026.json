@@ -1,0 +1,18 @@
+{
+  "id": "doc-026",
+  "channel": "email",
+  "title": "Email with Generic Rosehip Oil",
+  "text": "We hand-blend organic rosehip oil with plant squalane for daily comfort.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-002",
+      "span_start": 22,
+      "span_end": 33,
+      "excerpt": "rosehip oil",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-002 (generic rosehip oil instead of cold-pressed extract)"
+}

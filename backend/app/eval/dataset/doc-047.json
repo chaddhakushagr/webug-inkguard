@@ -1,0 +1,27 @@
+{
+  "id": "doc-047",
+  "channel": "blog",
+  "title": "Accessibility Non-Descriptive Link",
+  "text": "To read our clinical trial documentation and ingredient report, [click here] today.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-A11Y-01",
+      "span_start": 64,
+      "span_end": 76,
+      "excerpt": "[click here]",
+      "issue_type": "accessibility",
+      "verdict": null,
+      "severity": "medium"
+    },
+    {
+      "entry_code": "RULE-DISC-03",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "To read our clinical",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates RULE-A11Y-01 (non-descriptive link text) and RULE-DISC-03"
+}

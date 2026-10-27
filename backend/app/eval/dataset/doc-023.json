@@ -1,0 +1,18 @@
+{
+  "id": "doc-023",
+  "channel": "web",
+  "title": "Web with Disclaimer but Flawless",
+  "text": "Achieve flawless skin texture with our botanical blend. Individual results may vary.",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-010",
+      "span_start": 8,
+      "span_end": 16,
+      "excerpt": "flawless",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Near-miss: web disclaimer is present, but TERM-010 flawless is violated"
+}

@@ -1,0 +1,18 @@
+{
+  "id": "doc-063",
+  "channel": "social",
+  "title": "Expired Fact in Social Post",
+  "text": "Over 98% reported softer morning feel in 7 days in our early customer trial! #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "FACT-002",
+      "span_start": 5,
+      "span_end": 47,
+      "excerpt": "98% reported softer morning feel in 7 days",
+      "issue_type": "claim",
+      "verdict": "Expired",
+      "severity": "high"
+    }
+  ],
+  "notes": "Social copy citing expired consumer panel CP-08 (FACT-002)"
+}

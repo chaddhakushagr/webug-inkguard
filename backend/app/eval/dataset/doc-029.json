@@ -1,0 +1,18 @@
+{
+  "id": "doc-029",
+  "channel": "social",
+  "title": "Social with Banned Anti-aging",
+  "text": "Discover our comprehensive anti-aging protocol designed for mature skin. #LumoPartner",
+  "expected_findings": [
+    {
+      "entry_code": "TERM-005",
+      "span_start": 27,
+      "span_end": 37,
+      "excerpt": "anti-aging",
+      "issue_type": "terminology",
+      "verdict": null,
+      "severity": "medium"
+    }
+  ],
+  "notes": "Violates TERM-005 (anti-aging instead of age-smart)"
+}

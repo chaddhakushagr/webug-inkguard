@@ -1,0 +1,18 @@
+{
+  "id": "doc-044",
+  "channel": "email",
+  "title": "Confidential Launch Date Leak",
+  "text": "Save the date: our biggest secret product drop arrives on November 15 this year.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-CONF-01",
+      "span_start": 58,
+      "span_end": 69,
+      "excerpt": "November 15",
+      "issue_type": "confidential_leak",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates RULE-CONF-01 (strict leak of confidential launch date)"
+}

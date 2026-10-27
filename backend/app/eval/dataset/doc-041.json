@@ -1,0 +1,18 @@
+{
+  "id": "doc-041",
+  "channel": "web",
+  "title": "Web Clinical Page Missing Variance Note",
+  "text": "Clinical trial L-12 demonstrated visible skin hydration improvement within 4 weeks.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-DISC-02",
+      "span_start": 0,
+      "span_end": 20,
+      "excerpt": "Clinical trial L-12 ",
+      "issue_type": "missing_disclaimer",
+      "verdict": null,
+      "severity": "low"
+    }
+  ],
+  "notes": "Violates RULE-DISC-02 (web trial outcome missing 'Individual results may vary')"
+}

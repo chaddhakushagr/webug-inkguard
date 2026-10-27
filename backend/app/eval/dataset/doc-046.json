@@ -1,0 +1,18 @@
+{
+  "id": "doc-046",
+  "channel": "press_release",
+  "title": "Prohibited Drug Claim: Psoriasis",
+  "text": "Lumo announces clinical evaluation confirming formula cures psoriasis without steroids.",
+  "expected_findings": [
+    {
+      "entry_code": "RULE-HEALTH-01",
+      "span_start": 54,
+      "span_end": 69,
+      "excerpt": "cures psoriasis",
+      "issue_type": "tone",
+      "verdict": null,
+      "severity": "high"
+    }
+  ],
+  "notes": "Violates RULE-HEALTH-01 (prohibited prescription medical disease claim)"
+}
