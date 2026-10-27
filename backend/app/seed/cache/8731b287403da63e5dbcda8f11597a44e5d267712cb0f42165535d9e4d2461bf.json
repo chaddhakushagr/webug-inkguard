@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "cures psoriasis",
+      "claim_text": "Cosmetic marketing claiming treatment of psoriasis",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "RULE-HEALTH-01",
+      "confidence": 1.0,
+      "explanation": "Cosmetic marketing cannot claim treatment of psoriasis."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "Lumo announces clinical evaluation confirming formula cures psoriasis without steroids.",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The copy makes unauthorized medical/disease cure claims, which violates brand voice governance and safety standards.",
+      "cited_entry_code": "TONE-003"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "cures psoriasis without steroids",
+      "note": "Remove disease treatment claims immediately to comply with regulatory and brand rules.",
+      "kind": "clarity"
+    }
+  ]
+}

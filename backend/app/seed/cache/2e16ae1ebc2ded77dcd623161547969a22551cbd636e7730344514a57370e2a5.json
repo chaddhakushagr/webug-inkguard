@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "cold-pressed rosehip seed extract",
+      "claim_text": "Specifies the use of cold-pressed rosehip seed extract",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-002",
+      "confidence": 1.0,
+      "explanation": "The term matches the required specific naming convention for the ingredient as defined in TERM-002."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Wake up your complexion",
+      "assessment": "off_tone",
+      "confidence": 0.85,
+      "explanation": "Phrases like 'Wake up your complexion' lean slightly toward hyperbolic marketing rather than plain-spoken and grounded dermatological benefits.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

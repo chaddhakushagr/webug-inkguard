@@ -146,6 +146,8 @@ class SqlAlchemyReviewStore(ReviewStorePort):
                     needs_human_judgment=bool(item.get("needs_human_judgment", False)),
                     explanation=item.get("explanation", ""),
                     suggested_fix=item.get("suggested_fix"),
+                    verifier_verdict=item.get("verifier_verdict"),
+                    verifier_reason=item.get("verifier_reason"),
                     status="open",
                     is_synthetic=True,
                     created_at=now,

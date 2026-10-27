@@ -154,3 +154,51 @@ class OpenAICompatibleLLMAdapter:
         }
         res = self._execute_with_retry(payload)
         return res if isinstance(res, list) else res.get("suggestions", [])
+
+    def verify(
+        self,
+        finding: Dict[str, Any],
+        excerpt: str,
+        cited_entry: Dict[str, Any],
+        prompt_version: str = "v1",
+    ) -> Dict[str, Any]:
+        # Safety Invariant: Confidential entries must never enter outgoing payload
+        if cited_entry.get("classification", "").lower() == "confidential":
+            raise ValueError(
+                f"Security Invariant Violated: Confidential entry '{cited_entry.get('code')}' cannot be sent to external LLM."
+            )
+
+        # Safety Invariant: No API keys in payload
+        finding_json = json.dumps(finding)
+        if "AIza" in excerpt or "sk-" in excerpt or "AIza" in finding_json or "sk-" in finding_json:
+            raise ValueError("Security Invariant Violated: Unredacted API key detected in outgoing payload.")
+
+        system_prompt = self._load_prompt(f"verify.{prompt_version}.md")
+        user_content = (
+            f"### CANDIDATE FINDING TO VERIFY\n"
+            f"<<<CONTENT_DATA>>>\n"
+            f"{finding_json}\n"
+            f"<<</CONTENT_DATA>>>\n\n"
+            f"### QUOTED SPAN (EXCERPT)\n"
+            f"<<<CONTENT_DATA>>>\n"
+            f"{excerpt}\n"
+            f"<<</CONTENT_DATA>>>\n\n"
+            f"### CITED KNOWLEDGE BASE ENTRY\n"
+            f"<<<CONTENT_DATA>>>\n"
+            f"{json.dumps({'code': cited_entry.get('code'), 'title': cited_entry.get('title'), 'statement': (cited_entry.get('data') or {}).get('statement', cited_entry.get('body', ''))}, indent=2)}\n"
+            f"<<</CONTENT_DATA>>>\n"
+        )
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content},
+            ],
+            "temperature": 0.0,
+            "response_format": {"type": "json_object"},
+        }
+        res = self._execute_with_retry(payload)
+        return {
+            "verdict": res.get("verdict", "supported"),
+            "reason": res.get("reason", "Verification completed"),
+        }

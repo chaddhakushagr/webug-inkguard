@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "Our guaranteed #1 formula beats every other luxury moisturizer on store shelves.",
+      "claim_text": "The formula is guaranteed to be the number one product and beats all other luxury moisturizers.",
+      "category": "rank",
+      "verdict": "Unverified",
+      "cited_entry_code": "",
+      "confidence": 0.99,
+      "explanation": "There are no facts in the knowledge base supporting claims of being the #1 formula or beating every other luxury moisturizer."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Our guaranteed #1 formula beats every other luxury moisturizer on store shelves.",
+      "note": "Avoid using superlative claims like #1 or guaranteed superiority without backing facts.",
+      "kind": "clarity"
+    }
+  ]
+}

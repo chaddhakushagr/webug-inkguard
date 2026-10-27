@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "Lumo Glow Concentrate supports daily barrier hydration and visible radiance.",
+      "claim_text": "Lumo Glow Concentrate supports daily barrier hydration and visible radiance.",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.9,
+      "explanation": "The product designation matches TERM-001, and the hydration claims align with FACT-001."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Individual results may vary.",
+      "note": "Includes proper individual variance disclaimer for trial/quantified discussions.",
+      "kind": "clarity"
+    }
+  ]
+}

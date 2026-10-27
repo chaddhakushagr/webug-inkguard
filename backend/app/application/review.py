@@ -21,6 +21,7 @@ from app.domain.review.pipeline import (
     GuardrailsStage,
     SuggestionValidatorStage,
 )
+from app.domain.review.verifier import LLMVerifierStage
 from app.domain.review.sanitise import SanitiseStage
 from app.domain.review.rule_engine import RuleChecksStage
 from app.domain.review.accessibility import A11yChecksStage
@@ -37,6 +38,7 @@ class ReviewOrchestrator:
         default_mode: str = "mock",
         daily_cap: int = 100,
         model_name: str = "gemini-2.5-flash",
+        verifier_enabled: bool = False,
     ):
         self.store = store
         self.retriever = retriever
@@ -44,6 +46,7 @@ class ReviewOrchestrator:
         self.default_mode = default_mode
         self.daily_cap = daily_cap
         self.model_name = model_name
+        self.verifier_enabled = verifier_enabled
 
     def run_review(
         self,
@@ -115,9 +118,13 @@ class ReviewOrchestrator:
                 except Exception as e:
                     fallback_reason = f"Model analysis error or timeout: {str(e)}. Rule findings preserved."
 
-            # Step E: finalising (Guardrails + Suggestions)
+            # Step E: finalising (Guardrails + Verifier + Suggestions)
             self.store.update_review_progress(review_id, "finalising")
             context = GuardrailsStage().process(context)
+
+            is_verifier_active = bool(self.store.get_setting("verifier_enabled", self.verifier_enabled))
+            if is_verifier_active:
+                context = LLMVerifierStage(llm_adapter=self.llm, enabled=True).process(context)
 
             # Generate suggestions if LLM is active
             if context.mode != "rules_only":

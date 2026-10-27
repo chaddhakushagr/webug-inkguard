@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "100% natural ingredients",
+      "claim_text": "Claims the product is 100% natural.",
+      "category": "ingredient",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-013",
+      "confidence": 0.98,
+      "explanation": "The knowledge base explicitly states not to claim '100% natural' since stabilized preservatives ensure shelf safety."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Crafted with 100% natural ingredients straight from botanical gardens.",
+      "assessment": "off_tone",
+      "confidence": 0.9,
+      "explanation": "Uses hyperbolic phrasing and unverified sourcing ('straight from botanical gardens') instead of plain-spoken and grounded language.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "straight from botanical gardens",
+      "note": "Avoid vague or hyperbolic claims about ingredient origins.",
+      "kind": "clarity"
+    }
+  ]
+}

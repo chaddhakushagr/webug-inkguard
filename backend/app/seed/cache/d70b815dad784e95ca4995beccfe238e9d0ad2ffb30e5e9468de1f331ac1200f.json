@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "multi-molecular weight hyaluronic acid",
+      "claim_text": "Multi-molecular hyaluronic complex binds surface and epidermal moisture",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-011",
+      "confidence": 0.95,
+      "explanation": "The text discusses multi-molecular weight hyaluronic acid, which aligns directly with the multi-molecular hyaluronic complex in FACT-011."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Patch test advised before introducing any new active product.",
+      "note": "Appropriate inclusion of patch testing advisory per guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

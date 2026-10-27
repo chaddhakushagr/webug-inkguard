@@ -245,6 +245,8 @@ class FindingResponse(BaseModel):
     needs_human_judgment: bool
     explanation: str
     suggested_fix: Optional[str] = None
+    verifier_verdict: Optional[str] = None
+    verifier_reason: Optional[str] = None
     status: str
     is_synthetic: bool
     created_at: datetime

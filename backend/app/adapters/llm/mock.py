@@ -136,3 +136,16 @@ class MockLLMAdapter:
                 })
 
         return suggestions
+
+    def verify(
+        self,
+        finding: Dict[str, Any],
+        excerpt: str,
+        cited_entry: Dict[str, Any],
+        prompt_version: str = "v1",
+    ) -> Dict[str, Any]:
+        """
+        Deterministic offline entailment verification for mock adapter.
+        """
+        from app.domain.review.verifier import deterministic_verify
+        return deterministic_verify(finding, excerpt, cited_entry)

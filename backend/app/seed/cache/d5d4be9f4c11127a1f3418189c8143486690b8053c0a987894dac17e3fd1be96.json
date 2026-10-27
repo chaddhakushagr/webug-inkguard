@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "Achieve porcelain white perfection that hides every natural skin characteristic.",
+      "claim_text": "Promise of achieving porcelain white perfection and hiding natural skin characteristics",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TONE-004",
+      "confidence": 0.95,
+      "explanation": "The claim promotes unrealistic perfectionism and masks natural skin characteristics, which directly contradicts the inclusive brand voice that celebrates natural skin texture."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "Achieve porcelain white perfection that hides every natural skin characteristic.",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "This excerpt violates the inclusive and accessible tone guideline which mandates avoiding unrealistic perfectionism and celebrating natural skin texture.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "porcelain white perfection",
+      "note": "Avoid exclusionary aesthetics and unrealistic skin promises.",
+      "kind": "clarity"
+    }
+  ]
+}

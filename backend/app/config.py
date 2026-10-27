@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     ALLOW_SEED_RESET: bool = True
     NEXT_PUBLIC_API_BASE: str = "http://localhost:8000/api/v1"
+    VERIFIER_ENABLED: bool = False
 
     @property
     def effective_api_key(self) -> str:

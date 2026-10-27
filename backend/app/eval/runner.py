@@ -21,6 +21,7 @@ from app.domain.review.pipeline import (
     AnalyseStage,
     GuardrailsStage,
 )
+from app.domain.review.verifier import LLMVerifierStage
 from app.domain.review.sanitise import SanitiseStage
 from app.domain.review.rule_engine import RuleChecksStage
 from app.domain.review.accessibility import A11yChecksStage
@@ -139,45 +140,11 @@ class EvalRunner:
         # Stage 5: Guardrails
         context = GuardrailsStage().process(context)
 
-        # Optional Stage 6: Verifier pass if requested
+        # Stage 6: Secondary LLM Verifier Pass (if enabled)
         if self.verifier_enabled:
-            context = self._run_verifier_pass(context)
+            context = LLMVerifierStage(llm_adapter=self.llm_adapter, enabled=True).process(context)
 
         return [f.to_dict() for f in context.findings]
-
-    def _run_verifier_pass(self, context: ReviewContext) -> ReviewContext:
-        """
-        Secondary verification pass:
-        Validates that every finding with a cited entry is supported and logically entailed.
-        Filters out hallucinations or misattributed citations.
-        """
-        verified_findings: List[FindingItem] = []
-        retrieved_map = {e["code"]: e for e in context.kb_pool if "code" in e}
-
-        for f in context.findings:
-            if f.source == "rule":
-                verified_findings.append(f)
-                continue
-
-            # Check citation existence and relevance
-            if f.cited_entry_code:
-                entry = retrieved_map.get(f.cited_entry_code)
-                if not entry:
-                    # Dropped: ungrounded citation
-                    continue
-
-                # For claim findings, verify that the claim text aligns with evidence
-                if f.issue_type == "claim" and f.claim_verdict:
-                    verified_findings.append(f)
-                else:
-                    verified_findings.append(f)
-            else:
-                # Keep notes if confidence is high
-                if f.confidence >= 0.7:
-                    verified_findings.append(f)
-
-        context.findings = verified_findings
-        return context
 
     def evaluate(
         self,

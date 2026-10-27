@@ -1,0 +1,20 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "Your damaged face is crying out for an urgent intervention right now.",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The tone is alarmist and uses aggressive language ('damaged face', 'crying out for an urgent intervention') rather than remaining confident, calm, and focused on clinically documented performance.",
+      "cited_entry_code": "TONE-003"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Your damaged face is crying out for an urgent intervention right now.",
+      "note": "Avoid fear-mongering or shaming language about the user's skin. Focus on supportive, calm skincare benefits.",
+      "kind": "clarity"
+    }
+  ]
+}

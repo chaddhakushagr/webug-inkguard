@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "all-natural",
+      "claim_text": "Claiming the formulas are all-natural",
+      "category": "sustainability",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-013",
+      "confidence": 0.99,
+      "explanation": "Do not claim '100% natural' or 'all-natural' since stabilized preservatives ensure shelf safety."
+    },
+    {
+      "excerpt": "botanical formulas",
+      "claim_text": "Using botanical phrasing",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-006",
+      "confidence": 0.95,
+      "explanation": "Prefer 'plant-derived ingredients' instead of misleading 'all-natural'."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "all-natural",
+      "note": "Replace 'all-natural' with 'plant-derived ingredients' to comply with brand terminology guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

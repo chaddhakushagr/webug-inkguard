@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "non-irritating performance across 120 sensitive skin subjects",
+      "claim_text": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-006",
+      "confidence": 0.95,
+      "explanation": "The claim directly reflects the finding in FACT-006 regarding 120 sensitive skin subjects."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

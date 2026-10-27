@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "98% reported softer morning feel in 7 days",
+      "claim_text": "98% reported softer morning feel in 7 days",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-002",
+      "confidence": 0.99,
+      "explanation": "The claim directly matches the Consumer Perception Panel CP-08 fact statement."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

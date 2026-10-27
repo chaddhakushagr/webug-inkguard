@@ -1,0 +1,14 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Driven by scientific curiosity and botanical purity, we formulate with honesty and care.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "The text explains formulation with honesty and clarity without employing hyperbolic hype or miraculous promises.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

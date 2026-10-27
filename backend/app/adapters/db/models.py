@@ -155,6 +155,8 @@ class Finding(Base):
     needs_human_judgment = Column(Boolean, default=False)
     explanation = Column(Text, nullable=False)
     suggested_fix = Column(Text, nullable=True)
+    verifier_verdict = Column(String(32), nullable=True)
+    verifier_reason = Column(Text, nullable=True)
     status = Column(String(50), default="open")  # open, accepted, dismissed, escalated
     is_synthetic = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now)

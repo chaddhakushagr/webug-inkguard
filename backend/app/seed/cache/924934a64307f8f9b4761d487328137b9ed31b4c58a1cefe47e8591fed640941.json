@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "verified post-consumer recycled borosilicate glass certified by EuroCert",
+      "claim_text": "The packaging uses verified post-consumer recycled borosilicate glass certified by EuroCert.",
+      "category": "sustainability",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-005",
+      "confidence": 0.85,
+      "explanation": "FACT-005 states '100% post-consumer recycled glass packaging', but does not mention borosilicate glass or EuroCert certification."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "borosilicate glass certified by EuroCert",
+      "note": "Mentioning specific certifications not present in the knowledge base should be avoided.",
+      "kind": "clarity"
+    }
+  ]
+}

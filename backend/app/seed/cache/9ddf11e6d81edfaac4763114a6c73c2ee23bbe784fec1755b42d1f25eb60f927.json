@@ -1,0 +1,14 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Why barrier lipids matter: how ceramides and plant squalane sustain natural epidermal moisture. Patch test advised.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "The text explains dermatological benefits plainly and accurately without miraculous promises or hype, matching the grounded voice.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

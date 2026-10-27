@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "excerpt": "miracle serum",
+      "claim_text": "The product is described as a miracle and a serum",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-001",
+      "confidence": 0.99,
+      "explanation": "TERM-001 states the primary treatment must be designated as 'Lumo Glow Concentrate', never as a 'serum'. TERM-003 bans the term 'miracle'."
+    },
+    {
+      "excerpt": "transform your daily skin glow overnight",
+      "claim_text": "The product transforms skin glow overnight",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "Clinical trials show hydration improvement over 4 weeks (FACT-001), not overnight transformation."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "Our miracle serum will transform your daily skin glow overnight.",
+      "assessment": "off_tone",
+      "confidence": 0.9,
+      "explanation": "The copy uses exaggerated terms ('miracle', 'overnight transform') which lean into unrealistic perfectionism rather than inclusive and accessible messaging.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "serum",
+      "note": "Use 'Lumo Glow Concentrate' instead of 'serum' per TERM-001.",
+      "kind": "clarity"
+    }
+  ]
+}

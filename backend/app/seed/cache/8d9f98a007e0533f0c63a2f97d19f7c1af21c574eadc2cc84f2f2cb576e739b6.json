@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "cold-pressed rosehip seed extract",
+      "claim_text": "Use of cold-pressed rosehip seed extract",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-002",
+      "confidence": 1.0,
+      "explanation": "The copy correctly specifies 'cold-pressed rosehip seed extract' instead of generic 'rosehip oil'."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Start your morning ritual with Lumo Glow Concentrate. Formulated with cold-pressed rosehip seed extract to support healthy hydration.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "The copy clearly and plainly explains the product benefit and ingredient without hyperbolic hype or pseudo-scientific buzzwords.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

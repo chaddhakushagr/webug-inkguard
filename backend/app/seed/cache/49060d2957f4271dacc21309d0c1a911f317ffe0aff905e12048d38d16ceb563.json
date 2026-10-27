@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions in study DS-09.",
+      "claim_text": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-006",
+      "confidence": 1.0,
+      "explanation": "The claim matches the exact statement provided in safety evaluation FACT-006 and correctly cites study DS-09."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions in study DS-09.",
+      "assessment": "compliant",
+      "confidence": 1.0,
+      "explanation": "The copy states the clinical facts plainly and accurately without hyperbolic hype or miraculous promises.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

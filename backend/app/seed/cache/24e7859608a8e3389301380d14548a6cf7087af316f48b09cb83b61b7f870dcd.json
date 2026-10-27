@@ -1,0 +1,14 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TERM-014",
+      "excerpt": "LUMO GLOW",
+      "assessment": "off_tone",
+      "confidence": 0.99,
+      "explanation": "Product names must maintain title case: 'Lumo Glow', not 'LUMO GLOW'.",
+      "cited_entry_code": "TERM-014"
+    }
+  ],
+  "notes": []
+}

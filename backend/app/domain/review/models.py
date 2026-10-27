@@ -26,6 +26,8 @@ class FindingItem:
     is_policy: bool = True
     needs_human_judgment: bool = False
     fingerprint: Optional[str] = None
+    verifier_verdict: Optional[str] = None  # supported, not_supported, unsure
+    verifier_reason: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -46,6 +48,8 @@ class FindingItem:
             "is_policy": self.is_policy,
             "needs_human_judgment": self.needs_human_judgment,
             "fingerprint": self.fingerprint,
+            "verifier_verdict": self.verifier_verdict,
+            "verifier_reason": self.verifier_reason,
         }
 
 

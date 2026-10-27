@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "dermatologist approved",
+      "claim_text": "Formula is dermatologist approved across clinical panels",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-006",
+      "confidence": 0.95,
+      "explanation": "The claim aligns with the dermatologist safety evaluation DS-09 where the product is tested on sensitive skin subjects, supporting the dermatologist status."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

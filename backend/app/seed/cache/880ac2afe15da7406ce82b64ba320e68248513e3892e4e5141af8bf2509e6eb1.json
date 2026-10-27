@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "Sourced from 100% organic cold-pressed extraction from wild Patagonian Rosa Canina harvest.",
+      "claim_text": "Sourced from 100% organic cold-pressed extraction from wild Patagonian Rosa Canina harvest.",
+      "category": "sustainability",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-008",
+      "confidence": 0.98,
+      "explanation": "The text matches the statement in FACT-008 regarding 100% organic cold-pressed extraction from wild Patagonian Rosa Canina."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "botanical serum",
+      "claim_text": "The primary hydration treatment is designated as a serum.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-001",
+      "confidence": 0.99,
+      "explanation": "The primary hydration treatment must always be designated as 'Lumo Glow Concentrate', never as a 'serum'."
+    },
+    {
+      "excerpt": "Chilean Patagonian wild harvest",
+      "claim_text": "Sourcing from Chilean Patagonian wild harvest.",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-008",
+      "confidence": 0.95,
+      "explanation": "Fact states 100% organic cold-pressed extraction from wild Patagonian Rosa Canina."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Lumo launches flagship botanical serum",
+      "note": "Ensure product designation follows TERM-001 by using 'Lumo Glow Concentrate' instead of 'serum'.",
+      "kind": "clarity"
+    }
+  ]
+}

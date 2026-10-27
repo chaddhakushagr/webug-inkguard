@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "Clinical study L-12 demonstrated visible skin hydration improvement in 4 weeks across 94% of tested subjects.",
+      "claim_text": "Visible skin hydration improvement in 4 weeks across 94% of tested subjects",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-001",
+      "confidence": 1.0,
+      "explanation": "The statement directly matches Clinical Trial L-12 data regarding 4-week skin hydration in 94% of tested subjects."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Individual results may vary.",
+      "note": "Appropriately acknowledges individual variance for quantified trial percentages as per RULE-DISC-02.",
+      "kind": "clarity"
+    }
+  ]
+}

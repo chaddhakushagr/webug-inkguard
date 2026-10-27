@@ -1,0 +1,20 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "Discover our comprehensive anti-aging protocol designed for mature skin.",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Uses the term anti-aging and frames skincare around mature skin rather than age-smart barrier support, violating brand terminology and tone preferences.",
+      "cited_entry_code": "TERM-005"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "anti-aging protocol",
+      "note": "Replace 'anti-aging' with 'age-smart' or 'barrier-supporting' per brand guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

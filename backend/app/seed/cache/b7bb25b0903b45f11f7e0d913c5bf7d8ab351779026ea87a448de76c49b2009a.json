@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "98% naturally derived formulation",
+      "claim_text": "Claiming the formulation is 98% naturally derived",
+      "category": "ingredient",
+      "verdict": "Unverified",
+      "cited_entry_code": "TERM-013",
+      "confidence": 0.85,
+      "explanation": "The knowledge base warns against '100% natural' (TERM-013) and prefers 'plant-derived' (TERM-006), but there is no specific factual knowledge base entry verifying the exact 98% naturally derived metric."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Individual results may vary.",
+      "note": "Good inclusion of the individual variance disclaimer.",
+      "kind": "clarity"
+    }
+  ]
+}

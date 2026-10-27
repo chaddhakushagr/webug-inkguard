@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "Evaluated on only 10 healthy volunteers with minimal safety monitoring.",
+      "claim_text": "The product was evaluated on only 10 healthy volunteers with minimal safety monitoring.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "FACT-006",
+      "confidence": 0.95,
+      "explanation": "FACT-006 states that the product is dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions, which contradicts the claim of 10 healthy volunteers."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

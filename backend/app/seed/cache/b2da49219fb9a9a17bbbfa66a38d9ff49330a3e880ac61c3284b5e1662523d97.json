@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "actively treats eczema",
+      "claim_text": "Claims the product treats eczema",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "RULE-HEALTH-01",
+      "confidence": 0.99,
+      "explanation": "Cosmetic marketing cannot claim treatment of psoriasis, eczema, cystic acne, or dermatitis."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Our soothing barrier cream actively treats eczema and calms inflamed patches.",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The copy makes medical treatment claims rather than explaining dermatological benefits plainly and avoiding miraculous or medical promises.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "actively treats eczema",
+      "note": "Remove medical treatment claims to comply with cosmetic marketing guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

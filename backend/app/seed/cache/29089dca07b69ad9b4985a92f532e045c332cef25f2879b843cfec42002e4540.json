@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "formula showed visible skin tone balance improvement over 6 weeks",
+      "claim_text": "Visible skin tone balance improvement over 6 weeks using niacinamide 5%",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-010",
+      "confidence": 0.98,
+      "explanation": "The claim directly matches FACT-010 regarding visible skin tone balance improvement over 6 weeks."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

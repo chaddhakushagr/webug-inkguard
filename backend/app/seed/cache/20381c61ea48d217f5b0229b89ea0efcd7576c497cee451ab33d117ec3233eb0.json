@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "outperforms ordinary department store creams",
+      "claim_text": "Lumo creams outperform ordinary department store creams",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "",
+      "confidence": 0.95,
+      "explanation": "No knowledge base entry supports comparative performance against department store creams."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Experience unbeatable daily moisture",
+      "note": "Avoid absolute claims like 'unbeatable' unless backed by specific approved facts.",
+      "kind": "clarity"
+    }
+  ]
+}

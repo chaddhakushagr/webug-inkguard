@@ -12,6 +12,7 @@ from app.domain.review.sanitise import SanitiseStage
 from app.domain.review.rule_engine import RuleChecksStage
 from app.domain.review.accessibility import A11yChecksStage
 from app.domain.review.guardrails import GuardrailsStage
+from app.domain.review.verifier import LLMVerifierStage
 from app.domain.review.suggestion_validator import SuggestionValidatorStage
 from app.ports.retrieval import RetrieverPort
 from app.ports.llm import LLMPort
@@ -150,9 +151,15 @@ class AnalyseStage:
 class ReviewPipeline:
     """Orchestrates ordered stages over ReviewContext."""
 
-    def __init__(self, retriever: RetrieverPort, llm_adapter: LLMPort):
+    def __init__(
+        self,
+        retriever: RetrieverPort,
+        llm_adapter: LLMPort,
+        verifier_enabled: bool = False,
+    ):
         self.retriever = retriever
         self.llm = llm_adapter
+        self.verifier_enabled = verifier_enabled
 
         self.stages: List[ReviewStage] = [
             ExtractStage(),
@@ -162,6 +169,7 @@ class ReviewPipeline:
             RetrieveStage(self.retriever),
             AnalyseStage(self.llm),
             GuardrailsStage(),
+            LLMVerifierStage(llm_adapter=self.llm, enabled=self.verifier_enabled),
             SuggestionValidatorStage(),
         ]
 

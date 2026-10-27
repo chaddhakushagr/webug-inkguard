@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "dermatologist approved",
+      "claim_text": "Dermatologist approved for all skin types",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "TERM-012",
+      "confidence": 0.95,
+      "explanation": "Cannot assert 'dermatologist approved' without citing clinical trial DS-09, which is missing from the copy."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

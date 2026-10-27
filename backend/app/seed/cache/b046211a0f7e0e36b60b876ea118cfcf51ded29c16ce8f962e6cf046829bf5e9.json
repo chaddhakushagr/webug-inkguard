@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "instant fix",
+      "claim_text": "Promise of an instant fix for dry patches",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-011",
+      "confidence": 1.0,
+      "explanation": "TERM-011 explicitly states not to promise 'instant fix' or immediate permanent alteration."
+    },
+    {
+      "excerpt": "Lumo Glow Concentrate",
+      "claim_text": "Primary hydration treatment designation",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-001",
+      "confidence": 1.0,
+      "explanation": "The primary hydration treatment is correctly designated as 'Lumo Glow Concentrate'."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Need an instant fix for dry patches?",
+      "note": "Avoid using 'instant fix' phrasing as per brand guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

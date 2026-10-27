@@ -66,6 +66,8 @@ def finding_to_response(
         needs_human_judgment=f.needs_human_judgment,
         explanation=f.explanation,
         suggested_fix=f.suggested_fix,
+        verifier_verdict=f.verifier_verdict,
+        verifier_reason=f.verifier_reason,
         status=f.status,
         is_synthetic=f.is_synthetic,
         created_at=f.created_at,

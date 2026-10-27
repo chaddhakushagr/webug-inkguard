@@ -28,3 +28,17 @@ class LLMPort(Protocol):
         Generates minimal-edit suggestion replacements for reported findings.
         """
         ...
+
+    def verify(
+        self,
+        finding: Dict[str, Any],
+        excerpt: str,
+        cited_entry: Dict[str, Any],
+        prompt_version: str = "v1",
+    ) -> Dict[str, Any]:
+        """
+        Verifies whether the cited knowledge base entry logically and factually supports
+        the candidate finding and excerpt.
+        Returns strict JSON dictionary: {"verdict": "supported"|"not_supported"|"unsure", "reason": "..."}.
+        """
+        ...

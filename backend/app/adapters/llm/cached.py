@@ -79,3 +79,44 @@ class CachedLLMAdapter:
         prompt_version: str = "v1",
     ) -> List[Dict[str, Any]]:
         return self.inner.suggest_fixes(sanitised_text, findings, kb_entries, prompt_version=prompt_version)
+
+    def verify(
+        self,
+        finding: Dict[str, Any],
+        excerpt: str,
+        cited_entry: Dict[str, Any],
+        prompt_version: str = "v1",
+    ) -> Dict[str, Any]:
+        model = getattr(self.inner, "model", "mock")
+        raw = f"{finding.get('issue_type')}|{finding.get('explanation')}|{excerpt.strip()}|{cited_entry.get('code')}|{prompt_version}|{model}"
+        key = "vfy_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+        if key in self.cache:
+            self.last_cache_hit = True
+            return self.cache[key]
+
+        import os
+        disk_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "seed", "cache"))
+        disk_file = os.path.join(disk_dir, f"{key}.json")
+        if os.path.exists(disk_file):
+            try:
+                with open(disk_file, "r", encoding="utf-8") as f:
+                    cached_data = json.load(f)
+                    self.cache[key] = cached_data
+                    self.last_cache_hit = True
+                    return cached_data
+            except Exception:
+                pass
+
+        self.last_cache_hit = False
+        res = self.inner.verify(finding, excerpt, cited_entry, prompt_version=prompt_version)
+        self.cache[key] = res
+
+        if os.path.isdir(disk_dir):
+            try:
+                with open(disk_file, "w", encoding="utf-8") as f:
+                    json.dump(res, f, indent=2)
+            except Exception:
+                pass
+
+        return res

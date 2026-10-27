@@ -258,7 +258,7 @@ Contracts: 2 kept, 0 broken.
 The following checklist represents the exact sequence of implementation tasks for Round 3 prompts to complete:
 
 ### Track 1: Reliability Engine (P0)
-- [ ] **G-01**: Implement `LLMVerifierStage` in `backend/app/domain/review/verifier.py` with structured semantic entailment prompt (`backend/app/prompts/verify.v1.md`) validating that cited rules/facts factually support the candidate finding before exposure.
+- [x] **G-01**: Implement `LLMVerifierStage` in `backend/app/domain/review/verifier.py` with structured semantic entailment prompt (`backend/app/prompts/verify.v1.md`) validating that cited rules/facts factually support the candidate finding before exposure.
 - [ ] **G-02**: Build automated evaluation harness in `scripts/eval_harness.py` populated with $\ge 100$ ground-truth annotated marketing copy documents spanning all 5 channels (`Social`, `Email`, `Blog`, `Web`, `Press Release`).
 - [ ] **G-03**: Implement CI regression assertions verifying Precision $\ge 0.85$ and Recall $\ge 0.80$ on policy findings before and after verifier activation.
 

@@ -45,6 +45,10 @@ class RuleChecksStage:
                     span_start, span_end = match.span()
                     excerpt = match.group(0)
 
+                    # If already the approved preferred term, not a violation
+                    if preferred and excerpt == preferred:
+                        continue
+
                     # Check exceptions (e.g., "hair serum" for "serum")
                     is_exception = False
                     for exc in exceptions:

@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "botanical blend",
+      "claim_text": "The product features a botanical blend",
+      "category": "ingredient",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.85,
+      "explanation": "No specific fact in the knowledge base details a botanical blend for this product."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Achieve flawless skin texture",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The text promises 'flawless' skin, which violates the instruction to avoid promises of 'flawless' skin and contradicts the grounded, plain-spoken tone.",
+      "cited_entry_code": "TERM-010"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Achieve flawless skin texture with our botanical blend.",
+      "note": "Ensure to replace 'flawless' with terms focusing on radiant hydration according to TERM-010.",
+      "kind": "clarity"
+    }
+  ]
+}
