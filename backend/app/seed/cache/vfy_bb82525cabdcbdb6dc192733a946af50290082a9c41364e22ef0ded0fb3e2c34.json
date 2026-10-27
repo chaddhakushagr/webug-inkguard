@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The excerpt precisely matches the factual statement in cited entry FACT-001 regarding Clinical Trial L-12 skin hydration results."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the copy correctly matches the clinical trial data, and the cited entry confirms the statement is true and compliant. Correct usage and supported claims are not policy violations."
 }

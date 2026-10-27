@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited entry FACT-011 explicitly states 'Multi-molecular hyaluronic complex binds surface and epidermal moisture', which directly matches and supports the claim made in the quoted span."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the statement matches the approved fact and is supported. According to evaluation criteria, if the content is correct, compliant, or adhering to guidelines rather than violating them, the verdict must be not_supported."
 }

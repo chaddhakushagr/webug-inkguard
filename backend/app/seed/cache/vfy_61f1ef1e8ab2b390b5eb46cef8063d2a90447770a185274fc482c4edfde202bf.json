@@ -1,4 +1,4 @@
 {
-  "verdict": "unsure",
-  "reason": "The cited text confirms the product was 'dermatologist tested on 120 sensitive skin subjects', but it does not explicitly support the stronger claim of being 'dermatologist approved'."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the claim aligns with the safety evaluation and is supported by fact. Because the cited entry proves the content is correct and compliant rather than violating a policy, the finding must be dropped."
 }

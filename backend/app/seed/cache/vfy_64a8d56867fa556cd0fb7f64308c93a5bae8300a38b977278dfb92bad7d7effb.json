@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "FACT-008 states the extraction is from 'wild Patagonian Rosa Canina', while the excerpt adds 'Chilean', which is not explicitly mentioned in the cited fact statement, making the 'Chilean' portion unverified by this specific entry."
+  "verdict": "not_supported",
+  "reason": "The cited entry states the extraction is from 'wild Patagonian Rosa Canina', and specifying 'Chilean' is geographically accurate to Patagonia and does not violate the policy. The content is not in direct contradiction or violation of the factual statement."
 }

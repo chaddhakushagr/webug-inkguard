@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited source text (TERM-004) explicitly states that cosmetics 'do not cure medical skin pathologies', which directly supports the finding that the claim 'Formulated to cure dull skin' violates brand policy against using the term 'cure'."
+  "reason": "The cited entry explicitly states that cosmetics do not cure medical skin pathologies and lists 'Cure' as a banned term. The content uses the prohibited term 'cure' in the quoted span, directly violating policy TERM-004."
 }

@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited source text (FACT-006) explicitly states that the product was tested on 120 sensitive skin subjects, directly supporting the claim in the excerpt."
+  "verdict": "not_supported",
+  "reason": "The candidate finding itself states that the claim is supported by FACT-006 and correctly reflects the findings. According to evaluation criteria, if the cited entry shows the content is correct, compliant, or adhering to guidelines rather than violating them, the verdict must be not_supported."
 }

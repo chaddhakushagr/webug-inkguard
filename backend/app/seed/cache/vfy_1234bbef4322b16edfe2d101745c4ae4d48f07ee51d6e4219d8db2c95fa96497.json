@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited knowledge base entry TERM-006 explicitly states to prefer 'plant-derived ingredients' over misleading 'all-natural' claims, which aligns with the finding's preference for botanical terms."
+  "verdict": "not_supported",
+  "reason": "The candidate finding claims a violation, but the cited entry states that the brand prefers 'plant-derived' or botanical terms, and the quoted span ('plant botanical') actually complies with this preference rather than violating it."
 }

@@ -135,7 +135,8 @@ The following empirical results were produced directly by running `python manage
 | **`mock`** | **OFF** | 84 | 81.0% | 66 | 7 | 19 | **0.904** | **0.776** | **0.835** | Precision Met (+0.054) / Recall Missed (-0.024) |
 | **`mock`** | **ON** | 84 | 81.0% | 66 | 7 | 19 | **0.904** | **0.776** | **0.835** | Precision Met (+0.054) / Recall Missed (-0.024) |
 | **`cached`** | **OFF** | 84 | 23.8% | 77 | 119 | 8 | **0.393** | **0.906** | **0.548** | Recall Exceeded (+0.106) / Precision Missed (-0.457) |
-| **`cached`** | **ON** | 84 | 23.8% | 79 | 122 | 6 | **0.393** | **0.929** | **0.552** | Recall Exceeded (+0.129) / Precision Missed (-0.457) |
+| **`cached`** | **ON (v1)** | 84 | 23.8% | 79 | 122 | 6 | **0.393** | **0.929** | **0.552** | Recall Exceeded (+0.129) / Precision Missed (-0.457) |
+| **`cached`** | **ON (v2)** | 84 | **76.2%** | 71 | **60** | 14 | **0.542** | **0.835** | **0.657** | **Recall Met (+0.035)** / Precision Missed (-0.308) |
 
 ---
 
@@ -251,16 +252,46 @@ Claim Verdict Breakdown:
 
 ---
 
+### Detailed Breakdown 5: Mode `cached` (Verifier: ON v2 - Violation-Centric)
+```text
+[Inkguard CLI] >> Running: .venv/bin/python -m app.eval.cli --mode cached --verifier on --out docs/evidence/eval_cached_on_v2.json
+
+### Evaluation Results: Mode `cached` (Verifier: ON v2)
+- Total Documents: 84 | Clean Documents: 21 (Clean Pass Rate: 76.2%)
+- Overall: Precision: 0.542 | Recall: 0.835 | F1: 0.657 (TP: 71, FP: 60, FN: 14)
+
+| Category | TP | FP | FN | Precision | Recall | F1 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| `accessibility` | 0 | 1 | 1 | 0.000 | 0.000 | 0.000 |
+| `claim` | 12 | 38 | 11 | 0.240 | 0.522 | 0.329 |
+| `confidential_leak` | 3 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `missing_disclaimer` | 18 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `readability` | 0 | 4 | 0 | 0.000 | 1.000 | 0.000 |
+| `terminology` | 32 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `tone` | 6 | 17 | 2 | 0.261 | 0.750 | 0.387 |
+
+Claim Verdict Breakdown:
+| Verdict | TP | FP | FN | Precision | Recall | F1 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| `Contradicted` | 1 | 28 | 2 | 0.034 | 0.333 | 0.062 |
+| `Expired` | 4 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `Supported` | 0 | 1 | 8 | 0.000 | 0.000 | 0.000 |
+| `Unverified` | 1 | 8 | 1 | 0.111 | 0.500 | 0.182 |
+```
+
+---
+
 ## 6. Honest Target Analysis & Error Breakdown
 
 ### Target Comparison (Target: Precision $\ge 0.85$, Recall $\ge 0.80$)
 
 1. **Precision Target ($\ge 0.85$)**:
    - **`mock` Mode**: Achieved **0.904**, successfully exceeding the 0.85 target by **+0.054**.
-   - **`cached` Mode**: Achieved **0.393**, **MISSING the target**.
+   - **`cached` Mode (v1)**: Achieved **0.393** (122 False Positives).
+   - **`cached` Mode (v2)**: Achieved **0.542** (False Positives cut by >50% down to 60), advancing precision by **+0.149**, but still missing the strict 0.85 target.
 2. **Recall Target ($\ge 0.80$)**:
    - **`mock` Mode**: Achieved **0.776**, narrowly missing the 0.80 target by **-0.024** due to ungrounded claims in offline fixtures.
-   - **`cached` Mode**: Achieved **0.929**, successfully exceeding the 0.80 target by **+0.129** (79 out of 85 true ground-truth violations caught).
+   - **`cached` Mode (v2)**: Achieved **0.835**, successfully exceeding the 0.80 target by **+0.035** (71 true ground-truth violations caught).
 
 ---
 

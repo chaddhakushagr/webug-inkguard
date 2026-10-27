@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited source text FACT-005 directly confirms '100% post-consumer recycled glass packaging', which supports the core recycled glass claim in the excerpt."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the core claim is supported by Fact FACT-005. Since the cited entry shows the content is correct and compliant rather than violating a policy, the finding must be dropped."
 }

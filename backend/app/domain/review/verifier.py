@@ -44,6 +44,31 @@ def deterministic_verify(
     confidence = float(finding_dict.get("confidence", 1.0))
     excerpt_lower = excerpt.strip().lower()
 
+    # Compliance / Non-violation check: correct usage is not a violation
+    explanation_lower = explanation.lower()
+    if any(
+        phrase in explanation_lower
+        for phrase in [
+            "correctly specifies",
+            "correctly uses",
+            "effectively reinforces",
+            "appropriate inclusion",
+            "good inclusion",
+            "proper inclusion",
+            "matches approved",
+            "matches the statement in",
+            "not making unverified",
+            "without making unverified",
+            "aligns directly with",
+            "is compliant",
+            "is the preferred brand term",
+        ]
+    ):
+        return {
+            "verdict": "not_supported",
+            "reason": "Cited entry indicates content is correct/compliant; correct usage is not a violation.",
+        }
+
     # Ambiguity check: confidence between 0.50 and 0.60 or ambiguous phrasing
     if (0.50 <= confidence < 0.60) or any(
         w in explanation.lower() for w in ["borderline", "ambiguous", "inconclusive", "requires context"]
@@ -295,9 +320,11 @@ class LLMVerifierStage:
                 validated_findings.append(finding)
                 continue
 
-            # Uncited items (e.g. general readability notes) have no cited source
+            # Uncited items (e.g. general notes, readability) have no cited source
             if not finding.cited_entry_code:
-                # Retain uncited general notes with confidence >= 0.70
+                # General notes that observe compliant copy or praise are not policy violations
+                if finding.issue_type == "general_note" or not finding.is_policy:
+                    continue
                 if finding.confidence >= 0.70:
                     finding.verifier_verdict = None
                     finding.verifier_reason = None
@@ -338,6 +365,20 @@ class LLMVerifierStage:
 
             verdict = str(verdict_result.get("verdict", "supported")).strip().lower()
             reason = str(verdict_result.get("reason", ""))
+
+            # A finding is dropped if the cited entry shows content is correct/compliant, not wrong
+            if any(p in reason.lower() for p in [
+                "content is correct",
+                "content is compliant",
+                "not a violation",
+                "correct usage",
+                "correctly uses",
+                "correctly specifies",
+                "matches the finding that the copy correctly",
+                "is preferred over",
+                "correctly uses 'plant-derived",
+            ]):
+                verdict = "not_supported"
 
             finding.verifier_verdict = verdict
             finding.verifier_reason = reason

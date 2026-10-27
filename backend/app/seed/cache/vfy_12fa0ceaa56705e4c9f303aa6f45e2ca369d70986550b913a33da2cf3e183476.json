@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited rule TERM-007 explicitly states to 'Never use 'toxin-free' or 'non-toxic' as negative competitor attacks,' which directly supports the finding's identification and restriction of the excerpt 'toxin-free'."
+  "reason": "The cited entry explicitly states that 'toxin-free' must never be used as a negative competitor attack, and the content utilizes the exact prohibited term, thereby violating the policy."
 }

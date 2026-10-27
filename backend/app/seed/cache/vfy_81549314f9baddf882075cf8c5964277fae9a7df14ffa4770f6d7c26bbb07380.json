@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The quoted span referencing 'multi-molecular weight hyaluronic acid' is directly and logically supported by FACT-011, which states 'Multi-molecular hyaluronic complex binds surface and epidermal moisture'."
+  "verdict": "not_supported",
+  "reason": "The candidate finding itself states that the content aligns directly with the cited fact and notes the claim verdict is supported. According to the evaluation criteria, if the cited entry shows the content is correct, compliant, or adhering to guidelines, rather than violating them, the verdict must be 'not_supported'."
 }

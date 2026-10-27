@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited knowledge base entry FACT-012 has the exact statement 'Certified 100% cruelty-free under Leaping Bunny international standard', which directly supports the claim made in the quoted excerpt."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the claim is correct and matches the certified fact in the cited entry. Since the content is compliant and accurate rather than violating policy, the finding must be dropped."
 }

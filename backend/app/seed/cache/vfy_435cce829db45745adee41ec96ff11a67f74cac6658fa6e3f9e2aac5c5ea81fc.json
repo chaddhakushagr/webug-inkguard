@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited rule explicitly states that cosmetic marketing cannot claim treatment of eczema, and the excerpt directly violates this by claiming to 'treats eczema'."
+  "reason": "The cited knowledge base entry (RULE-HEALTH-01) explicitly states that cosmetic marketing cannot claim treatment of eczema, and the quoted span directly violates this rule by claiming to 'treats eczema'."
 }

@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The finding correctly notes that the cited source (FACT-003) mentions a 35% reduction in trans-epidermal water loss over 14 days, but does not contain any information or verification regarding winter air increasing trans-epidermal water loss. Thus, the claim is appropriately flagged as unverified by the cited entry."
+  "verdict": "not_supported",
+  "reason": "The cited entry (FACT-003) only states that there is a 35% reduction in trans-epidermal water loss over 14 days. It does not prove that the statement about winter air increasing trans-epidermal water loss is incorrect or a violation; it simply lacks mention of winter air, making the finding an unverified assumption rather than a proven violation."
 }

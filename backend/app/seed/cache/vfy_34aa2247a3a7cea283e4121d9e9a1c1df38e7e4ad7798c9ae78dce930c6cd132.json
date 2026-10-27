@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states the claim verdict is 'Supported' and that the copy matches the fact statement in FACT-008. Since the content is correct and compliant rather than violating policy, the finding must be dropped."
+}

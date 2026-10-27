@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited fact (FACT-006) states that testing was performed on 120 sensitive skin subjects, directly contradicting the copy's claim of 10 healthy volunteers."
+  "reason": "The cited fact explicitly states the product was tested on 120 sensitive skin subjects, whereas the quoted span claims it was evaluated on only 10 healthy volunteers with minimal safety monitoring, directly contradicting the official safety evaluation fact."
 }

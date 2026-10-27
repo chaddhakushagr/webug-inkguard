@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited rule TONE-004 explicitly prohibits 'unrealistic perfectionism'. The excerpt uses exaggerated terms like 'miracle serum' and 'transform... overnight', which directly constitute unrealistic perfectionism in skincare copy."
+  "reason": "The cited policy TONE-004 explicitly prohibits 'unrealistic perfectionism', and the quoted span uses exaggerated terms like 'miracle serum' and 'transform ... overnight', which violate this guideline."
 }

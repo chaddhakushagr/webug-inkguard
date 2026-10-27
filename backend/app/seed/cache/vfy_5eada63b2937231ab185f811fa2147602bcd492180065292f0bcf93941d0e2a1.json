@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited source text explicitly states 'Never state \"chemical-free\"' because 'All matter consists of chemicals, including pure water', which directly supports the finding that the claim '100% chemical-free' is contradicted by brand policy."
+  "reason": "The cited knowledge base entry explicitly states 'Never state \"chemical-free\"', which directly proves that the quoted span '100% chemical-free' is a policy violation."
 }

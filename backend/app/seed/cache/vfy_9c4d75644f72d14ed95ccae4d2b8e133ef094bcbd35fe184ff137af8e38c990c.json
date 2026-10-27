@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The cited entry TERM-015 explicitly states to reject whimsical terms like 'magic elixir', and the excerpt uses the related term 'magical', which directly supports the finding's policy violation."
+  "reason": "The cited entry (TERM-015) explicitly requires the rejection of whimsical terms like 'magic elixir' or 'sorcery' in formal copy, and the quoted span uses the prohibited term 'magical'."
 }

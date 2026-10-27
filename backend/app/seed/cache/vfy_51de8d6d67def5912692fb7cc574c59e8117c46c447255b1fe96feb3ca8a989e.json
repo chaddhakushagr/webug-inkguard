@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited source text FACT-006 explicitly states 'Dermatologist tested on 120 sensitive skin subjects with zero allergic contact reactions', which directly and accurately supports the claim made in the excerpt."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the claim is correct, matches the safety evaluation fact, and properly cites the study. According to evaluation criteria, if the finding is merely an observation that the copy is right or compliant, the verdict must be not_supported."
 }

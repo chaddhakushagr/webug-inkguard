@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited rule TERM-002 requires specifying 'cold-pressed rosehip seed extract', and the quoted excerpt correctly uses this exact term."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the term is used correctly according to TERM-002, and correct usage does not constitute a policy violation."
 }

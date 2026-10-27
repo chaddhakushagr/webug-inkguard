@@ -1,4 +1,4 @@
 {
-  "verdict": "supported",
-  "reason": "The cited knowledge base entry TERM-006 explicitly states to prefer 'plant-derived ingredients' instead of 'all-natural', which directly matches the finding that the copy correctly uses 'plant-derived ingredients'."
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that 'the copy correctly uses 'plant-derived ingredients' as preferred over misleading 'all-natural'. According to evaluation criteria, if the content is correct, compliant, or adhering to guidelines rather than violating them, the verdict must be 'not_supported'."
 }

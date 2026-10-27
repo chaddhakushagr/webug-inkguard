@@ -1,4 +1,4 @@
 {
   "verdict": "supported",
-  "reason": "The finding correctly identifies that the excerpt uses the term 'instant fix', and the cited source text (TERM-011) explicitly prohibits promising 'instant fix'."
+  "reason": "The cited entry TERM-011 explicitly prohibits promising an 'instant fix', and the quoted span uses the exact prohibited phrase."
 }
