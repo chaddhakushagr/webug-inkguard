@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "ultimate hydration experience",
+      "claim_text": "The product delivers the ultimate hydration experience.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.9,
+      "explanation": "While FACT-001 and FACT-011 substantiate specific hydration improvements and mechanisms, calling the product the 'ultimate hydration experience' is an unverified superlative claim."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-003",
+      "excerpt": "ultimate hydration experience",
+      "assessment": "off_tone",
+      "confidence": 0.92,
+      "explanation": "Using superlative phrasing like 'ultimate hydration experience' violates TONE-003 guidance to avoid aggressive supremacy claims and let documented performance speak for itself.",
+      "cited_entry_code": "TONE-003"
+    }
+  ],
+  "notes": []
+}

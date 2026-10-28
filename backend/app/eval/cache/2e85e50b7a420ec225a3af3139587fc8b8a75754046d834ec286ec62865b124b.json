@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "100% chemical-free",
+      "claim_text": "Claiming the treatment is 100% chemical-free",
+      "category": "ingredient",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-008",
+      "confidence": 1.0,
+      "explanation": "All matter consists of chemicals, including pure water. Never state 'chemical-free'."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Our purest treatment",
+      "note": "Verify if purity claims align with brand guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

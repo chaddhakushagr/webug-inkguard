@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "toxin-free",
+      "claim_text": "The product is toxin-free",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-007",
+      "confidence": 0.99,
+      "explanation": "Never use 'toxin-free' or 'non-toxic' as negative competitor attacks according to TERM-007."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "completely toxin-free",
+      "note": "Avoid using toxin-free fearmongering.",
+      "kind": "clarity"
+    }
+  ]
+}

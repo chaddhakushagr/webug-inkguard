@@ -148,6 +148,29 @@ class AnalyseStage:
         return context
 
 
+class ConfidenceFilterStage:
+    """
+    Review Stage filtering out low-confidence AI claim and tone findings
+    after the AI stage and before guardrails.
+    """
+    name: str = "ConfidenceFilter"
+
+    def __init__(self, threshold: float = 0.75):
+        self.threshold = threshold
+
+    def process(self, context: ReviewContext) -> ReviewContext:
+        context.findings = [
+            f
+            for f in context.findings
+            if not (
+                f.source == "ai"
+                and f.issue_type in ("claim", "tone")
+                and f.confidence < self.threshold
+            )
+        ]
+        return context
+
+
 class ReviewPipeline:
     """Orchestrates ordered stages over ReviewContext."""
 
@@ -156,10 +179,12 @@ class ReviewPipeline:
         retriever: RetrieverPort,
         llm_adapter: LLMPort,
         verifier_enabled: bool = False,
+        claim_confidence_threshold: float = 0.75,
     ):
         self.retriever = retriever
         self.llm = llm_adapter
         self.verifier_enabled = verifier_enabled
+        self.claim_confidence_threshold = claim_confidence_threshold
 
         self.stages: List[ReviewStage] = [
             ExtractStage(),
@@ -168,6 +193,7 @@ class ReviewPipeline:
             A11yChecksStage(),
             RetrieveStage(self.retriever),
             AnalyseStage(self.llm),
+            ConfidenceFilterStage(threshold=self.claim_confidence_threshold),
             GuardrailsStage(),
             LLMVerifierStage(llm_adapter=self.llm, enabled=self.verifier_enabled),
             SuggestionValidatorStage(),

@@ -43,26 +43,34 @@ class CachedLLMAdapter:
             self.last_cache_hit = True
             return self.cache[key]
 
-        # Check disk cache in seed/cache
+        # Check disk cache in eval/cache first, then seed/cache
         import os
-        disk_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "seed", "cache"))
-        disk_file = os.path.join(disk_dir, f"{key}.json")
-        if os.path.exists(disk_file):
-            try:
-                with open(disk_file, "r", encoding="utf-8") as f:
-                    cached_data = json.load(f)
-                    self.cache[key] = cached_data
-                    self.last_cache_hit = True
-                    return cached_data
-            except Exception:
-                pass
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        cache_dirs = [
+            os.path.join(base_dir, "eval", "cache"),
+            os.path.join(base_dir, "seed", "cache"),
+        ]
+
+        for c_dir in cache_dirs:
+            disk_file = os.path.join(c_dir, f"{key}.json")
+            if os.path.exists(disk_file):
+                try:
+                    with open(disk_file, "r", encoding="utf-8") as f:
+                        cached_data = json.load(f)
+                        self.cache[key] = cached_data
+                        self.last_cache_hit = True
+                        return cached_data
+                except Exception:
+                    pass
 
         self.last_cache_hit = False
         res = self.inner.analyze(sanitised_text, kb_entries, channel=channel, prompt_version=prompt_version)
         self.cache[key] = res
 
-        # Persist to disk cache
-        if os.path.isdir(disk_dir):
+        # Persist to disk cache (both eval/cache and seed/cache)
+        for c_dir in cache_dirs:
+            os.makedirs(c_dir, exist_ok=True)
+            disk_file = os.path.join(c_dir, f"{key}.json")
             try:
                 with open(disk_file, "w", encoding="utf-8") as f:
                     json.dump(res, f, indent=2)
@@ -96,23 +104,32 @@ class CachedLLMAdapter:
             return self.cache[key]
 
         import os
-        disk_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "seed", "cache"))
-        disk_file = os.path.join(disk_dir, f"{key}.json")
-        if os.path.exists(disk_file):
-            try:
-                with open(disk_file, "r", encoding="utf-8") as f:
-                    cached_data = json.load(f)
-                    self.cache[key] = cached_data
-                    self.last_cache_hit = True
-                    return cached_data
-            except Exception:
-                pass
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        cache_dirs = [
+            os.path.join(base_dir, "eval", "cache"),
+            os.path.join(base_dir, "seed", "cache"),
+        ]
+
+        for c_dir in cache_dirs:
+            disk_file = os.path.join(c_dir, f"{key}.json")
+            if os.path.exists(disk_file):
+                try:
+                    with open(disk_file, "r", encoding="utf-8") as f:
+                        cached_data = json.load(f)
+                        self.cache[key] = cached_data
+                        self.last_cache_hit = True
+                        return cached_data
+                except Exception:
+                    pass
 
         self.last_cache_hit = False
         res = self.inner.verify(finding, excerpt, cited_entry, prompt_version=prompt_version)
         self.cache[key] = res
 
-        if os.path.isdir(disk_dir):
+        # Persist to disk cache (both eval/cache and seed/cache)
+        for c_dir in cache_dirs:
+            os.makedirs(c_dir, exist_ok=True)
+            disk_file = os.path.join(c_dir, f"{key}.json")
             try:
                 with open(disk_file, "w", encoding="utf-8") as f:
                     json.dump(res, f, indent=2)

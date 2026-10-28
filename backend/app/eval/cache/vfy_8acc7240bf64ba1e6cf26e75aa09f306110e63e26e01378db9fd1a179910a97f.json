@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding states that the copy matches the fact statement in FACT-008 and is correct/compliant. According to the evaluation criteria, if the cited entry shows the content is correct or compliant rather than violating policies, the verdict must be 'not_supported'."
+}

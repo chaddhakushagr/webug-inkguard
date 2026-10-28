@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "Formulation study PF-01 showed 80% absorption in under 60 seconds.",
+      "claim_text": "80% absorption in under 60 seconds based on pilot formulation PF-01",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-009",
+      "confidence": 0.95,
+      "explanation": "The claim directly matches the approved fact FACT-009 regarding pilot formulation PF-01 absorption metrics."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

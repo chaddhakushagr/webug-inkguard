@@ -44,12 +44,23 @@ def main():
         help="Require claim verdict match for true positives",
     )
 
+    parser.add_argument(
+        "--confidence-threshold",
+        type=float,
+        default=None,
+        help="Filter AI claim/tone findings below confidence threshold (default: config CLAIM_CONFIDENCE_THRESHOLD)",
+    )
+
     args = parser.parse_args()
 
     docs = load_dataset()
     verifier_enabled = args.verifier.lower() == "on"
 
-    runner = EvalRunner(mode=args.mode, verifier_enabled=verifier_enabled)
+    runner = EvalRunner(
+        mode=args.mode,
+        verifier_enabled=verifier_enabled,
+        claim_confidence_threshold=args.confidence_threshold,
+    )
     report = runner.evaluate(
         docs,
         limit=args.limit,

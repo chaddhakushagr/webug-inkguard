@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "instant pore-erasing clarity",
+      "claim_text": "Pores can be erased instantly",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-009",
+      "confidence": 0.99,
+      "explanation": "Pores are anatomical structures and cannot be erased or deleted as per TERM-009, and instant fixes are prohibited by TERM-011."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Enjoy instant pore-erasing clarity",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The copy uses hyperbolic and miraculous promises ('instant pore-erasing') instead of being plain-spoken and grounded.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

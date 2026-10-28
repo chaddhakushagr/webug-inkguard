@@ -835,6 +835,8 @@ def trigger_review(
         default_mode=settings.LLM_MODE,
         daily_cap=settings.LLM_DAILY_CAP,
         model_name=settings.LLM_MODEL,
+        verifier_enabled=settings.VERIFIER_ENABLED,
+        claim_confidence_threshold=settings.CLAIM_CONFIDENCE_THRESHOLD,
     )
 
     if sync:

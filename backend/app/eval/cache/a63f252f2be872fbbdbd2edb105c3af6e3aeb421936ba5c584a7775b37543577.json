@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "Certified 100% cruelty-free under Leaping Bunny international standard",
+      "claim_text": "Certified 100% cruelty-free under Leaping Bunny international standard",
+      "category": "sustainability",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-012",
+      "confidence": 1.0,
+      "explanation": "The claim matches the certified fact that products are certified 100% cruelty-free under Leaping Bunny international standard."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

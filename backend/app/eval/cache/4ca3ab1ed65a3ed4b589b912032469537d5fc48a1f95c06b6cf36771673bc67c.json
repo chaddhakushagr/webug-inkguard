@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "85% active antioxidant potency maintained at 6 months",
+      "claim_text": "Vitamin C Ester active antioxidant potency is maintained at 85% at 6 months.",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-007",
+      "confidence": 0.99,
+      "explanation": "The statement directly matches the fact retrieved in FACT-007."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

@@ -201,6 +201,45 @@ export const FindingCard: React.FC<FindingCardProps> = ({
         </div>
       )}
 
+      {/* Verifier Pass Entailment Verdict (AI findings only) */}
+      {!isRule && (
+        <div className="mt-2.5">
+          {finding.needs_human_judgment || finding.verifier_verdict === "unsure" ? (
+            <div className="p-2 bg-[#FFFBEB] rounded-lg border border-[#FDE68A] text-xs text-[#B45309] flex items-start gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-[#B45309] mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-semibold">Needs human judgment:</span>{" "}
+                <span className="font-normal font-sans">
+                  {finding.verifier_reason || "Evidence is borderline or inconclusive; human judgment required."}
+                </span>
+              </div>
+            </div>
+          ) : finding.verifier_verdict === "not_supported" ? (
+            <div className="p-2 bg-[#FEF3F2] rounded-lg border border-[#FECDCA] text-xs text-[#B42318] flex items-start gap-1.5">
+              <X className="w-3.5 h-3.5 text-[#B42318] mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-semibold">Not supported:</span>{" "}
+                <span className="font-normal font-sans">
+                  {finding.verifier_reason || "Citation does not support a policy violation."}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="p-2 bg-[#ECFDF3] rounded-lg border border-[#ABEFC6] text-xs text-[#067647] flex items-start gap-1.5">
+              <Check className="w-3.5 h-3.5 text-[#067647] mt-0.5 flex-shrink-0" />
+              <div>
+                <span className="font-semibold">
+                  Verified against {finding.cited_entry_code || "knowledge base"}:
+                </span>{" "}
+                <span className="font-normal font-sans">
+                  {finding.verifier_reason || "Semantic entailment verified against cited policy."}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Cited Knowledge Base Source */}
       {finding.cited_entry_code && (
         <div className="mt-3 pt-2.5 border-t border-[#E2E5EA] flex items-center justify-between text-xs">

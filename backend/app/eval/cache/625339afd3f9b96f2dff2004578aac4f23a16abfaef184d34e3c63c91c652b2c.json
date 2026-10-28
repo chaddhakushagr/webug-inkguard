@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "rosehip oil",
+      "claim_text": "Use of generic term rosehip oil instead of required cold-pressed rosehip seed extract.",
+      "category": "ingredient",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-002",
+      "confidence": 0.95,
+      "explanation": "The knowledge base explicitly requires specifying 'cold-pressed rosehip seed extract' rather than generic 'rosehip oil'."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "rosehip oil",
+      "note": "Remember to update product terminology to 'cold-pressed rosehip seed extract' per brand guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

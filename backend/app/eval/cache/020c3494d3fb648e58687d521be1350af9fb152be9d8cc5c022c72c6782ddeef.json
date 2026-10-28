@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "Winter air can increase trans-epidermal water loss.",
+      "claim_text": "Winter air increases trans-epidermal water loss",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-003",
+      "confidence": 0.85,
+      "explanation": "FACT-003 cites a 35% reduction in trans-epidermal water loss over 14 days, but does not explicitly verify the claim about winter air increasing it."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Winter air can increase trans-epidermal water loss. Support your barrier daily with Lumo Glow Concentrate.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "The copy explains dermatological benefits plainly and clearly with precision and honesty, avoiding miraculous promises.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

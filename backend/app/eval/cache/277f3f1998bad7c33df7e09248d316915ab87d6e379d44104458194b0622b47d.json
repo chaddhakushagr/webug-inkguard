@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "A true magic elixir",
+      "claim_text": "Characterizing the product as a magic elixir",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-015",
+      "confidence": 0.99,
+      "explanation": "TERM-015 states to reject whimsical 'magic elixir' or 'sorcery' naming in formal copy."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "A true magic elixir for dull morning complexions looking for light.",
+      "note": "Avoid whimsical terminology in formal copy.",
+      "kind": "clarity"
+    }
+  ]
+}

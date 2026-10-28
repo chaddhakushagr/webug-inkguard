@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "wild Chilean Patagonia Rosa Canina",
+      "claim_text": "The rosehip is harvested from wild Chilean Patagonia Rosa Canina.",
+      "category": "sustainability",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-008",
+      "confidence": 0.85,
+      "explanation": "FACT-008 specifies wild Patagonian Rosa Canina, but does not explicitly mention 'Chilean'."
+    },
+    {
+      "excerpt": "cold-pressed rosehip seed extract",
+      "claim_text": "The product uses cold-pressed rosehip seed extract.",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-002",
+      "confidence": 0.95,
+      "explanation": "Term correctly specifies 'cold-pressed rosehip seed extract' as required by TERM-002."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

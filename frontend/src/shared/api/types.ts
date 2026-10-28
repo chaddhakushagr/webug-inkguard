@@ -102,6 +102,8 @@ export interface Finding {
   needs_human_judgment: boolean;
   explanation: string;
   suggested_fix?: string | null;
+  verifier_verdict?: string | null;
+  verifier_reason?: string | null;
   status: "open" | "accepted" | "dismissed" | "escalated";
   is_synthetic: boolean;
   created_at: string;
@@ -221,4 +223,68 @@ export interface AuditLogItem {
   prev_hash?: string | null;
   hash: string;
 }
+
+export interface OverallMetrics {
+  tp: number;
+  fp: number;
+  fn: number;
+  precision: number;
+  recall: number;
+  f1: number;
+}
+
+export interface EvalSummary {
+  total_documents: number;
+  clean_documents: number;
+  clean_documents_passed: number;
+  clean_pass_rate: number;
+  overall: OverallMetrics;
+}
+
+export interface CategoryMetrics {
+  tp: number;
+  fp: number;
+  fn: number;
+  precision: number;
+  recall: number;
+  f1: number;
+}
+
+export interface FalsePositiveItem {
+  document_id: string;
+  channel: string;
+  cited_entry_code?: string | null;
+  issue_type: string;
+  excerpt: string;
+  span: number[];
+  claim_verdict?: string | null;
+  explanation: string;
+  confidence?: number | null;
+  verifier_verdict?: string | null;
+  verifier_reason?: string | null;
+}
+
+export interface BeforeAfterRow {
+  mode: string;
+  verifier: string;
+  total_docs: number;
+  clean_pass_rate: number;
+  tp: number;
+  fp: number;
+  fn: number;
+  precision: number;
+  recall: number;
+  f1: number;
+}
+
+export interface EvaluationReportResponse {
+  summary: EvalSummary;
+  before_after: BeforeAfterRow[];
+  by_issue_type: Record<string, CategoryMetrics>;
+  by_claim_verdict: Record<string, CategoryMetrics>;
+  false_positives: FalsePositiveItem[];
+  false_positives_count: number;
+  metadata: Record<string, any>;
+}
+
 

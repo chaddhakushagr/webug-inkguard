@@ -1,0 +1,38 @@
+{
+  "claims": [
+    {
+      "excerpt": "supports tone balance and clarity across varied skin types",
+      "claim_text": "Niacinamide at 5% supports visible skin tone balance improvement",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-010",
+      "confidence": 0.95,
+      "explanation": "The claim aligns with the fact that Niacinamide 5% shows visible skin tone balance improvement over 6 weeks."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Niacinamide at 5% concentration supports tone balance and clarity across varied skin types.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "Explains dermatological benefits plainly without hyperbolic hype.",
+      "cited_entry_code": "TONE-001"
+    },
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "across varied skin types",
+      "assessment": "compliant",
+      "confidence": 0.9,
+      "explanation": "Welcomes diverse skin types appropriately.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Patch test advised.",
+      "note": "Good inclusion of patch test advisory for active product introductions in line with rule recommendations.",
+      "kind": "clarity"
+    }
+  ]
+}

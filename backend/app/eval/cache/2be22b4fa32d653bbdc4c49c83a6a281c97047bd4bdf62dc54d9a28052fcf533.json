@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "Our multi-molecular hyaluronic complex binds surface and epidermal moisture throughout the day.",
+      "claim_text": "Multi-molecular hyaluronic complex binds surface and epidermal moisture",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-011",
+      "confidence": 1.0,
+      "explanation": "The statement directly matches the approved fact FACT-011."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Our multi-molecular hyaluronic complex binds surface and epidermal moisture throughout the day.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "Explains dermatological benefits plainly with clarity and precision, avoiding hyperbolic hype.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

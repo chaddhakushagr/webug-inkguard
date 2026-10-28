@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "all-natural",
+      "claim_text": "Skincare philosophy is all-natural",
+      "category": "ingredient",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-006",
+      "confidence": 0.95,
+      "explanation": "The term 'all-natural' is discouraged; guidance specifies preferring 'plant-derived ingredients' instead."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Patch test advised.",
+      "note": "New active product introductions should advise patch testing per RULE-DISC-03.",
+      "kind": "clarity"
+    }
+  ]
+}

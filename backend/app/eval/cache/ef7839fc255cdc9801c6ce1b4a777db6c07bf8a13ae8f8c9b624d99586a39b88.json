@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "Experience the miracle transformation",
+      "claim_text": "Describes formulation results as a miracle transformation.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-003",
+      "confidence": 0.99,
+      "explanation": "The knowledge base explicitly states to never describe formulations or results as 'miracle' or 'miraculous'."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "miracle transformation that brings dull skin back to life",
+      "assessment": "off_tone",
+      "confidence": 0.9,
+      "explanation": "Uses unrealistic perfectionism and banned terminology instead of focusing on inclusive, natural skin care.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "miracle transformation",
+      "note": "Remove the banned term 'miracle' entirely.",
+      "kind": "clarity"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the claim is correct, matches the safety evaluation fact, and properly cites the study. According to evaluation criteria, if the finding is merely an observation that the copy is right or compliant, the verdict must be not_supported."
+}

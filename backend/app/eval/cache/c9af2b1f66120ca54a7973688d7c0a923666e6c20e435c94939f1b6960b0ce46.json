@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "completely cure dry skin overnight",
+      "claim_text": "Claims to completely cure dry skin overnight.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-004",
+      "confidence": 0.99,
+      "explanation": "Cosmetics hydrate and soothe; they do not cure medical skin pathologies, and overnight cures contradict brand guidelines."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "completely cure dry skin overnight",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Uses miraculous and exaggerated promises rather than explaining dermatological benefits plainly and honestly.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "completely cure dry skin overnight",
+      "note": "Avoid speed claims like overnight cures and banned terms like 'cure'.",
+      "kind": "clarity"
+    }
+  ]
+}

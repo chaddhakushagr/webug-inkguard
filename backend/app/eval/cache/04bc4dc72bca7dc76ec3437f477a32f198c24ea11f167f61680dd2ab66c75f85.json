@@ -1,0 +1,20 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TONE-004",
+      "excerpt": "Real skin, real texture, real daily hydration. Thoughtfully crafted for all skin types and tones.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "The copy successfully celebrates natural skin texture and addresses a broad diversity of skin types and tones, adhering to inclusive and accessible brand voice guidelines.",
+      "cited_entry_code": "TONE-004"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Real skin, real texture, real daily hydration.",
+      "note": "Copy effectively reinforces natural skin diversity without making unverified or prohibited claims.",
+      "kind": "clarity"
+    }
+  ]
+}

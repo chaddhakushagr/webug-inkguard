@@ -1,0 +1,411 @@
+{
+  "summary": {
+    "total_documents": 20,
+    "clean_documents": 20,
+    "clean_documents_passed": 4,
+    "clean_pass_rate": 0.2,
+    "overall": {
+      "tp": 0,
+      "fp": 26,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    }
+  },
+  "by_issue_type": {
+    "claim": {
+      "tp": 0,
+      "fp": 16,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "general_note": {
+      "tp": 0,
+      "fp": 6,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "readability": {
+      "tp": 0,
+      "fp": 4,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    }
+  },
+  "by_claim_verdict": {
+    "Supported": {
+      "tp": 0,
+      "fp": 11,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "Unverified": {
+      "tp": 0,
+      "fp": 4,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "Contradicted": {
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    }
+  },
+  "false_positives_count": 26,
+  "false_negatives_count": 0,
+  "false_positives": [
+    {
+      "document_id": "doc-001",
+      "channel": "social",
+      "cited_entry_code": "TERM-002",
+      "issue_type": "claim",
+      "excerpt": "cold-pressed rosehip seed extract",
+      "span": [
+        70,
+        103
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The copy correctly specifies 'cold-pressed rosehip seed extract' instead of generic 'rosehip oil'."
+    },
+    {
+      "document_id": "doc-002",
+      "channel": "social",
+      "cited_entry_code": "TERM-006",
+      "issue_type": "claim",
+      "excerpt": "Plant-derived ingredients",
+      "span": [
+        39,
+        64
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The copy correctly uses 'plant-derived ingredients' as preferred over misleading 'all-natural'."
+    },
+    {
+      "document_id": "doc-003",
+      "channel": "social",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Real skin, real texture, real daily hydration.",
+      "span": [
+        0,
+        46
+      ],
+      "claim_verdict": null,
+      "explanation": "Copy effectively reinforces natural skin diversity without making unverified or prohibited claims."
+    },
+    {
+      "document_id": "doc-006",
+      "channel": "email",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Our dropper bottles are crafte",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 14.6 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-006",
+      "channel": "email",
+      "cited_entry_code": "FACT-005",
+      "issue_type": "claim",
+      "excerpt": "100% post-consumer recycled borosilicate glass",
+      "span": [
+        37,
+        83
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "Fact FACT-005 confirms 100% post-consumer recycled glass packaging, though adding 'borosilicate' is unverified, the core recycled glass claim is supported."
+    },
+    {
+      "document_id": "doc-007",
+      "channel": "email",
+      "cited_entry_code": "FACT-003",
+      "issue_type": "claim",
+      "excerpt": "Winter air can increase trans-epidermal water loss.",
+      "span": [
+        0,
+        51
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "FACT-003 cites a 35% reduction in trans-epidermal water loss over 14 days, but does not explicitly verify the claim about winter air increasing it."
+    },
+    {
+      "document_id": "doc-008",
+      "channel": "email",
+      "cited_entry_code": "FACT-012",
+      "issue_type": "claim",
+      "excerpt": "certified cruelty-free under the Leaping Bunny international standard",
+      "span": [
+        16,
+        85
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The claim matches the statement in FACT-012."
+    },
+    {
+      "document_id": "doc-009",
+      "channel": "blog",
+      "cited_entry_code": "FACT-011",
+      "issue_type": "claim",
+      "excerpt": "multi-molecular weight hyaluronic acid",
+      "span": [
+        14,
+        52
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The text discusses multi-molecular weight hyaluronic acid, which aligns directly with the multi-molecular hyaluronic complex in FACT-011."
+    },
+    {
+      "document_id": "doc-009",
+      "channel": "blog",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Patch test advised before introducing any new active product.",
+      "span": [
+        101,
+        162
+      ],
+      "claim_verdict": null,
+      "explanation": "Appropriate inclusion of patch testing advisory per guidelines."
+    },
+    {
+      "document_id": "doc-010",
+      "channel": "blog",
+      "cited_entry_code": "FACT-008",
+      "issue_type": "claim",
+      "excerpt": "wild Chilean Patagonia Rosa Canina",
+      "span": [
+        15,
+        49
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "FACT-008 specifies wild Patagonian Rosa Canina, but does not explicitly mention 'Chilean'."
+    },
+    {
+      "document_id": "doc-010",
+      "channel": "blog",
+      "cited_entry_code": "TERM-002",
+      "issue_type": "claim",
+      "excerpt": "cold-pressed rosehip seed extract",
+      "span": [
+        55,
+        88
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "Term correctly specifies 'cold-pressed rosehip seed extract' as required by TERM-002."
+    },
+    {
+      "document_id": "doc-012",
+      "channel": "blog",
+      "cited_entry_code": "FACT-010",
+      "issue_type": "claim",
+      "excerpt": "supports tone balance and clarity across varied skin types",
+      "span": [
+        32,
+        90
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The claim aligns with the fact that Niacinamide 5% shows visible skin tone balance improvement over 6 weeks."
+    },
+    {
+      "document_id": "doc-012",
+      "channel": "blog",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Patch test advised.",
+      "span": [
+        92,
+        111
+      ],
+      "claim_verdict": null,
+      "explanation": "Good inclusion of patch test advisory for active product introductions in line with rule recommendations."
+    },
+    {
+      "document_id": "doc-013",
+      "channel": "web",
+      "cited_entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "Lumo Glow Concentrate supports daily barrier hydration and visible radiance.",
+      "span": [
+        0,
+        76
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The product designation matches TERM-001, and the hydration claims align with FACT-001."
+    },
+    {
+      "document_id": "doc-013",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Individual results may vary.",
+      "span": [
+        77,
+        105
+      ],
+      "claim_verdict": null,
+      "explanation": "Includes proper individual variance disclaimer for trial/quantified discussions."
+    },
+    {
+      "document_id": "doc-014",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Our ingredient integrity: 98% ",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.0 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-014",
+      "channel": "web",
+      "cited_entry_code": "TERM-013",
+      "issue_type": "claim",
+      "excerpt": "98% naturally derived formulation",
+      "span": [
+        26,
+        59
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "The knowledge base warns against '100% natural' (TERM-013) and prefers 'plant-derived' (TERM-006), but there is no specific factual knowledge base entry verifying the exact 98% naturally derived metric."
+    },
+    {
+      "document_id": "doc-014",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Individual results may vary.",
+      "span": [
+        100,
+        128
+      ],
+      "claim_verdict": null,
+      "explanation": "Good inclusion of the individual variance disclaimer."
+    },
+    {
+      "document_id": "doc-015",
+      "channel": "web",
+      "cited_entry_code": "FACT-006",
+      "issue_type": "claim",
+      "excerpt": "Tested for sensitive skin in clinical evaluation DS-09 with non-irritating findings.",
+      "span": [
+        0,
+        84
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The copy accurately references clinical evaluation DS-09 and aligns with the findings of dermatologist testing on sensitive skin subjects."
+    },
+    {
+      "document_id": "doc-016",
+      "channel": "web",
+      "cited_entry_code": "FACT-012",
+      "issue_type": "claim",
+      "excerpt": "100% cruelty-free",
+      "span": [
+        10,
+        27
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The fact confirms certification as 100% cruelty-free under the Leaping Bunny international standard."
+    },
+    {
+      "document_id": "doc-017",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Lumo announces completion of i",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.7 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-017",
+      "channel": "press_release",
+      "cited_entry_code": "FACT-006",
+      "issue_type": "claim",
+      "excerpt": "non-irritating performance across 120 sensitive skin subjects",
+      "span": [
+        71,
+        132
+      ],
+      "claim_verdict": "Supported",
+      "explanation": "The claim directly reflects the finding in FACT-006 regarding 120 sensitive skin subjects."
+    },
+    {
+      "document_id": "doc-018",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Lumo transitions packaging acr",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.2 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-018",
+      "channel": "press_release",
+      "cited_entry_code": "FACT-005",
+      "issue_type": "claim",
+      "excerpt": "verified post-consumer recycled borosilicate glass certified by EuroCert",
+      "span": [
+        47,
+        119
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "FACT-005 states '100% post-consumer recycled glass packaging', but does not mention borosilicate glass or EuroCert certification."
+    },
+    {
+      "document_id": "doc-018",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "borosilicate glass certified by EuroCert",
+      "span": [
+        79,
+        119
+      ],
+      "claim_verdict": null,
+      "explanation": "Mentioning specific certifications not present in the knowledge base should be avoided."
+    },
+    {
+      "document_id": "doc-019",
+      "channel": "social",
+      "cited_entry_code": "TERM-001",
+      "issue_type": "claim",
+      "excerpt": "botanical hair serum",
+      "span": [
+        75,
+        95
+      ],
+      "claim_verdict": "Contradicted",
+      "explanation": "The primary hydration treatment must always be designated as 'Lumo Glow Concentrate', never as a 'serum'."
+    }
+  ],
+  "false_negatives": []
+}

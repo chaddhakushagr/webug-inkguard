@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "100% post-consumer recycled borosilicate glass",
+      "claim_text": "The bottles are made from 100% post-consumer recycled glass.",
+      "category": "sustainability",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-005",
+      "confidence": 0.9,
+      "explanation": "Fact FACT-005 confirms 100% post-consumer recycled glass packaging, though adding 'borosilicate' is unverified, the core recycled glass claim is supported."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

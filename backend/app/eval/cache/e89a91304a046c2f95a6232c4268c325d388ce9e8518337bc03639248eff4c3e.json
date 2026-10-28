@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "toxin-free",
+      "claim_text": "Claiming the routine is toxin-free",
+      "category": "safety",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-007",
+      "confidence": 1.0,
+      "explanation": "The knowledge base explicitly states to never use 'toxin-free' or 'non-toxic' as negative competitor attacks."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Patch test advised.",
+      "note": "Proper inclusion of the patch test advisory for new active product introductions.",
+      "kind": "clarity"
+    }
+  ]
+}

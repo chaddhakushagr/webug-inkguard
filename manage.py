@@ -189,6 +189,8 @@ def cmd_eval(args):
     eval_cmd = [py, "-m", "app.eval.cli", "--mode", args.mode, "--verifier", args.verifier]
     if args.out:
         eval_cmd.extend(["--out", args.out])
+    if getattr(args, "limit", None):
+        eval_cmd.extend(["--limit", str(args.limit)])
     run_cmd(eval_cmd, cwd=ROOT_DIR)
 
 
@@ -215,6 +217,7 @@ def main():
     eval_parser.add_argument("--mode", choices=["rules_only", "mock", "cached", "live"], default="rules_only", help="Evaluation mode (default: rules_only)")
     eval_parser.add_argument("--verifier", choices=["on", "off"], default="off", help="Enable or disable verifier pass (default: off)")
     eval_parser.add_argument("--out", default=None, help="Path to write evaluation JSON report (e.g. docs/evidence/eval_rules_only.json)")
+    eval_parser.add_argument("--limit", type=int, default=None, help="Optional limit on number of documents evaluated")
 
     args = parser.parse_args()
 

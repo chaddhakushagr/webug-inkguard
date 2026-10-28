@@ -1,0 +1,11 @@
+{
+  "claims": [],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "click here",
+      "note": "Links should describe their destination instead of using non-informative 'click here' per RULE-A11Y-01.",
+      "kind": "clarity"
+    }
+  ]
+}

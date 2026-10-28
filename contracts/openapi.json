@@ -2622,6 +2622,58 @@
           }
         ]
       }
+    },
+    "/api/v1/eval/latest": {
+      "get": {
+        "tags": [
+          "Evaluation"
+        ],
+        "summary": "Alias for latest evaluation report",
+        "operationId": "get_evaluation_results_api_v1_eval_latest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationReportResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/evaluation/results": {
+      "get": {
+        "tags": [
+          "Evaluation"
+        ],
+        "summary": "Get benchmark policy evaluation results and before/after metrics",
+        "operationId": "get_evaluation_results_api_v1_evaluation_results_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationReportResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2715,6 +2767,64 @@
         ],
         "title": "AuditLogResponse"
       },
+      "BeforeAfterRow": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode"
+          },
+          "verifier": {
+            "type": "string",
+            "title": "Verifier"
+          },
+          "total_docs": {
+            "type": "integer",
+            "title": "Total Docs"
+          },
+          "clean_pass_rate": {
+            "type": "number",
+            "title": "Clean Pass Rate"
+          },
+          "tp": {
+            "type": "integer",
+            "title": "Tp"
+          },
+          "fp": {
+            "type": "integer",
+            "title": "Fp"
+          },
+          "fn": {
+            "type": "integer",
+            "title": "Fn"
+          },
+          "precision": {
+            "type": "number",
+            "title": "Precision"
+          },
+          "recall": {
+            "type": "number",
+            "title": "Recall"
+          },
+          "f1": {
+            "type": "number",
+            "title": "F1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "verifier",
+          "total_docs",
+          "clean_pass_rate",
+          "tp",
+          "fp",
+          "fn",
+          "precision",
+          "recall",
+          "f1"
+        ],
+        "title": "BeforeAfterRow"
+      },
       "BulkKBImportRequest": {
         "properties": {
           "entries": {
@@ -2730,6 +2840,44 @@
           "entries"
         ],
         "title": "BulkKBImportRequest"
+      },
+      "CategoryMetrics": {
+        "properties": {
+          "tp": {
+            "type": "integer",
+            "title": "Tp"
+          },
+          "fp": {
+            "type": "integer",
+            "title": "Fp"
+          },
+          "fn": {
+            "type": "integer",
+            "title": "Fn"
+          },
+          "precision": {
+            "type": "number",
+            "title": "Precision"
+          },
+          "recall": {
+            "type": "number",
+            "title": "Recall"
+          },
+          "f1": {
+            "type": "number",
+            "title": "F1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tp",
+          "fp",
+          "fn",
+          "precision",
+          "recall",
+          "f1"
+        ],
+        "title": "CategoryMetrics"
       },
       "CommentCreate": {
         "properties": {
@@ -3048,6 +3196,189 @@
         ],
         "title": "DismissalBreakdown"
       },
+      "EvalSummary": {
+        "properties": {
+          "total_documents": {
+            "type": "integer",
+            "title": "Total Documents"
+          },
+          "clean_documents": {
+            "type": "integer",
+            "title": "Clean Documents"
+          },
+          "clean_documents_passed": {
+            "type": "integer",
+            "title": "Clean Documents Passed"
+          },
+          "clean_pass_rate": {
+            "type": "number",
+            "title": "Clean Pass Rate"
+          },
+          "overall": {
+            "$ref": "#/components/schemas/OverallMetrics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_documents",
+          "clean_documents",
+          "clean_documents_passed",
+          "clean_pass_rate",
+          "overall"
+        ],
+        "title": "EvalSummary"
+      },
+      "EvaluationReportResponse": {
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/EvalSummary"
+          },
+          "before_after": {
+            "items": {
+              "$ref": "#/components/schemas/BeforeAfterRow"
+            },
+            "type": "array",
+            "title": "Before After"
+          },
+          "by_issue_type": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CategoryMetrics"
+            },
+            "type": "object",
+            "title": "By Issue Type"
+          },
+          "by_claim_verdict": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CategoryMetrics"
+            },
+            "type": "object",
+            "title": "By Claim Verdict"
+          },
+          "false_positives": {
+            "items": {
+              "$ref": "#/components/schemas/FalsePositiveItem"
+            },
+            "type": "array",
+            "title": "False Positives"
+          },
+          "false_positives_count": {
+            "type": "integer",
+            "title": "False Positives Count"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "summary",
+          "before_after",
+          "by_issue_type",
+          "by_claim_verdict",
+          "false_positives",
+          "false_positives_count",
+          "metadata"
+        ],
+        "title": "EvaluationReportResponse"
+      },
+      "FalsePositiveItem": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "cited_entry_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cited Entry Code"
+          },
+          "issue_type": {
+            "type": "string",
+            "title": "Issue Type"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          },
+          "span": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Span",
+            "default": []
+          },
+          "claim_verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claim Verdict"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "verifier_verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifier Verdict"
+          },
+          "verifier_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifier Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "channel",
+          "issue_type",
+          "excerpt",
+          "explanation"
+        ],
+        "title": "FalsePositiveItem"
+      },
       "FindingDismissRequest": {
         "properties": {
           "reason_code": {
@@ -3195,6 +3526,28 @@
               }
             ],
             "title": "Suggested Fix"
+          },
+          "verifier_verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifier Verdict"
+          },
+          "verifier_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verifier Reason"
           },
           "status": {
             "type": "string",
@@ -3612,6 +3965,44 @@
         },
         "type": "object",
         "title": "NoteRequest"
+      },
+      "OverallMetrics": {
+        "properties": {
+          "tp": {
+            "type": "integer",
+            "title": "Tp"
+          },
+          "fp": {
+            "type": "integer",
+            "title": "Fp"
+          },
+          "fn": {
+            "type": "integer",
+            "title": "Fn"
+          },
+          "precision": {
+            "type": "number",
+            "title": "Precision"
+          },
+          "recall": {
+            "type": "number",
+            "title": "Recall"
+          },
+          "f1": {
+            "type": "number",
+            "title": "F1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tp",
+          "fp",
+          "fn",
+          "precision",
+          "recall",
+          "f1"
+        ],
+        "title": "OverallMetrics"
       },
       "PublishRequest": {
         "properties": {

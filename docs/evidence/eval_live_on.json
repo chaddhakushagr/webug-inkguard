@@ -1,0 +1,135 @@
+{
+  "summary": {
+    "total_documents": 20,
+    "clean_documents": 20,
+    "clean_documents_passed": 15,
+    "clean_pass_rate": 0.75,
+    "overall": {
+      "tp": 0,
+      "fp": 6,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    }
+  },
+  "by_issue_type": {
+    "readability": {
+      "tp": 0,
+      "fp": 4,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "claim": {
+      "tp": 0,
+      "fp": 2,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    }
+  },
+  "by_claim_verdict": {
+    "Unverified": {
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    },
+    "Contradicted": {
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0
+    }
+  },
+  "false_positives_count": 6,
+  "false_negatives_count": 0,
+  "false_positives": [
+    {
+      "document_id": "doc-006",
+      "channel": "email",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Our dropper bottles are crafte",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 14.6 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-014",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Our ingredient integrity: 98% ",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.0 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-017",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Lumo announces completion of i",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.7 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-018",
+      "channel": "press_release",
+      "cited_entry_code": null,
+      "issue_type": "readability",
+      "excerpt": "Lumo transitions packaging acr",
+      "span": [
+        0,
+        30
+      ],
+      "claim_verdict": null,
+      "explanation": "Reading grade level is 17.2 (target is 10-12 for consumer accessibility); simplify complex phrasing."
+    },
+    {
+      "document_id": "doc-018",
+      "channel": "press_release",
+      "cited_entry_code": "FACT-005",
+      "issue_type": "claim",
+      "excerpt": "verified post-consumer recycled borosilicate glass certified by EuroCert",
+      "span": [
+        47,
+        119
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "FACT-005 states '100% post-consumer recycled glass packaging', but does not mention borosilicate glass or EuroCert certification."
+    },
+    {
+      "document_id": "doc-019",
+      "channel": "social",
+      "cited_entry_code": "TERM-001",
+      "issue_type": "claim",
+      "excerpt": "botanical hair serum",
+      "span": [
+        75,
+        95
+      ],
+      "claim_verdict": "Contradicted",
+      "explanation": "The primary hydration treatment must always be designated as 'Lumo Glow Concentrate', never as a 'serum'."
+    }
+  ],
+  "false_negatives": []
+}

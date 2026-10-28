@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "98% reported softer morning feel in 7 days",
+      "claim_text": "98% of users reported a softer morning feel in 7 days",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "FACT-002",
+      "confidence": 0.95,
+      "explanation": "FACT-002 explicitly notes that Consumer Perception Panel CP-08 is Expired and cannot be used."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Over 98% reported softer morning feel in 7 days in our early customer trial!",
+      "note": "Quantified trial percentages must acknowledge that individual results vary.",
+      "kind": "clarity"
+    }
+  ]
+}

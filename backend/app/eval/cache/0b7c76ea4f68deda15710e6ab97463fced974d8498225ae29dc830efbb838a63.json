@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "Barrier study BF-04 demonstrated 35% reduction in trans-epidermal water loss over 14 days.",
+      "claim_text": "35% reduction in trans-epidermal water loss over 14 days",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-003",
+      "confidence": 1.0,
+      "explanation": "The excerpt directly matches the approved statement in FACT-003 regarding barrier study BF-04."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Individual results may vary.",
+      "note": "Properly acknowledges individual variance as required by RULE-DISC-02 for quantified trial percentages.",
+      "kind": "clarity"
+    }
+  ]
+}

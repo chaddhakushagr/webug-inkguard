@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "80% absorption in under 60 seconds",
+      "claim_text": "80% absorption in under 60 seconds",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "FACT-009",
+      "confidence": 0.95,
+      "explanation": "The cited fact FACT-009 refers specifically to the 2022 Pilot Formulation PF-01 which is marked as expired, meaning this formulation metric is no longer current or approved for use."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

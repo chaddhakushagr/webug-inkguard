@@ -11,7 +11,7 @@ from app.domain.review.rule_engine import RuleChecksStage
 from app.domain.review.accessibility import A11yChecksStage
 from app.domain.review.guardrails import GuardrailsStage
 from app.domain.review.suggestion_validator import validate_suggestion, SuggestionValidatorStage
-from app.domain.review.pipeline import ReviewPipeline
+from app.domain.review.pipeline import ReviewPipeline, ConfidenceFilterStage
 from app.adapters.retrieval.bm25 import BM25Retriever
 from app.adapters.llm.mock import MockLLMAdapter
 from app.adapters.llm.openai_compatible import OpenAICompatibleLLMAdapter
@@ -323,3 +323,88 @@ def test_openai_adapter_outgoing_payload_asserts_no_confidential_entry():
     )
     assert "FACT-001" in json.dumps(payload)
     assert "FACT-004" not in json.dumps(payload)
+
+
+def test_confidence_filter_stage():
+    filter_stage = ConfidenceFilterStage(threshold=0.75)
+
+    findings = [
+        FindingItem(
+            id="f-01",
+            source="ai",
+            issue_type="claim",
+            severity="medium",
+            confidence=0.70,  # Below threshold -> must be filtered
+            span_start=0,
+            span_end=10,
+            excerpt="weak claim",
+            explanation="Unsubstantiated",
+        ),
+        FindingItem(
+            id="f-02",
+            source="ai",
+            issue_type="tone",
+            severity="medium",
+            confidence=0.65,  # Below threshold -> must be filtered
+            span_start=11,
+            span_end=20,
+            excerpt="maybe off",
+            explanation="Mild deviation",
+        ),
+        FindingItem(
+            id="f-03",
+            source="ai",
+            issue_type="claim",
+            severity="high",
+            confidence=0.75,  # Equal to threshold -> must be kept
+            span_start=21,
+            span_end=30,
+            excerpt="solid claim",
+            explanation="Clear violation",
+        ),
+        FindingItem(
+            id="f-04",
+            source="ai",
+            issue_type="tone",
+            severity="medium",
+            confidence=0.90,  # Above threshold -> must be kept
+            span_start=31,
+            span_end=40,
+            excerpt="blatant tone",
+            explanation="Severe violation",
+        ),
+        FindingItem(
+            id="f-05",
+            source="rule",
+            issue_type="claim",
+            severity="high",
+            confidence=0.50,  # Rule source -> must NEVER be filtered by AI confidence filter
+            span_start=41,
+            span_end=50,
+            excerpt="rule claim",
+            explanation="Deterministic rule",
+        ),
+        FindingItem(
+            id="f-06",
+            source="ai",
+            issue_type="general_note",
+            severity="low",
+            confidence=0.60,  # Non-claim, non-tone -> must not be filtered
+            span_start=51,
+            span_end=60,
+            excerpt="general note",
+            explanation="Readability note",
+        ),
+    ]
+
+    ctx = ReviewContext(text="Sample text for testing", findings=findings)
+    ctx = filter_stage.process(ctx)
+
+    retained_ids = [f.id for f in ctx.findings]
+    assert "f-01" not in retained_ids  # Dropped: AI claim confidence 0.70 < 0.75
+    assert "f-02" not in retained_ids  # Dropped: AI tone confidence 0.65 < 0.75
+    assert "f-03" in retained_ids      # Kept: AI claim confidence 0.75 >= 0.75
+    assert "f-04" in retained_ids      # Kept: AI tone confidence 0.90 >= 0.75
+    assert "f-05" in retained_ids      # Kept: Rule finding source="rule"
+    assert "f-06" in retained_ids      # Kept: Issue type general_note
+

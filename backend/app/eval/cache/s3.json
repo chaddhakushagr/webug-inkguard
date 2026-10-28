@@ -1,0 +1,33 @@
+{
+  "claims": [
+    {
+      "excerpt": "cold-pressed rosehip seed extract",
+      "claim_text": "Specifies the ingredient as cold-pressed rosehip seed extract",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-002",
+      "confidence": 1.0,
+      "explanation": "Correctly specifies 'cold-pressed rosehip seed extract' per brand requirements."
+    },
+    {
+      "excerpt": "94% of tested subjects experienced visible hydration improvement",
+      "claim_text": "94% of tested subjects experienced visible skin hydration improvement in 4 weeks",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-001",
+      "confidence": 1.0,
+      "explanation": "Accurately reflects the clinical trial finding of visible skin hydration improvement across 94% of tested subjects."
+    },
+    {
+      "excerpt": "Certified 100% cruelty-free under the Leaping Bunny program",
+      "claim_text": "Certified 100% cruelty-free under Leaping Bunny international standard",
+      "category": "sustainability",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-012",
+      "confidence": 1.0,
+      "explanation": "Matches the certified Leaping Bunny cruelty-free standard fact."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

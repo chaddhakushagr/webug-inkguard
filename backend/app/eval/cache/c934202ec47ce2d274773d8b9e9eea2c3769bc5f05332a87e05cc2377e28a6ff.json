@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "Plant-derived ingredients",
+      "claim_text": "Use of plant-derived ingredients instead of all-natural",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-006",
+      "confidence": 1.0,
+      "explanation": "The copy correctly uses 'plant-derived ingredients' as preferred over misleading 'all-natural'."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

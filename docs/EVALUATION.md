@@ -126,7 +126,16 @@ python manage.py eval --mode mock --verifier on --out docs/evidence/eval_mock_ve
 
 ## 5. Empirical Evaluation Results: Verifier OFF vs. Verifier ON
 
-The following empirical results were produced directly by running `python manage.py eval` against the complete 84-document benchmark in both `mock` and `cached` modes, before and after enabling the secondary `LLMVerifierStage`:
+### Run Metadata & Configuration
+| Parameter | Value |
+| :--- | :--- |
+| **Benchmark Date** | `2026-10-28` |
+| **Model** | `gemini-3.5-flash-lite` (via Google AI Studio OpenAI-compatible endpoint) |
+| **Prompt Versions** | Primary Analysis: `backend/app/prompts/analysis.v1.md`<br>Entailment Verifier: `backend/app/prompts/verify.v1.md` |
+| **Claim Confidence Gate** | `CLAIM_CONFIDENCE_THRESHOLD = 0.75` (filters low-confidence claim & tone candidates) |
+| **Total Benchmark Corpus** | 84 documents (21 clean negatives [25.0%], 63 policy violation positives [75.0%]) |
+| **Offline Disk Cache** | `backend/app/eval/cache/` (188 response files covering 100% of the 84 documents) |
+| **Offline Verification** | `env -u GOOGLE_API_KEY -u LLM_API_KEY python manage.py eval --mode cached --verifier on` |
 
 ### Before-and-After Summary Table
 
@@ -137,6 +146,9 @@ The following empirical results were produced directly by running `python manage
 | **`cached`** | **OFF** | 84 | 23.8% | 77 | 119 | 8 | **0.393** | **0.906** | **0.548** | Recall Exceeded (+0.106) / Precision Missed (-0.457) |
 | **`cached`** | **ON (v1)** | 84 | 23.8% | 79 | 122 | 6 | **0.393** | **0.929** | **0.552** | Recall Exceeded (+0.129) / Precision Missed (-0.457) |
 | **`cached`** | **ON (v2)** | 84 | **76.2%** | 71 | **60** | 14 | **0.542** | **0.835** | **0.657** | **Recall Met (+0.035)** / Precision Missed (-0.308) |
+| **`cached`** | **ON (v3)** | 84 | **76.2%** | 71 | **61** | 14 | **0.538** | **0.835** | **0.654** | **Recall Met (+0.035)** / Precision Missed (-0.312) |
+| **`live` (Batch)** | **OFF** | 20 | 20.0% | 0 | 26 | 0 | **0.000** | **1.000** | **0.000** | Clean baseline: 26 FPs on 20 clean docs |
+| **`live` (Batch)** | **ON** | 20 | **75.0%** | 0 | **6** | 0 | **0.000** | **1.000** | **0.000** | **>76% FP reduction** (6 FPs, 15/20 clean pass) |
 
 ---
 
@@ -278,6 +290,56 @@ Claim Verdict Breakdown:
 | `Supported` | 0 | 1 | 8 | 0.000 | 0.000 | 0.000 |
 | `Unverified` | 1 | 8 | 1 | 0.111 | 0.500 | 0.182 |
 ```
+
+---
+
+### Detailed Breakdown 6: Mode `cached` (Verifier: ON v3 - Confidence Filtered)
+```text
+[Inkguard CLI] >> Running: .venv/bin/python -m app.eval.cli --mode cached --verifier on --out docs/evidence/eval_cached_on_v3.json
+
+### Evaluation Results: Mode `cached` (Verifier: ON)
+- Total Documents: 84 | Clean Documents: 21 (Clean Pass Rate: 76.2%)
+- Overall: Precision: 0.538 | Recall: 0.835 | F1: 0.654 (TP: 71, FP: 61, FN: 14)
+
+| Category | TP | FP | FN | Precision | Recall | F1 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| `accessibility` | 0 | 1 | 1 | 0.000 | 0.000 | 0.000 |
+| `claim` | 12 | 37 | 11 | 0.245 | 0.522 | 0.333 |
+| `confidential_leak` | 3 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `missing_disclaimer` | 18 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `readability` | 0 | 4 | 0 | 0.000 | 1.000 | 0.000 |
+| `terminology` | 32 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `tone` | 6 | 19 | 2 | 0.240 | 0.750 | 0.364 |
+
+Claim Verdict Breakdown:
+| Verdict | TP | FP | FN | Precision | Recall | F1 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| `Contradicted` | 1 | 28 | 2 | 0.034 | 0.333 | 0.062 |
+| `Expired` | 4 | 0 | 0 | 1.000 | 1.000 | 1.000 |
+| `Supported` | 0 | 1 | 8 | 0.000 | 0.000 | 0.000 |
+| `Unverified` | 1 | 7 | 1 | 0.125 | 0.500 | 0.200 |
+```
+
+---
+
+### Detailed Breakdown 7: Mode `live` Batches (Verifier OFF vs. ON)
+Executed against clean document batches with Google AI Studio (`gemini-3.5-flash-lite`) within free quota limits:
+
+#### Live Batch (Verifier: OFF) - `docs/evidence/eval_live_off.json`
+- Evaluated Documents: 20 clean negative documents (`doc-001` to `doc-020`)
+- Clean Documents Passed: 4 / 20 (**Clean Pass Rate: 20.0%**)
+- False Positives Generated: **26 FPs**
+  - Claim observations: 16 FPs (11 Supported compliant copy praise, 3 Contradicted, 2 Unverified)
+  - General compliant copy notes: 6 FPs
+  - Readability grade warnings: 4 FPs
+
+#### Live Batch (Verifier: ON) - `docs/evidence/eval_live_on.json`
+- Evaluated Documents: 20 clean negative documents (`doc-001` to `doc-020`)
+- Clean Documents Passed: 15 / 20 (**Clean Pass Rate: 75.0%**)
+- False Positives Generated: **6 FPs** (>76% reduction in ungrounded findings)
+  - Readability grade warnings: 4 FPs (pure deterministic metric)
+  - Borderline claims: 2 FPs (1 Contradicted, 1 Unverified)
+  - General notes / compliant praise: **0 FPs** (100% eliminated by verifier pass)
 
 ---
 

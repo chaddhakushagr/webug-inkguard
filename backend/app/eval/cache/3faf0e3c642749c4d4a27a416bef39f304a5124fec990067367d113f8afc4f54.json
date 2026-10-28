@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "reduce wrinkles by 90% in two weeks",
+      "claim_text": "Claim that the product reduces wrinkles by 90% in two weeks.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "There is no fact in the knowledge base supporting a 90% reduction in wrinkles in two weeks. FACT-001 mentions skin hydration improvement in 4 weeks across 94% of tested subjects, but nothing regarding 90% wrinkle reduction."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Our concentrate is clinically proven to reduce wrinkles by 90% in two weeks.",
+      "note": "Ensure product is designated as 'Lumo Glow Concentrate' per TERM-001 if this is the primary hydration treatment.",
+      "kind": "clarity"
+    }
+  ]
+}

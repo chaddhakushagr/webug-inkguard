@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "anti-aging care",
+      "claim_text": "Refers to skin care as anti-aging rather than age-smart or barrier-supporting.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-005",
+      "confidence": 0.98,
+      "explanation": "Brand philosophy specifies using 'age-smart' or 'barrier-supporting' rather than 'anti-aging'."
+    },
+    {
+      "excerpt": "rosehip actives",
+      "claim_text": "Refers to rosehip generically rather than specifying cold-pressed rosehip seed extract.",
+      "category": "ingredient",
+      "verdict": "Unverified",
+      "cited_entry_code": "TERM-002",
+      "confidence": 0.9,
+      "explanation": "The knowledge base requires specifying 'cold-pressed rosehip seed extract' rather than generic 'rosehip oil' or actives."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Start your proactive anti-aging care",
+      "note": "Update 'anti-aging' to 'age-smart' to align with Lumo brand guidelines.",
+      "kind": "clarity"
+    }
+  ]
+}

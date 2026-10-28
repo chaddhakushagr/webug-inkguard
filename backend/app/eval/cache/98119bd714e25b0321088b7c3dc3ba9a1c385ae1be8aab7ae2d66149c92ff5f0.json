@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "100% cruelty-free",
+      "claim_text": "Certified 100% cruelty-free formulation",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-012",
+      "confidence": 0.95,
+      "explanation": "The fact confirms certification as 100% cruelty-free under the Leaping Bunny international standard."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Certified 100% cruelty-free packaging and formulation. Individual results may vary.",
+      "assessment": "compliant",
+      "confidence": 0.9,
+      "explanation": "The statement is clear, plain-spoken, and grounded without hyperbolic hype.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

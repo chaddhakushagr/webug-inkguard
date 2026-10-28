@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "plant botanical",
+      "claim_text": "Use of plant-derived or botanical description",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "TERM-006",
+      "confidence": 0.9,
+      "explanation": "The knowledge base prefers plant-derived/botanical terms over misleading all-natural claims."
+    },
+    {
+      "excerpt": "boosts collagen naturally",
+      "claim_text": "Boosts collagen naturally",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "There is no supporting fact in the knowledge base confirming that the product boosts collagen."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "Our plant botanical blend boosts collagen naturally for supple skin feel!",
+      "note": "Ensure claims adhere strictly to verified clinical facts.",
+      "kind": "clarity"
+    }
+  ]
+}

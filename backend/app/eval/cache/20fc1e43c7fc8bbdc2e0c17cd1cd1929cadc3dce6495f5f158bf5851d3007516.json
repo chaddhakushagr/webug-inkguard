@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "treats eczema",
+      "claim_text": "Claim that the product treats eczema",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "RULE-HEALTH-01",
+      "confidence": 0.99,
+      "explanation": "Cosmetic marketing cannot claim treatment of psoriasis, eczema, cystic acne, or dermatitis."
+    },
+    {
+      "excerpt": "cure flaking skin",
+      "claim_text": "Claim that the product cures flaking skin",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-004",
+      "confidence": 0.99,
+      "explanation": "Cosmetics hydrate and soothe; they do not cure medical skin pathologies."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

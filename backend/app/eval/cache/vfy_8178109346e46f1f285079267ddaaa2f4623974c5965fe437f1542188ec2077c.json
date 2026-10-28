@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding states that the claim is correct and aligns with the cited fact. Per evaluation criteria, if the cited entry shows the content is correct, compliant, or adhering to guidelines rather than violating them, the verdict must be not_supported."
+}

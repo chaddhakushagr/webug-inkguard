@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "botanical hair serum",
+      "claim_text": "Reference to a hair serum from the brand",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-001",
+      "confidence": 0.95,
+      "explanation": "The primary hydration treatment must always be designated as 'Lumo Glow Concentrate', never as a 'serum'."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

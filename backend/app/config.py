@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     ALLOW_SEED_RESET: bool = True
     NEXT_PUBLIC_API_BASE: str = "http://localhost:8000/api/v1"
     VERIFIER_ENABLED: bool = False
+    CLAIM_CONFIDENCE_THRESHOLD: float = 0.75
 
     @property
     def effective_api_key(self) -> str:

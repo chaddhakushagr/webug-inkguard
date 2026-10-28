@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "excerpt": "Formulated to cure chronic dehydration",
+      "claim_text": "The product cures chronic dehydration.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-004",
+      "confidence": 1.0,
+      "explanation": "Cosmetics hydrate and soothe; they do not cure medical skin pathologies, and the use of 'cure' is banned."
+    }
+  ],
+  "tone": [],
+  "notes": []
+}

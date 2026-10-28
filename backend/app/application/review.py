@@ -18,6 +18,7 @@ from app.domain.review.pipeline import (
     ExtractStage,
     RetrieveStage,
     AnalyseStage,
+    ConfidenceFilterStage,
     GuardrailsStage,
     SuggestionValidatorStage,
 )
@@ -39,6 +40,7 @@ class ReviewOrchestrator:
         daily_cap: int = 100,
         model_name: str = "gemini-2.5-flash",
         verifier_enabled: bool = False,
+        claim_confidence_threshold: float = 0.75,
     ):
         self.store = store
         self.retriever = retriever
@@ -47,6 +49,7 @@ class ReviewOrchestrator:
         self.daily_cap = daily_cap
         self.model_name = model_name
         self.verifier_enabled = verifier_enabled
+        self.claim_confidence_threshold = claim_confidence_threshold
 
     def run_review(
         self,
@@ -117,6 +120,9 @@ class ReviewOrchestrator:
                     context = AnalyseStage(self.llm).process(context)
                 except Exception as e:
                     fallback_reason = f"Model analysis error or timeout: {str(e)}. Rule findings preserved."
+
+            # Filter low-confidence AI claim and tone findings before guardrails
+            context = ConfidenceFilterStage(threshold=self.claim_confidence_threshold).process(context)
 
             # Step E: finalising (Guardrails + Verifier + Suggestions)
             self.store.update_review_progress(review_id, "finalising")

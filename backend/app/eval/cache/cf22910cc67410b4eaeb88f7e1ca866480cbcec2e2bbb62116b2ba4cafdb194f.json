@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "Patagonian botanical mastery",
+      "claim_text": "Botanical ingredients originating from Patagonia",
+      "category": "ingredient",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-008",
+      "confidence": 0.9,
+      "explanation": "Supported by FACT-008 regarding cold-pressed extraction from wild Patagonian Rosa Canina."
+    },
+    {
+      "excerpt": "unrivaled skin moisture retention",
+      "claim_text": "Unrivaled skin moisture retention properties",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-011",
+      "confidence": 0.85,
+      "explanation": "While multi-molecular hyaluronic complex binds surface and epidermal moisture (FACT-011), the claim of being 'unrivaled' is unverified."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "unrivaled skin moisture retention",
+      "note": "Consider softening superlatives like 'unrivaled' to align with clinical facts.",
+      "kind": "clarity"
+    }
+  ]
+}

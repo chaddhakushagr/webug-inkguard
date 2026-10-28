@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the claim is supported by the cited fact ('The claim directly matches FACT-010'). Since the cited entry shows the content is correct and compliant rather than violating a rule, the finding must be dropped."
+}

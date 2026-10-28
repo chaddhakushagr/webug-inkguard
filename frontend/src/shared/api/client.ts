@@ -14,6 +14,7 @@ import {
   RuleCounter,
   SystemStatus,
   AuditLogItem,
+  EvaluationReportResponse,
 } from "./types";
 
 let hasCompletedFirstRequest = false;
@@ -283,4 +284,7 @@ export const api = {
     const query = qs.toString();
     return `${getApiBase()}/audit/export${query ? `?${query}` : ""}`;
   },
+
+  // Evaluation Benchmarks & Metrics
+  getEvaluationResults: () => request<EvaluationReportResponse>("/evaluation/results"),
 };

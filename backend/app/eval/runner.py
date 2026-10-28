@@ -19,6 +19,7 @@ from app.domain.review.pipeline import (
     ExtractStage,
     RetrieveStage,
     AnalyseStage,
+    ConfidenceFilterStage,
     GuardrailsStage,
 )
 from app.domain.review.verifier import LLMVerifierStage
@@ -38,7 +39,7 @@ from app.seed.lumo_brand import (
 
 
 CACHE_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "seed", "cache")
+    os.path.join(os.path.dirname(__file__), "cache")
 )
 
 
@@ -50,10 +51,16 @@ class EvalRunner:
         mode: str = "rules_only",
         verifier_enabled: bool = False,
         daily_cap: Optional[int] = None,
+        claim_confidence_threshold: Optional[float] = None,
     ):
         self.mode = mode.lower()
         self.verifier_enabled = verifier_enabled
         self.daily_cap = daily_cap if daily_cap is not None else settings.LLM_DAILY_CAP
+        self.claim_confidence_threshold = (
+            claim_confidence_threshold
+            if claim_confidence_threshold is not None
+            else settings.CLAIM_CONFIDENCE_THRESHOLD
+        )
         self.retriever = BM25Retriever()
         self.kb_pool = SEED_TERMS + SEED_RULES + SEED_FACTS + SEED_TONE + SEED_ASSETS
         self.live_calls_made = 0
@@ -136,6 +143,9 @@ class EvalRunner:
             except Exception as e:
                 # Fallback gracefully
                 context.stats["llm_error"] = str(e)
+
+        # Stage 4b: Filter low-confidence AI claim and tone findings before guardrails
+        context = ConfidenceFilterStage(threshold=self.claim_confidence_threshold).process(context)
 
         # Stage 5: Guardrails
         context = GuardrailsStage().process(context)

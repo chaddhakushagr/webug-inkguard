@@ -5,26 +5,26 @@
     "clean_documents_passed": 5,
     "clean_pass_rate": 0.2381,
     "overall": {
-      "tp": 77,
-      "fp": 119,
-      "fn": 8,
-      "precision": 0.3929,
-      "recall": 0.9059,
-      "f1": 0.548
+      "tp": 79,
+      "fp": 128,
+      "fn": 6,
+      "precision": 0.3816,
+      "recall": 0.9294,
+      "f1": 0.5411
     }
   },
   "by_issue_type": {
     "claim": {
-      "tp": 18,
-      "fp": 55,
-      "fn": 5,
-      "precision": 0.2466,
-      "recall": 0.7826,
-      "f1": 0.375
+      "tp": 20,
+      "fp": 58,
+      "fn": 3,
+      "precision": 0.2564,
+      "recall": 0.8696,
+      "f1": 0.396
     },
     "general_note": {
       "tp": 0,
-      "fp": 42,
+      "fp": 46,
       "fn": 0,
       "precision": 0.0,
       "recall": 1.0,
@@ -46,6 +46,14 @@
       "recall": 1.0,
       "f1": 1.0
     },
+    "tone": {
+      "tp": 6,
+      "fp": 19,
+      "fn": 2,
+      "precision": 0.24,
+      "recall": 0.75,
+      "f1": 0.3636
+    },
     "missing_disclaimer": {
       "tp": 18,
       "fp": 0,
@@ -53,14 +61,6 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1": 1.0
-    },
-    "tone": {
-      "tp": 6,
-      "fp": 17,
-      "fn": 2,
-      "precision": 0.2609,
-      "recall": 0.75,
-      "f1": 0.3871
     },
     "confidential_leak": {
       "tp": 3,
@@ -81,28 +81,28 @@
   },
   "by_claim_verdict": {
     "Supported": {
-      "tp": 7,
+      "tp": 8,
       "fp": 18,
-      "fn": 1,
-      "precision": 0.28,
-      "recall": 0.875,
-      "f1": 0.4242
+      "fn": 0,
+      "precision": 0.3077,
+      "recall": 1.0,
+      "f1": 0.4706
     },
     "Unverified": {
-      "tp": 0,
-      "fp": 11,
-      "fn": 2,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0
+      "tp": 1,
+      "fp": 13,
+      "fn": 1,
+      "precision": 0.0714,
+      "recall": 0.5,
+      "f1": 0.125
     },
     "Contradicted": {
       "tp": 1,
-      "fp": 27,
+      "fp": 28,
       "fn": 2,
-      "precision": 0.0357,
+      "precision": 0.0345,
       "recall": 0.3333,
-      "f1": 0.0645
+      "f1": 0.0625
     },
     "Expired": {
       "tp": 4,
@@ -113,8 +113,8 @@
       "f1": 1.0
     }
   },
-  "false_positives_count": 119,
-  "false_negatives_count": 8,
+  "false_positives_count": 128,
+  "false_negatives_count": 6,
   "false_positives": [
     {
       "document_id": "doc-001",
@@ -479,6 +479,71 @@
       ],
       "claim_verdict": null,
       "explanation": "Ensure product is referred to as 'Lumo Glow Concentrate' instead of 'serum'."
+    },
+    {
+      "document_id": "doc-023",
+      "channel": "web",
+      "cited_entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "botanical blend",
+      "span": [
+        39,
+        54
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "No specific fact in the knowledge base details a botanical blend for this product."
+    },
+    {
+      "document_id": "doc-023",
+      "channel": "web",
+      "cited_entry_code": "TERM-010",
+      "issue_type": "tone",
+      "excerpt": "Achieve flawless skin texture",
+      "span": [
+        0,
+        29
+      ],
+      "claim_verdict": null,
+      "explanation": "The text promises 'flawless' skin, which violates the instruction to avoid promises of 'flawless' skin and contradicts the grounded, plain-spoken tone."
+    },
+    {
+      "document_id": "doc-023",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Achieve flawless skin texture with our botanical blend.",
+      "span": [
+        0,
+        55
+      ],
+      "claim_verdict": null,
+      "explanation": "Ensure to replace 'flawless' with terms focusing on radiant hydration according to TERM-010."
+    },
+    {
+      "document_id": "doc-024",
+      "channel": "blog",
+      "cited_entry_code": "TERM-006",
+      "issue_type": "claim",
+      "excerpt": "all-natural",
+      "span": [
+        28,
+        39
+      ],
+      "claim_verdict": "Contradicted",
+      "explanation": "The term 'all-natural' is discouraged; guidance specifies preferring 'plant-derived ingredients' instead."
+    },
+    {
+      "document_id": "doc-024",
+      "channel": "blog",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Patch test advised.",
+      "span": [
+        67,
+        86
+      ],
+      "claim_verdict": null,
+      "explanation": "New active product introductions should advise patch testing per RULE-DISC-03."
     },
     {
       "document_id": "doc-025",
@@ -1183,6 +1248,58 @@
       "explanation": "Avoid using superlative claims like #1 or guaranteed superiority without backing facts."
     },
     {
+      "document_id": "doc-058",
+      "channel": "social",
+      "cited_entry_code": "TONE-001",
+      "issue_type": "tone",
+      "excerpt": "Unlock flawless radiance in just 2 days with our rapid botanical infusion.",
+      "span": [
+        0,
+        74
+      ],
+      "claim_verdict": null,
+      "explanation": "Uses hyperbolic promises ('flawless', 'in just 2 days') violating the plain-spoken and grounded brand voice guidelines."
+    },
+    {
+      "document_id": "doc-058",
+      "channel": "social",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "flawless",
+      "span": [
+        7,
+        15
+      ],
+      "claim_verdict": null,
+      "explanation": "Avoid promises of 'flawless' skin per TERM-010."
+    },
+    {
+      "document_id": "doc-059",
+      "channel": "web",
+      "cited_entry_code": "FACT-001",
+      "issue_type": "claim",
+      "excerpt": "reduce wrinkles by 90% in two weeks",
+      "span": [
+        40,
+        75
+      ],
+      "claim_verdict": "Unverified",
+      "explanation": "There is no fact in the knowledge base supporting a 90% reduction in wrinkles in two weeks. FACT-001 mentions skin hydration improvement in 4 weeks across 94% of tested subjects, but nothing regarding 90% wrinkle reduction."
+    },
+    {
+      "document_id": "doc-059",
+      "channel": "web",
+      "cited_entry_code": null,
+      "issue_type": "general_note",
+      "excerpt": "Our concentrate is clinically proven to reduce wrinkles by 90% in two weeks.",
+      "span": [
+        0,
+        76
+      ],
+      "claim_verdict": null,
+      "explanation": "Ensure product is designated as 'Lumo Glow Concentrate' per TERM-001 if this is the primary hydration treatment."
+    },
+    {
       "document_id": "doc-063",
       "channel": "social",
       "cited_entry_code": null,
@@ -1714,18 +1831,6 @@
       "verdict": "Unverified"
     },
     {
-      "document_id": "doc-058",
-      "channel": "social",
-      "entry_code": "FACT-001",
-      "issue_type": "claim",
-      "excerpt": "flawless radiance in just 2 days",
-      "span": [
-        7,
-        39
-      ],
-      "verdict": "Unverified"
-    },
-    {
       "document_id": "doc-065",
       "channel": "social",
       "entry_code": "TONE-003",
@@ -1748,18 +1853,6 @@
         58
       ],
       "verdict": null
-    },
-    {
-      "document_id": "doc-076",
-      "channel": "web",
-      "entry_code": "FACT-011",
-      "issue_type": "claim",
-      "excerpt": "multi-molecular hyaluronic complex binds surface and epidermal moisture",
-      "span": [
-        4,
-        75
-      ],
-      "verdict": "Supported"
     }
   ]
 }

@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the claim is supported by FACT-012 and that the copy correctly uses the certified statement. Correct usage and compliance do not constitute a policy violation, so the finding must be dropped."
+}

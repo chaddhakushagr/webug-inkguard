@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "Unlock flawless glass skin",
+      "claim_text": "Promise of flawless skin.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-010",
+      "confidence": 0.99,
+      "explanation": "The knowledge base explicitly states to avoid promises of 'flawless' skin and focus instead on radiant hydration."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Unlock flawless glass skin",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The use of 'flawless' represents a miraculous or perfectionist promise, violating the plain-spoken and grounded brand voice.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Unlock flawless glass skin",
+      "note": "Avoid using the term 'flawless'. Focus instead on radiant hydration as per TERM-010.",
+      "kind": "clarity"
+    }
+  ]
+}

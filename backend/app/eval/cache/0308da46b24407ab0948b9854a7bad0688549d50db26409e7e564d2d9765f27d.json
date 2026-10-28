@@ -1,0 +1,32 @@
+{
+  "claims": [
+    {
+      "excerpt": "completely cure wrinkles",
+      "claim_text": "Cures wrinkles",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-004",
+      "confidence": 0.99,
+      "explanation": "Cosmetics hydrate and soothe; they do not cure medical skin pathologies."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TERM-003",
+      "excerpt": "miracle",
+      "assessment": "off_tone",
+      "confidence": 0.99,
+      "explanation": "Never describe formulations or results as 'miracle' or 'miraculous'.",
+      "cited_entry_code": "TERM-003"
+    },
+    {
+      "attribute_code": "TERM-015",
+      "excerpt": "magical",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Reject whimsical 'magic elixir' or 'sorcery' naming in formal copy.",
+      "cited_entry_code": "TERM-015"
+    }
+  ],
+  "notes": []
+}

@@ -1,0 +1,4 @@
+{
+  "verdict": "not_supported",
+  "reason": "The candidate finding explicitly states that the copy is supported by FACT-008 and considers the claim compliant. Per instructions, if the cited entry shows the content is correct, compliant, or adhering to guidelines rather than violating them, the verdict must be not_supported."
+}

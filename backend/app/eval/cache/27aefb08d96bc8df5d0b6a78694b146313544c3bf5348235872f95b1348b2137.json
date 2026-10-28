@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "Unlock flawless radiance in just 2 days with our rapid botanical infusion.",
+      "claim_text": "Achieving flawless radiance in 2 days using a rapid botanical infusion.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "No clinical trial or fact supports achieving radiant results in 2 days."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Unlock flawless radiance in just 2 days with our rapid botanical infusion.",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "Uses hyperbolic promises ('flawless', 'in just 2 days') violating the plain-spoken and grounded brand voice guidelines.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "flawless",
+      "note": "Avoid promises of 'flawless' skin per TERM-010.",
+      "kind": "clarity"
+    }
+  ]
+}

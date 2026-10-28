@@ -1,0 +1,20 @@
+{
+  "claims": [],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "groundbreaking formulas",
+      "assessment": "off_tone",
+      "confidence": 0.95,
+      "explanation": "The term 'groundbreaking' uses hyperbolic hype, which violates the plain-spoken and grounded guidance.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Get ready for [CONFIDENTIAL_REDACTED_1] dropping soon",
+      "note": "Avoid hype-driven product launch phrasing.",
+      "kind": "clarity"
+    }
+  ]
+}

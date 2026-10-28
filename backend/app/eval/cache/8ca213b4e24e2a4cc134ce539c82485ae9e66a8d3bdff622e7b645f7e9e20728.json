@@ -1,0 +1,63 @@
+{
+  "claims": [
+    {
+      "excerpt": "Clinically proven to completely cure dry skin",
+      "claim_text": "The product is clinically proven to completely cure dry skin.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-004",
+      "confidence": 0.99,
+      "explanation": "Cosmetics hydrate and soothe; they do not cure medical skin pathologies and the term 'cure' is banned."
+    },
+    {
+      "excerpt": "delivers 100% satisfaction",
+      "claim_text": "The product delivers 100% satisfaction guarantee.",
+      "category": "efficacy",
+      "verdict": "Unverified",
+      "cited_entry_code": "FACT-001",
+      "confidence": 0.95,
+      "explanation": "No knowledge base entry supports a 100% satisfaction guarantee or 100% metric."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TERM-003",
+      "excerpt": "miracle",
+      "assessment": "off_tone",
+      "confidence": 1.0,
+      "explanation": "Never describe formulations or results as 'miracle' or 'miraculous'.",
+      "cited_entry_code": "TERM-003"
+    },
+    {
+      "attribute_code": "TERM-005",
+      "excerpt": "age-smart",
+      "assessment": "compliant",
+      "confidence": 1.0,
+      "explanation": "Use 'age-smart' or 'barrier-supporting' rather than 'anti-aging'.",
+      "cited_entry_code": "TERM-005"
+    },
+    {
+      "attribute_code": "TERM-001",
+      "excerpt": "serum",
+      "assessment": "off_tone",
+      "confidence": 1.0,
+      "explanation": "The primary hydration treatment must always be designated as 'Lumo Glow Concentrate', never as a 'serum'.",
+      "cited_entry_code": "TERM-001"
+    },
+    {
+      "attribute_code": "TERM-010",
+      "excerpt": "flawless",
+      "assessment": "off_tone",
+      "confidence": 1.0,
+      "explanation": "Avoid promises of 'flawless' skin. Focus on radiant hydration.",
+      "cited_entry_code": "TERM-010"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "Discover the miracle powers of our new age-smart serum!",
+      "note": "Ensure product designation uses 'Lumo Glow Concentrate' instead of 'serum' and remove banned terms like 'miracle'.",
+      "kind": "clarity"
+    }
+  ]
+}

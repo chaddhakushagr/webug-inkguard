@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "excerpt": "Tested for sensitive skin in clinical evaluation DS-09 with non-irritating findings.",
+      "claim_text": "Dermatologist tested on sensitive skin subjects with zero allergic contact reactions",
+      "category": "efficacy",
+      "verdict": "Supported",
+      "cited_entry_code": "FACT-006",
+      "confidence": 0.95,
+      "explanation": "The copy accurately references clinical evaluation DS-09 and aligns with the findings of dermatologist testing on sensitive skin subjects."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "Tested for sensitive skin in clinical evaluation DS-09 with non-irritating findings. Individual results may vary.",
+      "assessment": "compliant",
+      "confidence": 0.95,
+      "explanation": "The text explains dermatological findings plainly and honestly without hyperbolic hype or miraculous promises.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": []
+}

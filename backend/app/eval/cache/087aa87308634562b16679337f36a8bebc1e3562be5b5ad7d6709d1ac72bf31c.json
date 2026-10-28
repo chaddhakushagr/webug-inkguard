@@ -1,0 +1,21 @@
+{
+  "claims": [
+    {
+      "excerpt": "serum",
+      "claim_text": "Designating the primary hydration treatment as a serum.",
+      "category": "efficacy",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-001",
+      "confidence": 1.0,
+      "explanation": "The primary hydration treatment must always be designated as 'Lumo Glow Concentrate', never as a 'serum'."
+    }
+  ],
+  "tone": [],
+  "notes": [
+    {
+      "excerpt": "summer serum",
+      "note": "Ensure product is referred to as 'Lumo Glow Concentrate' instead of 'serum'.",
+      "kind": "clarity"
+    }
+  ]
+}

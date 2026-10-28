@@ -1,0 +1,30 @@
+{
+  "claims": [
+    {
+      "excerpt": "rosehip oil",
+      "claim_text": "Use of generic rosehip oil instead of required term",
+      "category": "ingredient",
+      "verdict": "Contradicted",
+      "cited_entry_code": "TERM-002",
+      "confidence": 0.95,
+      "explanation": "The knowledge base specifies 'cold-pressed rosehip seed extract' rather than generic 'rosehip oil'."
+    }
+  ],
+  "tone": [
+    {
+      "attribute_code": "TONE-001",
+      "excerpt": "We hand-blend organic rosehip oil with plant squalane for daily comfort.",
+      "assessment": "compliant",
+      "confidence": 0.9,
+      "explanation": "The tone is grounded and plain-spoken, avoiding miraculous promises or pseudo-scientific buzzwords.",
+      "cited_entry_code": "TONE-001"
+    }
+  ],
+  "notes": [
+    {
+      "excerpt": "rosehip oil",
+      "note": "Revise 'rosehip oil' to 'cold-pressed rosehip seed extract' to align with TERM-002.",
+      "kind": "clarity"
+    }
+  ]
+}
