@@ -56,6 +56,7 @@ function KnowledgeBaseContent() {
   const searchParams = useSearchParams();
   const initialId = searchParams.get("id");
   const initialType = searchParams.get("type") || "all";
+  const initialTab = searchParams.get("tab") === "edit" || searchParams.get("edit") === "true" ? "edit" : "detail";
 
   const [user, setUser] = useState<User | null>(null);
   const [entries, setEntries] = useState<KBEntry[]>([]);
@@ -107,7 +108,7 @@ function KnowledgeBaseContent() {
       if (initialId && !selectedEntry) {
         const match = data.find((e) => e.id === initialId || e.code === initialId.toUpperCase());
         if (match) {
-          openDetail(match);
+          openDetail(match, initialTab);
         }
       }
     } catch (err: any) {
@@ -121,13 +122,13 @@ function KnowledgeBaseContent() {
     loadEntries();
   }, [typeFilter, tierFilter, statusFilter, expiringOnly]);
 
-  const openDetail = async (entry: KBEntry) => {
+  const openDetail = async (entry: KBEntry, tab: "detail" | "versions" | "edit" = "detail") => {
     setSelectedEntry(entry);
     setEditTitle(entry.title);
     setEditBody(entry.body || "");
     setEditClassification(entry.classification);
     setEditChangeNote("");
-    setActiveTab("detail");
+    setActiveTab(tab);
     setIsDetailOpen(true);
 
     // Fetch version history

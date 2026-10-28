@@ -290,12 +290,22 @@ def get_guideline_health(
         reviewer_dismissals = 0
         clarification_count = 0
 
+        drilldown_dismissals: List[Dict[str, Any]] = []
+        drilldown_comments: List[Dict[str, Any]] = []
+        reviewers_disagreeing_ids = set()
+
         for f in fnds:
             # Check comments on finding
             f_comments = comments_by_finding.get(f.id, [])
             for comm in f_comments:
                 if is_clarification_comment(comm.body):
                     clarification_count += 1
+                    drilldown_comments.append({
+                        "id": comm.id,
+                        "body": comm.body,
+                        "author_role": user_roles.get(comm.author_id, "creator"),
+                        "created_at": comm.created_at.isoformat() if comm.created_at else None,
+                    })
 
             # Check actions on finding
             acts = actions_by_finding.get(f.id, [])
@@ -306,21 +316,48 @@ def get_guideline_health(
                     if a.action == "dismiss":
                         creator_dismissals += 1
                         has_creator_dismiss = True
+                        drilldown_dismissals.append({
+                            "reason_code": a.reason_code or "creator_dismissed",
+                            "reason_text": a.reason_text or "Dismissed by creator during initial triage",
+                            "actor_role": "creator",
+                            "created_at": a.created_at.isoformat() if a.created_at else None,
+                        })
                     elif a.action == "accept":
                         creator_acceptances += 1
                 else:  # Reviewer, Brand Manager, or Admin
                     if a.action == "dismiss":
                         reviewer_dismissals += 1
+                        drilldown_dismissals.append({
+                            "reason_code": a.reason_code or "reviewer_dismissed",
+                            "reason_text": a.reason_text or "Dismissed by reviewer during review",
+                            "actor_role": role,
+                            "created_at": a.created_at.isoformat() if a.created_at else None,
+                        })
                     elif a.action == "accept":
                         reviewer_acceptances += 1
+
                     if a.reason_code == "reviewer_override" or (has_creator_dismiss and a.action == "accept"):
                         reviewer_overrides += 1
+                        reviewers_disagreeing_ids.add(a.actor_id)
+
+        # If reviewers had discordant decisions (some accepted, some dismissed)
+        if reviewer_acceptances > 0 and reviewer_dismissals > 0:
+            for f in fnds:
+                for a in actions_by_finding.get(f.id, []):
+                    if user_roles.get(a.actor_id) in ["reviewer", "brand_manager", "admin"]:
+                        reviewers_disagreeing_ids.add(a.actor_id)
 
         # Check uncited comments that mention this rule code
         for c in all_comments:
             if c.finding_id is None and code in c.body:
                 if is_clarification_comment(c.body):
                     clarification_count += 1
+                    drilldown_comments.append({
+                        "id": c.id,
+                        "body": c.body,
+                        "author_role": user_roles.get(c.author_id, "reviewer"),
+                        "created_at": c.created_at.isoformat() if c.created_at else None,
+                    })
 
         data_in = AmbiguityInput(
             rule_code=code,
@@ -336,6 +373,26 @@ def get_guideline_health(
         )
 
         res = compute_ambiguity_score(data_in)
+
+        # Human-readable contributing factors in plain words
+        contributing_factors = []
+        reviewers_disagreeing_count = len(reviewers_disagreeing_ids)
+        if res.status == "evaluated":
+            if creator_dismissals > 0:
+                pct = round(res.dismissal_rate * 100)
+                contributing_factors.append(f"Dismissed by {pct}% of creators")
+            if reviewers_disagreeing_count > 0:
+                contributing_factors.append(f"{reviewers_disagreeing_count} reviewer{'s' if reviewers_disagreeing_count > 1 else ''} disagree")
+            elif reviewer_overrides > 0:
+                contributing_factors.append(f"{reviewer_overrides} reviewer override{'s' if reviewer_overrides > 1 else ''}")
+            elif res.disagreement_rate > 0:
+                contributing_factors.append("Reviewers disagree on enforcement")
+
+            if clarification_count > 0:
+                contributing_factors.append(f"{clarification_count} clarification comment{'s' if clarification_count > 1 else ''}")
+        else:
+            contributing_factors.append(f"Only {res.total_events} event{'s' if res.total_events != 1 else ''} (minimum 5 required)")
+
         results.append(
             GuidelineHealthItem(
                 rule_code=res.rule_code,
@@ -353,6 +410,10 @@ def get_guideline_health(
                 ambiguity_score=res.ambiguity_score,
                 status=res.status,
                 recommendation=res.recommendation,
+                contributing_factors=contributing_factors,
+                drilldown_dismissals=drilldown_dismissals[:10],
+                drilldown_comments=drilldown_comments[:10],
+                reviewers_disagreeing_count=reviewers_disagreeing_count,
             )
         )
 

@@ -109,6 +109,11 @@ function InsightsContent() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <Link href="/insights/guideline-health/">
+                <Button variant="primary" size="md">
+                  Guideline Health &rarr;
+                </Button>
+              </Link>
               <Link href="/audit/">
                 <Button variant="secondary" size="md">
                   Audit Trail &rarr;

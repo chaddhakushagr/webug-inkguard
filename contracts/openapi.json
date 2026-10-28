@@ -3994,6 +3994,34 @@
           "recommendation": {
             "type": "string",
             "title": "Recommendation"
+          },
+          "contributing_factors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Contributing Factors"
+          },
+          "drilldown_dismissals": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Drilldown Dismissals"
+          },
+          "drilldown_comments": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Drilldown Comments"
+          },
+          "reviewers_disagreeing_count": {
+            "type": "integer",
+            "title": "Reviewers Disagreeing Count",
+            "default": 0
           }
         },
         "type": "object",

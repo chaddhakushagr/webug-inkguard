@@ -287,4 +287,78 @@ export interface EvaluationReportResponse {
   metadata: Record<string, any>;
 }
 
+// Guideline Health (Improvement 2)
+export interface DismissalDetail {
+  reason_code?: string | null;
+  reason_text?: string | null;
+  actor_role: string;
+  count?: number;
+  created_at?: string | null;
+}
+
+export interface ClarificationCommentDetail {
+  id: string;
+  body: string;
+  author_role?: string | null;
+  created_at?: string | null;
+}
+
+export interface GuidelineHealthItem {
+  rule_code: string;
+  rule_title: string;
+  rule_type: string;
+  total_events: number;
+  times_triggered: number;
+  creator_dismissals: number;
+  reviewer_overrides: number;
+  clarification_comments: number;
+  dismissal_rate: number;
+  override_rate: number;
+  disagreement_rate: number;
+  clarification_rate: number;
+  ambiguity_score: number | null;
+  status: "evaluated" | "not_enough_data";
+  recommendation: string;
+  contributing_factors?: string[];
+  drilldown_dismissals?: DismissalDetail[];
+  drilldown_comments?: ClarificationCommentDetail[];
+  reviewers_disagreeing_count?: number;
+}
+
+export interface StaleRuleResponse {
+  entry_id: string;
+  code: string;
+  type: string;
+  title: string;
+  stale_reasons: string[];
+  severity: "high" | "medium" | "low";
+  last_triggered_at?: string | null;
+  valid_until?: string | null;
+  review_date?: string | null;
+  recommendation: string;
+}
+
+export interface GapProposalResponse {
+  id: string;
+  code: string;
+  title: string;
+  type: string;
+  body: string;
+  classification: string;
+  status: string;
+  cluster_size: number;
+  top_keywords: string[];
+  sample_comments: string[];
+  created_at: string;
+}
+
+export interface GapActionResponse {
+  success: boolean;
+  gap_id: string;
+  action: "approved" | "rejected";
+  entry_id?: string | null;
+  code?: string | null;
+  message: string;
+}
+
 

@@ -19,6 +19,7 @@ import {
   PenTool,
   Activity,
   Target,
+  HeartPulse,
 } from "lucide-react";
 import { ModeChip, AIMode } from "./ModeChip";
 import { Dialog } from "./Dialog";
@@ -127,6 +128,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
     ...(isManagerOrAdmin
       ? [
           { label: "Insights", href: "/insights/", icon: <BarChart3 className="w-4 h-4" /> },
+          { label: "Guideline Health", href: "/insights/guideline-health/", icon: <HeartPulse className="w-4 h-4" /> },
           { label: "Evaluation", href: "/eval/", icon: <Target className="w-4 h-4" /> },
           { label: "Audit Log", href: "/audit/", icon: <Shield className="w-4 h-4" /> },
           { label: "Settings", href: "/settings/", icon: <Settings className="w-4 h-4" /> },

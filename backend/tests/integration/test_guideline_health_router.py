@@ -20,6 +20,26 @@ from app.adapters.db.models import KBEntry, AuditLog
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def clean_gap_test_state():
+    def _clean():
+        db = SessionLocal()
+        try:
+            db.query(AuditLog).filter(
+                AuditLog.action.in_(["kb_entry_created_from_gap", "kb_gap_rejected"])
+            ).delete(synchronize_session=False)
+            db.query(KBEntry).filter(
+                KBEntry.code.like("RULE-GAP-%")
+            ).delete(synchronize_session=False)
+            db.commit()
+        finally:
+            db.close()
+
+    _clean()
+    yield
+    _clean()
+
+
 def login(email: str, password: str = "LumoDemo2026!") -> str:
     res = client.post("/api/v1/auth/login", json={"email": email, "password": password})
     assert res.status_code == 200, f"Failed login for {email}: {res.text}"

@@ -344,6 +344,11 @@ class GuidelineHealthItem(BaseModel):
     ambiguity_score: Optional[int] = None
     status: str  # "evaluated" or "not_enough_data"
     recommendation: str
+    contributing_factors: List[str] = Field(default_factory=list)
+    drilldown_dismissals: List[Dict[str, Any]] = Field(default_factory=list)
+    drilldown_comments: List[Dict[str, Any]] = Field(default_factory=list)
+    reviewers_disagreeing_count: int = 0
+
 
 
 class StaleRuleResponse(BaseModel):

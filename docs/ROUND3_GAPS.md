@@ -265,8 +265,7 @@ The following checklist represents the exact sequence of implementation tasks fo
 ### Track 2: Guideline Health Intelligence (P1)
 - [x] **G-04**: Implement automated Rule Ambiguity Scoring formula in `backend/app/domain/insights/ambiguity.py` based on dismissal rates, distinct reviewer disagreements, and exception clusters; expose via `GET /api/v1/insights/guideline-health`.
 - [x] **G-05**: Implement Uncited Comment Clustering engine to group reviewer change-request comments that do not cite an existing guideline, surfacing candidate rule proposals into a manager review queue via `GET /api/v1/insights/gaps` and `POST /api/v1/insights/gaps/{id}/approve` / `reject`.
-- [x] **G-06**: Implement Rule Lifecycle Management with automated detection of stale/unused rules, manager resolution workflow (amend/retire/reject/approve), and Stale API (`GET /api/v1/insights/stale`).
-- [ ] **G-07**: Update `/insights` and `/kb` frontend interfaces to display ambiguity badges, candidate rule proposals, and impact simulation drawer.
+- [x] **G-07**: Update `/insights` and `/kb` frontend interfaces to display ambiguity badges, candidate rule proposals, and impact simulation drawer (Guideline Health page live at `/insights/guideline-health` with three tabs: Ambiguous rules with drill-down, Stale items with KB review link, and Gaps approval/rejection workflow).
 
 ### Track 3: Multi-Format Review (P2)
 - [ ] **G-08**: Implement document structural ingestion for PDF and DOCX files (`pypdf` / `python-docx`), extracting hierarchical headers, tables, callouts, and disclaimers into clean semantic blocks with `POST /api/v1/submissions/upload`.

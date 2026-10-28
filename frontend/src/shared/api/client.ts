@@ -15,6 +15,10 @@ import {
   SystemStatus,
   AuditLogItem,
   EvaluationReportResponse,
+  GuidelineHealthItem,
+  StaleRuleResponse,
+  GapProposalResponse,
+  GapActionResponse,
 } from "./types";
 
 let hasCompletedFirstRequest = false;
@@ -287,4 +291,16 @@ export const api = {
 
   // Evaluation Benchmarks & Metrics
   getEvaluationResults: () => request<EvaluationReportResponse>("/evaluation/results"),
+
+  // Guideline Health (Improvement 2)
+  getGuidelineHealth: () => request<GuidelineHealthItem[]>("/insights/guideline-health"),
+  getStaleRules: () => request<StaleRuleResponse[]>("/insights/stale"),
+  getGapProposals: () => request<GapProposalResponse[]>("/insights/gaps"),
+  approveGapProposal: (gapId: string) =>
+    request<GapActionResponse>(`/insights/gaps/${gapId}/approve`, { method: "POST" }),
+  rejectGapProposal: (gapId: string, reason: string) =>
+    request<GapActionResponse>(`/insights/gaps/${gapId}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
 };
