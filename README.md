@@ -40,6 +40,16 @@ python manage.py setup
 python manage.py dev
 ```
 
+### Optional: Enabling Local OCR for Images & Scans
+Text, DOCX, and digital PDF extraction run out-of-the-box in pure Python with zero binary dependencies. To enable OCR for scanned images (.png, .jpg, scanned .pdf) locally, install Tesseract:
+* **macOS:** `brew install tesseract`
+* **Ubuntu / Debian:** `sudo apt-get install -y tesseract-ocr tesseract-ocr-eng`
+* **Fedora / RHEL:** `sudo dnf install -y tesseract tesseract-langpack-eng`
+* **Docker:** Alternatively, run via Docker (`docker build -t inkguard . && docker run -p 8000:8000 inkguard`).
+
+*If Tesseract is not installed on the host, the upload path gracefully informs the user ("OCR unavailable on this host") while all DOCX and digital text-PDF files continue to extract and review normally.*
+
+
 ### Other Commands
 ```bash
 python manage.py test           # Run all unit and integration tests
