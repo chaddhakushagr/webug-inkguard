@@ -5,7 +5,7 @@ Safe to run repeatedly without duplicate key errors or data drift.
 """
 
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from app.adapters.db.session import engine, SessionLocal, Base
 from app.adapters.db.models import (
@@ -18,6 +18,7 @@ from app.adapters.db.models import (
     Review,
     Finding,
     FindingAction,
+    Comment,
 )
 from app.adapters.db.audit import record_audit
 from app.adapters.security import hash_password
@@ -230,6 +231,25 @@ def run_seed(db: Session = None):
         db.commit()
 
         print("[Seed] 5. Loading synthetic review history (8 weeks, 4 teams, 80 reviews)...")
+        has_modern_actions = db.query(FindingAction).filter(FindingAction.id.like("act-c-syn-rev-%")).first()
+        if not has_modern_actions:
+            # Refresh old synthetic review history with creator actions and clarification comments
+            syn_subs = db.query(Submission).filter(Submission.id.like("syn-sub-%")).all()
+            for s in syn_subs:
+                vers = db.query(SubmissionVersion).filter(SubmissionVersion.submission_id == s.id).all()
+                for v in vers:
+                    revs = db.query(Review).filter(Review.submission_version_id == v.id).all()
+                    for r in revs:
+                        fnds = db.query(Finding).filter(Finding.review_id == r.id).all()
+                        for f in fnds:
+                            db.query(FindingAction).filter(FindingAction.finding_id == f.id).delete()
+                            db.query(Comment).filter(Comment.finding_id == f.id).delete()
+                            db.delete(f)
+                        db.delete(r)
+                    db.delete(v)
+                db.delete(s)
+            db.commit()
+
         existing_syn_count = db.query(Submission).filter(Submission.id.like("syn-sub-%")).count()
         if existing_syn_count < 80:
             history_items = generate_synthetic_history(weeks=8, total_reviews=80)
@@ -331,20 +351,112 @@ def run_seed(db: Session = None):
                     db.add(fnd)
                     db.flush()
 
-                    if item["action"] in ["accept", "dismiss", "escalate"]:
-                        act = FindingAction(
-                            id=f"act-{item['review_id']}",
+                    # 1. Creator action
+                    c_act = item.get("creator_action", item["action"])
+                    act_c = FindingAction(
+                        id=f"act-c-{item['review_id']}",
+                        finding_id=fnd.id,
+                        actor_id=c_id,
+                        action=c_act,
+                        reason_code=item.get("dismiss_reason") if c_act == "dismiss" else "creator_fix",
+                        reason_text=item.get("comment") or "Recorded in creator triage",
+                        created_at=ts,
+                    )
+                    db.add(act_c)
+
+                    # 2. Reviewer action (if different or override)
+                    r_act = item.get("reviewer_action", item["action"])
+                    if r_act != c_act or item.get("is_override"):
+                        act_r = FindingAction(
+                            id=f"act-r-{item['review_id']}",
                             finding_id=fnd.id,
                             actor_id=r_id,
-                            action=item["action"],
-                            reason_code=item.get("dismiss_reason") or ("approved_edit" if item["action"] == "accept" else "manager_escalation"),
-                            reason_text=item.get("comment") or "Recorded in synthetic review history",
-                            created_at=ts,
+                            action=r_act,
+                            reason_code="reviewer_override" if item.get("is_override") else ("approved_edit" if r_act == "accept" else item.get("dismiss_reason")),
+                            reason_text="Reviewer override during content verification" if item.get("is_override") else (item.get("comment") or "Reviewer sign-off"),
+                            created_at=ts + timedelta(minutes=15),
                         )
-                        db.add(act)
+                        db.add(act_r)
+
+                    # 3. Threaded clarification comment on finding
+                    if item.get("clarification_question"):
+                        comm = Comment(
+                            id=f"comm-{item['review_id']}",
+                            submission_id=sub.id,
+                            finding_id=fnd.id,
+                            author_id=c_id,
+                            body=item["clarification_question"],
+                            created_at=ts + timedelta(minutes=5),
+                        )
+                        db.add(comm)
 
             db.commit()
             print(f"[Seed] Successfully seeded {len(history_items)} synthetic reviews with findings and actions.")
+
+        # Seed uncited reviewer comments that form gap clusters
+        print("[Seed] 6. Seeding uncited reviewer comments for Gap Detection...")
+        existing_gap_comments = db.query(Comment).filter(Comment.id.like("gap-comment-%")).count()
+        if existing_gap_comments < 7:
+            gap_comment_seeds = [
+                # Cluster 1: Packaging & FSC Recycled Certification
+                {
+                    "id": "gap-comment-001",
+                    "sub_id": "syn-sub-001",
+                    "reviewer": "u-reviewer-1",
+                    "text": "Please include FSC certified packaging disclosure on all printed carton boxes.",
+                },
+                {
+                    "id": "gap-comment-002",
+                    "sub_id": "syn-sub-002",
+                    "reviewer": "u-reviewer-2",
+                    "text": "Missing required FSC logo certification on recycled retail packaging units.",
+                },
+                {
+                    "id": "gap-comment-003",
+                    "sub_id": "syn-sub-003",
+                    "reviewer": "u-reviewer-1",
+                    "text": "Carton packaging copy must explicitly specify FSC certified recycled materials.",
+                },
+                {
+                    "id": "gap-comment-004",
+                    "sub_id": "syn-sub-004",
+                    "reviewer": "u-manager",
+                    "text": "Retail packaging compliance requires FSC mixed-sources certification mark on box flap.",
+                },
+                # Cluster 2: International Shipping & European Customs VAT
+                {
+                    "id": "gap-comment-005",
+                    "sub_id": "syn-sub-005",
+                    "reviewer": "u-reviewer-1",
+                    "text": "European international shipping orders require VAT customs tax disclosure at checkout.",
+                },
+                {
+                    "id": "gap-comment-006",
+                    "sub_id": "syn-sub-006",
+                    "reviewer": "u-reviewer-2",
+                    "text": "Add clear EU VAT customs notification for international European shipping orders.",
+                },
+                {
+                    "id": "gap-comment-007",
+                    "sub_id": "syn-sub-007",
+                    "reviewer": "u-manager",
+                    "text": "International shipping policy must clarify EU VAT handling and customs duties.",
+                },
+            ]
+            for gc in gap_comment_seeds:
+                existing = db.query(Comment).filter(Comment.id == gc["id"]).first()
+                if not existing:
+                    c = Comment(
+                        id=gc["id"],
+                        submission_id=gc["sub_id"],
+                        finding_id=None,
+                        author_id=gc["reviewer"],
+                        body=gc["text"],
+                        created_at=now - timedelta(days=5),
+                    )
+                    db.add(c)
+            db.commit()
+            print("[Seed] Successfully seeded uncited reviewer comments for Gap Detection clusters.")
 
         record_audit(
             db=db,

@@ -420,7 +420,23 @@ SEED_RULES = [
             "channel": "packaging_ca",
             "required_phrase": "Fabriqué au Canada",
             "severity": "high",
+            "review_date": "2026-06-01",
             "message": "Quebec packaging copy requires certified bilingual packaging certification",
+        },
+    },
+    {
+        "code": "RULE-CLAIM-03",
+        "type": "rule",
+        "title": "Consumer Panel CP-08 Claims (Cites Expired Study)",
+        "body": "Claims citing 89% barrier restoration must reference Consumer Panel CP-08 protocol FACT-002.",
+        "classification": "internal",
+        "data": {
+            "rule_type": "regex",
+            "pattern": r"(?i)\b(89% barrier restoration|consumer panel cp-08)\b",
+            "cited_fact": "FACT-002",
+            "review_date": "2026-05-15",
+            "severity": "high",
+            "message": "Claims citing Consumer Panel CP-08 rely on expired FACT-002; update protocol citation",
         },
     },
     {
@@ -763,12 +779,39 @@ def generate_synthetic_history(
         include_ambig = (i % 4 == 0)
         rule_code = "RULE-AMBIG-01" if include_ambig else rng.choice(rule_codes)
 
-        # Decide action
+        clarification_text = None
+        creator_action = "accept"
+        reviewer_action = "accept"
+        override = False
+
         if rule_code == "RULE-AMBIG-01":
-            # 60% dismissed inconsistently
-            action = "dismiss" if rng.random() < 0.65 else "accept"
+            # 65% creator dismissals
+            creator_action = "dismiss" if rng.random() < 0.65 else "accept"
+            # Inconsistent reviewer actions: Sarah tends to dismiss, Alex tends to accept/override
+            if reviewer == "reviewer.sarah@lumo.internal":
+                reviewer_action = "dismiss"
+            else:
+                reviewer_action = "accept" if rng.random() < 0.60 else "dismiss"
+
+            # Reviewer override occurs when reviewer action disagrees with creator
+            if creator_action == "dismiss" and reviewer_action == "accept":
+                override = True
+
+            # Seed clarification questions on several AMBIG findings
+            if i in [4, 12, 20, 36, 52]:
+                clarification_options = [
+                    "Is 'world-class radiance' considered a superlative under this rule?",
+                    "Needs clarification: does 'unrivaled glow' count as an absolute or exception?",
+                    "Unclear rule boundary between superlative and clinical trial proof.",
+                    "Why is 'revolutionary hydration' flagged if we have clinical proof?",
+                    "Could you clarify the exception policy for social media headlines?",
+                ]
+                clarification_text = clarification_options[(i // 8) % len(clarification_options)]
+            action = reviewer_action
         else:
-            action = rng.choice(["accept", "accept", "dismiss", "escalate"])
+            creator_action = rng.choice(["accept", "accept", "dismiss", "accept"])
+            reviewer_action = creator_action
+            action = creator_action
 
         item = {
             "review_id": f"syn-rev-{i:03d}",
@@ -780,6 +823,10 @@ def generate_synthetic_history(
             "timestamp": rev_time.isoformat(),
             "rule_code": rule_code,
             "action": action,
+            "creator_action": creator_action,
+            "reviewer_action": reviewer_action,
+            "is_override": override,
+            "clarification_question": clarification_text,
             "dismiss_reason": rng.choice(dismiss_reasons) if action == "dismiss" else None,
             "comment": (
                 "Phrasing is acceptable in marketing headline"

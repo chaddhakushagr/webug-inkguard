@@ -327,6 +327,65 @@ class RuleCounter(BaseModel):
     distinct_dismissers: int = 0
 
 
+# --- Guideline Health (Improvement 2) ---
+class GuidelineHealthItem(BaseModel):
+    rule_code: str
+    rule_title: str
+    rule_type: str
+    total_events: int
+    times_triggered: int
+    creator_dismissals: int
+    reviewer_overrides: int
+    clarification_comments: int
+    dismissal_rate: float
+    override_rate: float
+    disagreement_rate: float
+    clarification_rate: float
+    ambiguity_score: Optional[int] = None
+    status: str  # "evaluated" or "not_enough_data"
+    recommendation: str
+
+
+class StaleRuleResponse(BaseModel):
+    entry_id: str
+    code: str
+    type: str
+    title: str
+    stale_reasons: List[str]
+    severity: str
+    last_triggered_at: Optional[str] = None
+    valid_until: Optional[str] = None
+    review_date: Optional[str] = None
+    recommendation: str
+
+
+class GapProposalResponse(BaseModel):
+    id: str
+    code: str
+    title: str
+    type: str = "rule"
+    body: str
+    classification: str = "internal"
+    status: str = "draft"
+    cluster_size: int
+    top_keywords: List[str]
+    sample_comments: List[str]
+    created_at: str
+
+
+class GapRejectRequest(BaseModel):
+    reason: str = Field(..., min_length=3, description="Mandatory reason for rejecting gap proposal")
+
+
+class GapActionResponse(BaseModel):
+    success: bool
+    gap_id: str
+    action: str
+    entry_id: Optional[str] = None
+    code: Optional[str] = None
+    message: str
+
+
 # --- Audit ---
 class AuditLogResponse(BaseModel):
     id: str

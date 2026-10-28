@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
-from typing import List, Dict, Any
-from fastapi import APIRouter, Depends
+from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -10,7 +10,13 @@ from app.api.schemas import (
     RecurringIssue,
     DismissalBreakdown,
     RuleCounter,
+    GuidelineHealthItem,
+    StaleRuleResponse,
+    GapProposalResponse,
+    GapRejectRequest,
+    GapActionResponse,
 )
+from app.api.dependencies import require_role, AuthenticatedUser
 from app.adapters.db.session import get_db
 from app.adapters.db.models import (
     Review,
@@ -19,8 +25,21 @@ from app.adapters.db.models import (
     Submission,
     SubmissionVersion,
     KBEntry,
+    KBEntryVersion,
+    Comment,
+    AuditLog,
+    User,
     Team,
+    get_uuid,
 )
+from app.adapters.db.audit import record_audit
+from app.domain.insights.ambiguity import (
+    AmbiguityInput,
+    compute_ambiguity_score,
+    is_clarification_comment,
+)
+from app.domain.insights.stale import detect_stale_rules
+from app.domain.insights.gaps import cluster_uncited_comments, CommentItem
 
 router = APIRouter(prefix="/insights", tags=["Insights"])
 
@@ -215,3 +234,393 @@ def get_rule_counters(db: Session = Depends(get_db)):
 
     counters.sort(key=lambda x: x.times_triggered, reverse=True)
     return counters
+
+
+# --- Guideline Health Intelligence (Round 3 Improvement 2) ---
+
+@router.get("/guideline-health", response_model=List[GuidelineHealthItem])
+def get_guideline_health(
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_role("brand_manager", "admin")),
+):
+    """
+    Ranks active KB rules by Ambiguity Score (0-100) based on:
+    - Creator dismissal rate (30%)
+    - Reviewer override rate (30%)
+    - Reviewer disagreement discordance (25%)
+    - Threaded clarification comments rate (15%)
+    Rules with < 5 events return status='not_enough_data' and ambiguity_score=None.
+    """
+    entries = db.query(KBEntry).filter(KBEntry.status == "active").all()
+    rule_map = {e.code: e for e in entries}
+
+    all_findings = db.query(Finding).all()
+    findings_by_code: Dict[str, List[Finding]] = defaultdict(list)
+    for f in all_findings:
+        if f.cited_entry_id:
+            findings_by_code[f.cited_entry_id].append(f)
+            if f.cited_entry_id not in rule_map:
+                rule_map[f.cited_entry_id] = KBEntry(
+                    code=f.cited_entry_id,
+                    title=f.explanation or f"Rule {f.cited_entry_id}",
+                    type=f.issue_type or "rule",
+                )
+
+    all_actions = db.query(FindingAction).all()
+    actions_by_finding: Dict[str, List[FindingAction]] = defaultdict(list)
+    for a in all_actions:
+        actions_by_finding[a.finding_id].append(a)
+
+    user_roles = {u.id: u.role for u in db.query(User).all()}
+
+    all_comments = db.query(Comment).all()
+    comments_by_finding: Dict[str, List[Comment]] = defaultdict(list)
+    for c in all_comments:
+        if c.finding_id:
+            comments_by_finding[c.finding_id].append(c)
+
+    results: List[GuidelineHealthItem] = []
+
+    for code, entry in rule_map.items():
+        fnds = findings_by_code.get(code, [])
+        creator_dismissals = 0
+        creator_acceptances = 0
+        reviewer_overrides = 0
+        reviewer_acceptances = 0
+        reviewer_dismissals = 0
+        clarification_count = 0
+
+        for f in fnds:
+            # Check comments on finding
+            f_comments = comments_by_finding.get(f.id, [])
+            for comm in f_comments:
+                if is_clarification_comment(comm.body):
+                    clarification_count += 1
+
+            # Check actions on finding
+            acts = actions_by_finding.get(f.id, [])
+            has_creator_dismiss = False
+            for a in acts:
+                role = user_roles.get(a.actor_id, "reviewer")
+                if role == "creator":
+                    if a.action == "dismiss":
+                        creator_dismissals += 1
+                        has_creator_dismiss = True
+                    elif a.action == "accept":
+                        creator_acceptances += 1
+                else:  # Reviewer, Brand Manager, or Admin
+                    if a.action == "dismiss":
+                        reviewer_dismissals += 1
+                    elif a.action == "accept":
+                        reviewer_acceptances += 1
+                    if a.reason_code == "reviewer_override" or (has_creator_dismiss and a.action == "accept"):
+                        reviewer_overrides += 1
+
+        # Check uncited comments that mention this rule code
+        for c in all_comments:
+            if c.finding_id is None and code in c.body:
+                if is_clarification_comment(c.body):
+                    clarification_count += 1
+
+        data_in = AmbiguityInput(
+            rule_code=code,
+            rule_title=entry.title,
+            rule_type=getattr(entry, "type", "rule"),
+            total_findings=len(fnds),
+            creator_dismissals=creator_dismissals,
+            creator_acceptances=creator_acceptances,
+            reviewer_overrides=reviewer_overrides,
+            reviewer_acceptances=reviewer_acceptances,
+            reviewer_dismissals=reviewer_dismissals,
+            clarification_comments=clarification_count,
+        )
+
+        res = compute_ambiguity_score(data_in)
+        results.append(
+            GuidelineHealthItem(
+                rule_code=res.rule_code,
+                rule_title=res.rule_title,
+                rule_type=res.rule_type,
+                total_events=res.total_events,
+                times_triggered=res.times_triggered,
+                creator_dismissals=res.creator_dismissals,
+                reviewer_overrides=res.reviewer_overrides,
+                clarification_comments=res.clarification_comments,
+                dismissal_rate=res.dismissal_rate,
+                override_rate=res.override_rate,
+                disagreement_rate=res.disagreement_rate,
+                clarification_rate=res.clarification_rate,
+                ambiguity_score=res.ambiguity_score,
+                status=res.status,
+                recommendation=res.recommendation,
+            )
+        )
+
+    # Sort: evaluated first by ambiguity_score descending, then not_enough_data
+    results.sort(
+        key=lambda x: (
+            0 if x.status == "evaluated" else 1,
+            -(x.ambiguity_score if x.ambiguity_score is not None else -1),
+            -x.total_events,
+            x.rule_code,
+        )
+    )
+    return results
+
+
+@router.get("/stale", response_model=List[StaleRuleResponse])
+def get_stale_rules_endpoint(
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_role("brand_manager", "admin")),
+):
+    """
+    Detects stale rules and facts:
+    - Rules not triggered in last 8 weeks (or never triggered)
+    - KB entries past their scheduled review date
+    - Facts expired or expiring within 30 days
+    - Rules that cite expired facts
+    """
+    entries = db.query(KBEntry).filter(KBEntry.status == "active").all()
+    entries_dict = [
+        {
+            "id": e.id,
+            "code": e.code,
+            "type": e.type,
+            "title": e.title,
+            "body": e.body or "",
+            "data": e.data or {},
+            "status": e.status,
+        }
+        for e in entries
+    ]
+
+    now = datetime.now(timezone.utc)
+    eight_weeks_ago = now - timedelta(weeks=8)
+
+    # Latest trigger date per code
+    latest_triggers = (
+        db.query(Finding.cited_entry_id, func.max(Finding.created_at))
+        .filter(Finding.cited_entry_id != None)
+        .group_by(Finding.cited_entry_id)
+        .all()
+    )
+    last_triggered_map = {row[0]: row[1] for row in latest_triggers if row[0]}
+
+    # Trigger counts in last 8 weeks
+    counts_8w = (
+        db.query(Finding.cited_entry_id, func.count(Finding.id))
+        .filter(Finding.cited_entry_id != None, Finding.created_at >= eight_weeks_ago)
+        .group_by(Finding.cited_entry_id)
+        .all()
+    )
+    counts_8w_map = {row[0]: row[1] for row in counts_8w if row[0]}
+
+    stale_items = detect_stale_rules(
+        kb_entries=entries_dict,
+        last_triggered_by_code=last_triggered_map,
+        trigger_counts_last_8_weeks=counts_8w_map,
+        reference_time=now,
+    )
+
+    return [
+        StaleRuleResponse(
+            entry_id=item.entry_id,
+            code=item.code,
+            type=item.type,
+            title=item.title,
+            stale_reasons=item.stale_reasons,
+            severity=item.severity,
+            last_triggered_at=item.last_triggered_at,
+            valid_until=item.valid_until,
+            review_date=item.review_date,
+            recommendation=item.recommendation,
+        )
+        for item in stale_items
+    ]
+
+
+def _get_active_proposals(db: Session) -> List[Any]:
+    uncited_comments = (
+        db.query(Comment)
+        .filter(Comment.finding_id == None)
+        .order_by(Comment.created_at.desc())
+        .all()
+    )
+    comment_items = [
+        CommentItem(
+            id=c.id,
+            body=c.body,
+            author_id=c.author_id,
+            submission_id=c.submission_id,
+            created_at=c.created_at,
+        )
+        for c in uncited_comments
+    ]
+    proposals = cluster_uncited_comments(comment_items, min_cluster_size=2, similarity_threshold=0.20)
+
+    # Exclude proposals that have already been resolved (approved or rejected) in audit log
+    resolved_gap_ids = set()
+    audit_rows = (
+        db.query(AuditLog)
+        .filter(AuditLog.action.in_(["kb_entry_created_from_gap", "kb_gap_rejected"]))
+        .all()
+    )
+    for row in audit_rows:
+        details = row.details or {}
+        if "gap_id" in details:
+            resolved_gap_ids.add(details["gap_id"])
+        elif row.entity_type == "gap_proposal":
+            resolved_gap_ids.add(row.entity_id)
+
+    return [p for p in proposals if p.id not in resolved_gap_ids]
+
+
+@router.get("/gaps", response_model=List[GapProposalResponse])
+def get_comment_gaps_endpoint(
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_role("brand_manager", "admin")),
+):
+    """
+    Returns draft KB rule proposals generated by clustering uncited reviewer comments
+    using lexical BM25 similarity. Visible only to brand_manager and admin.
+    """
+    proposals = _get_active_proposals(db)
+    return [
+        GapProposalResponse(
+            id=p.id,
+            code=p.code,
+            title=p.title,
+            type=p.type,
+            body=p.body,
+            classification=p.classification,
+            status=p.status,
+            cluster_size=p.cluster_size,
+            top_keywords=p.top_keywords,
+            sample_comments=p.sample_comments,
+            created_at=p.created_at,
+        )
+        for p in proposals
+    ]
+
+
+@router.post("/gaps/{gap_id}/approve", response_model=GapActionResponse)
+def approve_gap_proposal(
+    gap_id: str,
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_role("brand_manager", "admin")),
+):
+    """
+    Approves a draft gap proposal and adds it as an active rule in the Knowledge Base
+    with version 1 and an append-only audit log record. Role-restricted to brand_manager and admin.
+    """
+    proposals = _get_active_proposals(db)
+    matching = next((p for p in proposals if p.id == gap_id), None)
+    if not matching:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Gap proposal {gap_id} not found or already resolved.",
+        )
+
+    # Ensure unique code in KB
+    code = matching.code
+    existing_code = db.query(KBEntry).filter(KBEntry.code == code).first()
+    if existing_code:
+        code = f"{code}-{get_uuid()[:4]}"
+
+    new_entry = KBEntry(
+        id=get_uuid(),
+        code=code,
+        type="rule",
+        title=matching.title,
+        body=matching.body,
+        data={
+            "source": "gap_detection",
+            "cluster_size": matching.cluster_size,
+            "top_keywords": matching.top_keywords,
+            "sample_comments": matching.sample_comments,
+        },
+        classification="internal",
+        status="active",
+        owner_id=current_user.id,
+        current_version=1,
+    )
+    db.add(new_entry)
+    db.flush()
+
+    ver = KBEntryVersion(
+        id=get_uuid(),
+        entry_id=new_entry.id,
+        version=1,
+        snapshot={
+            "code": new_entry.code,
+            "title": new_entry.title,
+            "body": new_entry.body,
+            "type": new_entry.type,
+            "data": new_entry.data,
+            "classification": new_entry.classification,
+        },
+        changed_by=current_user.id,
+        change_note="Approved from reviewer comment gap cluster",
+    )
+    db.add(ver)
+
+    record_audit(
+        db=db,
+        action="kb_entry_created_from_gap",
+        entity_type="kb_entry",
+        entity_id=new_entry.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role,
+        details={
+            "gap_id": gap_id,
+            "code": new_entry.code,
+            "title": new_entry.title,
+            "cluster_size": matching.cluster_size,
+        },
+    )
+    db.commit()
+
+    return GapActionResponse(
+        success=True,
+        gap_id=gap_id,
+        action="approved",
+        entry_id=new_entry.id,
+        code=new_entry.code,
+        message=f"Gap proposal approved as active rule {new_entry.code}.",
+    )
+
+
+@router.post("/gaps/{gap_id}/reject", response_model=GapActionResponse)
+def reject_gap_proposal(
+    gap_id: str,
+    req: GapRejectRequest,
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(require_role("brand_manager", "admin")),
+):
+    """
+    Rejects a draft gap proposal with a mandatory reason.
+    Records the rejection in the audit log. Role-restricted to brand_manager and admin.
+    """
+    if not req.reason or len(req.reason.strip()) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A substantive rejection reason (at least 3 characters) is required.",
+        )
+
+    record_audit(
+        db=db,
+        action="kb_gap_rejected",
+        entity_type="gap_proposal",
+        entity_id=gap_id,
+        actor_id=current_user.id,
+        actor_role=current_user.role,
+        details={"gap_id": gap_id, "reason": req.reason.strip()},
+    )
+    db.commit()
+
+    return GapActionResponse(
+        success=True,
+        gap_id=gap_id,
+        action="rejected",
+        message=f"Gap proposal {gap_id} rejected: {req.reason.strip()}",
+    )
