@@ -41,6 +41,38 @@ def can_manage_users(role: str) -> bool:
     return role == "admin"
 
 
+def normalize_channel(channel: Optional[str]) -> str:
+    """
+    Normalizes channel string to standard canonical channels:
+    'social', 'email', 'blog', 'web', 'press_release'.
+    Handles spaces, dashes, case variation, and common aliases.
+    """
+    if not channel:
+        return "web"
+    c = str(channel).strip().lower().replace("-", "_").replace(" ", "_")
+    if "press" in c or "release" in c or c == "pr":
+        return "press_release"
+    if "email" in c or "newsletter" in c:
+        return "email"
+    if "blog" in c or "article" in c:
+        return "blog"
+    if "social" in c:
+        return "social"
+    if "web" in c or "site" in c or "landing" in c:
+        return "web"
+    return c
+
+
+def get_risk_tier_for_channel(channel: Optional[str]) -> str:
+    """Returns 'high' for press_release, 'medium' for email/blog/web, and 'low' for social/others."""
+    c = normalize_channel(channel)
+    if c == "press_release":
+        return "high"
+    elif c in ("email", "blog", "web"):
+        return "medium"
+    return "low"
+
+
 def get_required_approvals(risk_tier: str) -> int:
     """High-risk submissions require 2 distinct approvals; low and medium require 1."""
     if risk_tier.lower() == "high":

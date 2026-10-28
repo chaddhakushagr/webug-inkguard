@@ -406,3 +406,14 @@ class AuditLogResponse(BaseModel):
     request_id: Optional[str] = None
     prev_hash: Optional[str] = None
     hash: str
+
+
+# --- Notifications ---
+class NotificationResponse(BaseModel):
+    id: str
+    user_id: str
+    submission_id: Optional[str] = None
+    title: str
+    message: str
+    is_read: bool
+    created_at: datetime

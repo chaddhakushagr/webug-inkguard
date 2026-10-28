@@ -27,6 +27,7 @@ from app.adapters.db.models import (
     AICall,
     Team,
     UploadedDocument,
+    Notification,
 )
 from app.adapters.db.audit import record_audit
 from app.adapters.retrieval.bm25 import BM25Retriever
@@ -40,6 +41,8 @@ from app.api.dependencies import get_current_user, require_role, AuthenticatedUs
 from app.domain.workflow.permissions import (
     compute_submission_allowed_actions,
     get_required_approvals,
+    normalize_channel,
+    get_risk_tier_for_channel,
 )
 from app.domain.workflow.diff import compute_content_diff
 from app.domain.workflow.state_machine import WorkflowStateMachine, WorkflowState
@@ -48,15 +51,6 @@ router = APIRouter(tags=["Submissions & Workflow"])
 
 # In-memory per-user review rate limiter: user_id -> list of timestamps
 _user_review_timestamps: Dict[str, List[float]] = {}
-
-
-def get_risk_tier_for_channel(channel: str) -> str:
-    c = channel.strip().lower()
-    if c == "press_release":
-        return "high"
-    elif c in ("email", "blog", "web"):
-        return "medium"
-    return "low"
 
 
 def build_submission_detail(
@@ -164,7 +158,7 @@ def list_submissions(
     if status:
         query = query.filter(Submission.status == status)
     if channel:
-        query = query.filter(Submission.channel == channel)
+        query = query.filter(Submission.channel == normalize_channel(channel))
     if risk_tier:
         query = query.filter(Submission.risk_tier == risk_tier)
 
@@ -240,15 +234,27 @@ def create_submission(
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
 ):
-    now = datetime.now(timezone.utc)
-    risk_tier = get_risk_tier_for_channel(req.channel)
-    content_text = req.content.strip()
+    if not req.title or not req.title.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Submission title cannot be blank.",
+        )
+    content_text = req.content.strip() if req.content else ""
+    if not content_text or len(content_text) < 5:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Submission content cannot be empty (minimum 5 characters required).",
+        )
     if len(content_text) > settings.MAX_CONTENT_CHARS:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"Content length ({len(content_text)}) exceeds limit of {settings.MAX_CONTENT_CHARS} characters",
         )
     content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()
+    now = datetime.now(timezone.utc)
+
+    normalized_ch = normalize_channel(req.channel)
+    risk_tier = get_risk_tier_for_channel(normalized_ch)
 
     team_val = req.team_id or getattr(current_user, "team_id", None) or getattr(current_user, "team", None)
     resolved_team_id = None
@@ -258,7 +264,7 @@ def create_submission(
 
     sub = Submission(
         title=req.title.strip(),
-        channel=req.channel.strip().lower(),
+        channel=normalized_ch,
         risk_tier=risk_tier,
         status="Draft",
         creator_id=current_user.id,
@@ -340,7 +346,8 @@ async def upload_document_submission(
         )
 
     now = datetime.now(timezone.utc)
-    risk_tier = get_risk_tier_for_channel(channel)
+    normalized_ch = normalize_channel(channel)
+    risk_tier = get_risk_tier_for_channel(normalized_ch)
     extracted_text = doc_structure.full_text.strip()
     if not extracted_text:
         extracted_text = f"[Document extracted from {file.filename} with {doc_structure.page_count} page(s)]"
@@ -371,7 +378,7 @@ async def upload_document_submission(
     # 3. Create Submission record
     sub = Submission(
         title=sub_title,
-        channel=channel.strip().lower(),
+        channel=normalized_ch,
         risk_tier=risk_tier,
         status="Draft",
         creator_id=current_user.id,
@@ -556,7 +563,12 @@ def update_submission_content(
         )
 
     now = datetime.now(timezone.utc)
-    content_text = req.content.strip()
+    content_text = req.content.strip() if req.content else ""
+    if not content_text or len(content_text) < 5:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Submission content cannot be empty (minimum 5 characters required).",
+        )
     if len(content_text) > settings.MAX_CONTENT_CHARS:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -908,6 +920,24 @@ def approve_submission(
     required_approvals = get_required_approvals(sub.risk_tier)
     if approvals_count >= required_approvals:
         sub.status = "Approved"
+        notif_title = "Approved"
+        notif_message = f"Submission '{sub.title}' has been approved."
+    else:
+        notif_title = "Needs Second Approver"
+        notif_message = f"Submission '{sub.title}' requires a second approver."
+
+    recipients = {uid for uid in [sub.creator_id, sub.assignee_id] if uid}
+    for uid in recipients:
+        db.add(
+            Notification(
+                user_id=uid,
+                submission_id=sub.id,
+                title=notif_title,
+                message=notif_message,
+                is_read=False,
+                created_at=now,
+            )
+        )
 
     sub.updated_at = now
     db.commit()
@@ -1034,8 +1064,28 @@ def trigger_review(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=f"Rate limit exceeded: maximum {settings.RATE_LIMIT_REVIEWS_PER_HOUR} reviews per hour",
         )
-    recent_ts.append(now_ts)
-    _user_review_timestamps[current_user.id] = recent_ts
+    # Deduplicate in-flight reviews for the current version (G-15)
+    active_rev = (
+        db.query(Review)
+        .filter(
+            Review.submission_version_id == sub.current_version_id,
+            Review.status.in_(["extracting", "rule_checks", "retrieving", "analysing", "finalising"]),
+        )
+        .first()
+    )
+    if active_rev:
+        count = db.query(Finding).filter(Finding.review_id == active_rev.id).count()
+        return ReviewResponse(
+            id=active_rev.id,
+            submission_version_id=active_rev.submission_version_id,
+            status=active_rev.status,
+            mode=active_rev.mode,
+            provider=active_rev.provider,
+            model=active_rev.model,
+            findings_count=count,
+            started_at=active_rev.started_at,
+            completed_at=active_rev.completed_at,
+        )
 
     now = datetime.now(timezone.utc)
     rev_id = str(uuid.uuid4())

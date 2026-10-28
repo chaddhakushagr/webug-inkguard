@@ -212,6 +212,7 @@ function NewSubmissionContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError(null);
 
     // INVARIANT: Never send both file and text simultaneously.

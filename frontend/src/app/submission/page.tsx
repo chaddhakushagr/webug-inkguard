@@ -228,7 +228,7 @@ function SubmissionDetailContent() {
 
   // Review Trigger & Live Polling (5 Stages)
   const handleTriggerReview = async () => {
-    if (!sub) return;
+    if (!sub || isReviewRunning) return;
     setIsReviewRunning(true);
     setActionError(null);
     setActionSuccess(null);
@@ -378,7 +378,7 @@ function SubmissionDetailContent() {
 
   // Workflow Action Handlers
   const handleSubmitForApproval = async () => {
-    if (!sub) return;
+    if (!sub || isActionPending) return;
     setIsActionPending(true);
     setActionError(null);
     try {
@@ -398,7 +398,7 @@ function SubmissionDetailContent() {
   };
 
   const handleClaim = async () => {
-    if (!sub) return;
+    if (!sub || isActionPending) return;
     setIsActionPending(true);
     setActionError(null);
     try {
@@ -418,7 +418,7 @@ function SubmissionDetailContent() {
   };
 
   const executeModalAction = async () => {
-    if (!sub) return;
+    if (!sub || isActionPending) return;
     setIsActionPending(true);
     setActionError(null);
     try {
@@ -452,7 +452,7 @@ function SubmissionDetailContent() {
   };
 
   const handleMarkPublished = async () => {
-    if (!sub) return;
+    if (!sub || isActionPending) return;
     if (!confirm("Confirm that this approved marketing copy has been published to live channels?")) return;
     setIsActionPending(true);
     setActionError(null);
@@ -666,6 +666,7 @@ function SubmissionDetailContent() {
                     size="md"
                     onClick={handleClaim}
                     isLoading={isActionPending}
+                    disabled={isActionPending}
                     leftIcon={<CheckCircle2 className="w-4 h-4" />}
                   >
                     Claim Review
@@ -678,11 +679,13 @@ function SubmissionDetailContent() {
                     variant="danger"
                     size="md"
                     onClick={() => {
+                      if (isActionPending) return;
                       setNoteModalType("request_changes");
                       setActionNote("");
                       setNoteModalOpen(true);
                     }}
                     isLoading={isActionPending}
+                    disabled={isActionPending}
                     leftIcon={<AlertCircle className="w-4 h-4" />}
                   >
                     Request Changes
@@ -695,11 +698,13 @@ function SubmissionDetailContent() {
                     variant="primary"
                     size="md"
                     onClick={() => {
+                      if (isActionPending) return;
                       setNoteModalType("approve");
                       setActionNote("Verified against Lumo tone, term, and clinical fact guidelines.");
                       setNoteModalOpen(true);
                     }}
                     isLoading={isActionPending}
+                    disabled={isActionPending}
                     leftIcon={<Check className="w-4 h-4" />}
                   >
                     Approve Submission
@@ -713,6 +718,7 @@ function SubmissionDetailContent() {
                     size="md"
                     onClick={handleMarkPublished}
                     isLoading={isActionPending}
+                    disabled={isActionPending}
                     leftIcon={<CheckCircle2 className="w-4 h-4" />}
                   >
                     Mark as Published
@@ -1470,6 +1476,7 @@ function SubmissionDetailContent() {
                 size="sm"
                 onClick={executeModalAction}
                 isLoading={isActionPending}
+                disabled={isActionPending}
               >
                 {noteModalType === "approve" ? "Confirm Approval" : "Submit Revision Request"}
               </Button>

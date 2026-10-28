@@ -19,6 +19,7 @@ import {
   StaleRuleResponse,
   GapProposalResponse,
   GapActionResponse,
+  NotificationItem,
 } from "./types";
 
 let hasCompletedFirstRequest = false;
@@ -311,4 +312,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ reason }),
     }),
+
+  // In-App Notifications (F-26)
+  getNotifications: () => request<NotificationItem[]>("/notifications"),
+  markNotificationRead: (id: string) =>
+    request<NotificationItem>(`/notifications/${id}/read`, { method: "POST" }),
+  markAllNotificationsRead: () =>
+    request<{ status: string; marked_read: number }>("/notifications/read-all", { method: "POST" }),
+
+  // Admin / Demo Reset (F-67 / G-13)
+  resetDemo: () => request<{ status: string; message: string }>("/admin/reset-demo", { method: "GET" }),
+  resetDemoPost: () => request<{ status: string; message: string }>("/admin/reset-demo", { method: "POST" }),
 };
+

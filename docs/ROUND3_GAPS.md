@@ -31,8 +31,8 @@ In [SUBMISSION_R2.md](file:///home/redpanda/Documents/WeBug/docs/SUBMISSION_R2.m
    - *Status*: **Not Built**.
    - *Verification*: `POST /api/v1/kb/import/bulk` accepts structured JSON only. Ingestion of raw `.txt` / `.md` guideline documents with heuristic extraction to candidate entries is not implemented.
 2. **F-26 (In-App Push Notifications)**:
-   - *Status*: **Not Built**.
-   - *Verification*: Workflow updates are reflected passively via the Reviewer Queue table and status chips. No notification bell, toast event queue, or in-app notification center table exists.
+   - *Status*: **Built**.
+   - *Verification*: `Notification` table, `GET /api/v1/notifications`, `POST /api/v1/notifications/{id}/read`, notification bell with unread badge in shell, and automatic notification triggers for creator and assignee on "Needs Second Approver" or "Approved".
 
 ### Verification of Built Features (Empirical API & UI Execution)
 Every major feature marked `Built` was tested against the active running application:
@@ -52,6 +52,7 @@ Every major feature marked `Built` was tested against the active running applica
 | **F-23** | 2-Approver Rule (High Risk) | 2 sequential approvals by distinct reviewers | HTTP 200: Approval 1 keeps `In Review`; Approval 2 marks `Approved` | **WORKS** |
 | **F-24** | Threaded Comments | `POST /api/v1/submissions/{id}/comments` | HTTP 200: Persisted threaded review comment | **WORKS** |
 | **F-25** | Reviewer Queue & Claim | `POST /api/v1/submissions/{id}/claim` | HTTP 200: Assignee set to reviewer; status advances to `In Review` | **WORKS** |
+| **F-26** | In-App Notifications | `GET /api/v1/notifications`, `POST .../{id}/read` | HTTP 200: Fetches unread notifications, marks read | **WORKS** |
 | **F-27** | Mark Published | `POST /api/v1/submissions/{id}/mark-published` | HTTP 200: Published URL attached, status `Marked Published` | **WORKS** |
 | **F-28** | Audit Log & CSV Export | `GET /api/v1/audit/export` | HTTP 200: Returns 639 KB valid RFC 4180 CSV (`text/csv`) | **WORKS** |
 | **F-30** | 5-Stage Review Orchestration | `POST /submissions/{id}/review`, `GET /reviews/{id}` | HTTP 200: Stages progress from extracting to completed | **WORKS** |
@@ -59,7 +60,7 @@ Every major feature marked `Built` was tested against the active running applica
 | **F-50–F-53** | Insights Metrics & Seed | `GET /api/v1/insights/summary`, `/rules` | HTTP 200: Returns metrics aggregated across 80 synthetic reviews | **WORKS** |
 | **F-63** | Admin "No External AI" Switch | `PUT /api/v1/settings` | HTTP 200: Immediate fallback to `rules_only` verified | **WORKS** |
 | **F-66** | Daily Cap Degradation | `POST /submissions/{id}/review` with cap=0 | HTTP 200: Completed via rules_only with fallback banner | **WORKS** |
-| **F-67** | Admin Demo Reset Endpoint | `POST /api/v1/system/reset-demo` | **HTTP 404/405**: Route not registered in FastAPI router (CLI only) | **DOUBT CONFIRMED** |
+| **F-67** | Admin Demo Reset Endpoint | `POST /api/v1/system/reset-demo`, `GET /api/v1/admin/reset-demo` | HTTP 200: Re-seeds database to pristine demo state | **WORKS** |
 
 ---
 
@@ -278,11 +279,11 @@ The following checklist represents the exact sequence of implementation tasks fo
 
 ### Track 4: Unbuilt Features & Defect Hardening (P3)
 - [ ] **G-11**: Implement `F-14`: Unstructured guideline document importer (.txt / .md to candidate entries with heuristic classification and human confirmation in UI).
-- [ ] **G-12**: Implement `F-26`: In-app notification center (notification bell, read/unread states, workflow trigger toasts).
-- [ ] **G-13**: Mount `POST /api/v1/system/reset-demo` endpoint in FastAPI router to allow one-click demo data reset matching `manage.py seed`.
-- [ ] **G-14**: Fix channel string normalization in `get_risk_tier_for_channel` (`backend/app/api/routers/submissions.py:50`) so `"Press Release"`, `"press-release"`, and `"press_release"` all properly map to `high` risk.
-- [ ] **G-15**: Add concurrency locking and deduplication to `POST /submissions/{submission_id}/review` to prevent duplicate review jobs and duplicate findings when buttons are double-clicked.
-- [ ] **G-16**: Add minimum content length validation ($\ge 5$ chars) on submission creation to reject empty submissions (`content: ""`) with HTTP 422.
+- [x] **G-12**: Implement `F-26`: In-app notification center (DB table `notifications`, `GET /api/v1/notifications`, `POST /api/v1/notifications/{id}/read`, notification bell with badge count in shell, automatic notification triggers for creator and assignee on "Needs Second Approver" or "Approved").
+- [x] **G-13**: Mount `POST /api/v1/system/reset-demo` and `GET /api/v1/admin/reset-demo` (F-67) endpoints in FastAPI router to allow one-click demo data reset matching `manage.py seed` (admin role gated).
+- [x] **G-14**: Fix channel string normalization in `normalize_channel` and `get_risk_tier_for_channel` so `"Press Release"`, `"press-release"`, and `"press_release"` all properly map to `high` risk, and channel query filtering never fails.
+- [x] **G-15**: Add idempotency and double-click prevention on submission form and review panel; deduplicate in-flight reviews for the current version.
+- [x] **G-16**: Add minimum content length validation ($\ge 5$ chars) and 0-byte file upload check to reject empty submissions with HTTP 422 before the review pipeline runs.
 - [ ] **G-17**: Enhance `<AuthGuard>` in `frontend/src/shared/ui/AuthGuard.tsx` to preserve `?return_to=` URL parameter across unauthenticated deep links.
 - [ ] **G-18**: Disable the "Accept Fix" button in the frontend finding card whenever `suggested_fix` is null.
 - [ ] **G-19**: Add visual badge in Reviewer Queue (`frontend/src/app/queue/page.tsx`) showing "1 of 2 Approved" for high-risk submissions awaiting second review.

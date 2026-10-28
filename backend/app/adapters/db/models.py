@@ -270,3 +270,18 @@ class Setting(Base):
     key = Column(String(100), primary_key=True)
     value = Column(JSON, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String(36), primary_key=True, default=get_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    submission_id = Column(String(36), ForeignKey("submissions.id", ondelete="CASCADE"), nullable=True, index=True)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+
+    user = relationship("User")
+    submission = relationship("Submission")

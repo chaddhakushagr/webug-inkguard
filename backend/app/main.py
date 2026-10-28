@@ -20,6 +20,8 @@ from app.api.routers import (
     audit as audit_router,
     settings as settings_router,
     evaluation as evaluation_router,
+    notifications as notifications_router,
+    admin as admin_router,
 )
 
 
@@ -150,6 +152,8 @@ def create_app() -> FastAPI:
     app.include_router(audit_router.router, prefix="/api/v1")
     app.include_router(settings_router.router, prefix="/api/v1")
     app.include_router(evaluation_router.router, prefix="/api/v1")
+    app.include_router(notifications_router.router, prefix="/api/v1")
+    app.include_router(admin_router.router, prefix="/api/v1")
 
     # Frontend Static Files (if exported build is present)
     static_dirs = [

@@ -20,12 +20,13 @@ import {
   Activity,
   Target,
   HeartPulse,
+  Bell,
 } from "lucide-react";
 import { ModeChip, AIMode } from "./ModeChip";
 import { Dialog } from "./Dialog";
 import { Button } from "./Button";
 import { ToastContainer } from "./Toast";
-import { User, DemoUser } from "../api/types";
+import { User, DemoUser, NotificationItem } from "../api/types";
 import { api } from "../api/client";
 
 interface AppShellProps {
@@ -42,6 +43,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isReLoginOpen, setIsReLoginOpen] = useState(false);
   const [reLoginMessage, setReLoginMessage] = useState("Your session has expired. Please sign in again.");
+
+  // F-26 (notifications) & Cold-start UX states
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
 
   useEffect(() => {
     // 1. Load active user
@@ -62,15 +68,40 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
         // fallback
       });
 
-    // 3. Fetch health / AI mode
+    // 3. Fetch health / AI mode with cold-start UX (show banner if > 2s to respond)
+    let coldStartTimer: NodeJS.Timeout | null = setTimeout(() => {
+      setIsWakingUp(true);
+    }, 2000);
+
     api
       .getHealth()
       .then((h) => {
+        if (coldStartTimer) {
+          clearTimeout(coldStartTimer);
+          coldStartTimer = null;
+        }
+        setIsWakingUp(false);
         if (h.ai_mode) setAiMode(h.ai_mode as AIMode);
       })
-      .catch(() => {});
+      .catch(() => {
+        if (coldStartTimer) {
+          clearTimeout(coldStartTimer);
+          coldStartTimer = null;
+        }
+        setIsWakingUp(false);
+      });
 
-    // 4. 401 Unauthorized listener
+    // 4. In-App Notifications (F-26)
+    const loadNotifications = () => {
+      api
+        .getNotifications()
+        .then((items) => setNotifications(items || []))
+        .catch(() => {});
+    };
+    loadNotifications();
+    const notifInterval = setInterval(loadNotifications, 10000);
+
+    // 5. 401 Unauthorized listener
     const handleUnauthorized = (e: any) => {
       setReLoginMessage(e?.detail?.message || "Your session has expired. Please sign in again.");
       setIsReLoginOpen(true);
@@ -78,9 +109,33 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
 
     window.addEventListener("inkguard:unauthorized", handleUnauthorized);
     return () => {
+      if (coldStartTimer) clearTimeout(coldStartTimer);
+      clearInterval(notifInterval);
       window.removeEventListener("inkguard:unauthorized", handleUnauthorized);
     };
   }, []);
+
+  const handleMarkNotificationRead = async (notif: NotificationItem) => {
+    try {
+      await api.markNotificationRead(notif.id);
+      setNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      if (notif.submission_id) {
+        setIsNotificationsOpen(false);
+        window.location.href = `/submission/?id=${notif.submission_id}`;
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await api.markAllNotificationsRead();
+      setNotifications([]);
+    } catch {
+      // ignore
+    }
+  };
 
   const handleSwitchDemoRole = async (user: DemoUser) => {
     try {
@@ -256,6 +311,17 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
 
         {/* 3. Main Workspace Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+          {/* Cold-Start UX Banner (Render free tier may take ~30 s on first load) */}
+          {isWakingUp && (
+            <div
+              id="cold-start-banner"
+              className="bg-[#FEF3F2] border-b border-[#FECDCA] text-[#B42318] px-4 py-2.5 text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all"
+            >
+              <span className="inline-block w-2 h-2 rounded-full bg-[#B42318] animate-ping" />
+              <span>Waking up… (Render free tier may take ~30 s on first load)</span>
+            </div>
+          )}
+
           {/* Top Bar Header */}
           <header className="h-16 bg-white border-b border-[#E2E5EA] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20">
             <div className="flex items-center gap-3">
@@ -269,10 +335,84 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
               {pageTitle && <h1 className="text-lg font-bold text-[#1F2A44] hidden sm:block">{pageTitle}</h1>}
             </div>
 
-            {/* Top Bar Right: ModeChip + Switch Demo Role */}
+            {/* Top Bar Right: ModeChip + Notifications + Switch Demo Role */}
             <div className="flex items-center gap-3">
               {/* ModeChip (SPEC Invariant) */}
               <ModeChip mode={aiMode} />
+
+              {/* Notification Bell (F-26) */}
+              <div className="relative">
+                <button
+                  type="button"
+                  id="nav-notification-bell"
+                  aria-label="View notifications"
+                  aria-expanded={isNotificationsOpen}
+                  onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                  className="relative p-2 rounded-lg border border-[#CBD2DC] bg-white hover:bg-[#F7F7F4] text-[#5B6475] hover:text-[#1F2A44] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
+                >
+                  <Bell className="w-4 h-4" />
+                  {notifications.length > 0 && (
+                    <span
+                      id="nav-notification-badge"
+                      className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-[#B42318] text-[9px] font-bold text-white shadow-xs leading-none"
+                    >
+                      {notifications.length > 9 ? "9+" : notifications.length}
+                    </span>
+                  )}
+                </button>
+
+                {isNotificationsOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-20"
+                      onClick={() => setIsNotificationsOpen(false)}
+                      aria-hidden="true"
+                    />
+                    <div
+                      role="region"
+                      aria-label="In-app notifications"
+                      className="absolute right-0 mt-2 w-80 rounded-xl bg-white border border-[#CBD2DC] shadow-xl p-3 z-30"
+                    >
+                      <div className="flex items-center justify-between border-b border-[#E2E5EA] pb-2 mb-2">
+                        <span className="text-xs font-bold text-[#1F2A44]">Notifications</span>
+                        {notifications.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleMarkAllNotificationsRead}
+                            className="text-[11px] font-medium text-[#0F766E] hover:underline"
+                          >
+                            Mark all as read
+                          </button>
+                        )}
+                      </div>
+
+                      {notifications.length === 0 ? (
+                        <div className="py-6 text-center text-xs text-[#5B6475]">
+                          No unread notifications
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-72 overflow-y-auto">
+                          {notifications.map((n) => (
+                            <div
+                              key={n.id}
+                              onClick={() => handleMarkNotificationRead(n)}
+                              className="p-2.5 rounded-lg border border-[#E2E5EA] hover:border-[#0F766E]/40 hover:bg-[#F7F7F4] transition-colors cursor-pointer text-left"
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-bold text-[#1F2A44]">{n.title}</span>
+                                <span className="text-[10px] text-[#5B6475]">
+                                  {new Date(n.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </span>
+                              </div>
+                              <p className="text-xs text-[#5B6475] leading-snug">{n.message}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
 
               {/* Instant "Switch Demo Role" Dropdown (For Judges) */}
               <div className="relative">
