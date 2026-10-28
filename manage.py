@@ -145,16 +145,13 @@ def cmd_warm_cache(args):
 
 def cmd_e2e(args):
     py = get_python()
-    base_url = args.base_url or "http://localhost:8000"
-    print(f"[Inkguard E2E] Running end-to-end golden path verification against {base_url}...")
-    script = (
-        f"import httpx; "
-        f"client = httpx.Client(base_url='{base_url}'); "
-        f"res = client.get('/api/v1/health'); "
-        f"assert res.status_code == 200, f'Health check failed: {{res.status_code}}'; "
-        f"print('E2E Golden path basic connectivity verified: ' + str(res.json()))"
-    )
-    run_cmd([py, "-c", script], cwd=ROOT_DIR)
+    print("[Inkguard E2E] Running end-to-end main journeys test suite (J1 - J9)...")
+    env = {}
+    if args.base_url:
+        env["E2E_BASE_URL"] = args.base_url
+        print(f"[Inkguard E2E] Targeting base URL: {args.base_url}")
+    test_args = [py, "-m", "pytest", "backend/tests/e2e", "-v"]
+    run_cmd(test_args, cwd=ROOT_DIR, env=env)
 
 
 def cmd_dev(args):
