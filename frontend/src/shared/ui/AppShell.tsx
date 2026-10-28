@@ -323,8 +323,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
           )}
 
           {/* Top Bar Header */}
-          <header className="h-16 bg-white border-b border-[#E2E5EA] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-20">
-            <div className="flex items-center gap-3">
+          <header className="h-16 bg-white border-b border-[#E2E5EA] px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 sticky top-0 z-20">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 aria-label="Open mobile navigation menu"
@@ -332,11 +332,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
               >
                 <Menu className="w-5 h-5" />
               </button>
-              {pageTitle && <h1 className="text-lg font-bold text-[#1F2A44] hidden sm:block">{pageTitle}</h1>}
+              {pageTitle && <h1 className="text-lg font-bold text-[#1F2A44] hidden sm:block truncate max-w-[200px] lg:max-w-none">{pageTitle}</h1>}
             </div>
 
             {/* Top Bar Right: ModeChip + Notifications + Switch Demo Role */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {/* ModeChip (SPEC Invariant) */}
               <ModeChip mode={aiMode} />
 
@@ -371,7 +371,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
                     <div
                       role="region"
                       aria-label="In-app notifications"
-                      className="absolute right-0 mt-2 w-80 rounded-xl bg-white border border-[#CBD2DC] shadow-xl p-3 z-30"
+                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] rounded-xl bg-white border border-[#CBD2DC] shadow-xl p-3 z-30"
                     >
                       <div className="flex items-center justify-between border-b border-[#E2E5EA] pb-2 mb-2">
                         <span className="text-xs font-bold text-[#1F2A44]">Notifications</span>
@@ -421,10 +421,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
                   onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
                   aria-expanded={isRoleDropdownOpen}
                   aria-haspopup="true"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#CBD2DC] bg-white hover:bg-[#F7F7F4] text-xs font-semibold text-[#1F2A44] shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
+                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#CBD2DC] bg-white hover:bg-[#F7F7F4] text-xs font-semibold text-[#1F2A44] shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E]"
                 >
                   <UserCheck className="w-3.5 h-3.5 text-[#0F766E]" />
-                  <span>Switch Role</span>
+                  <span className="hidden sm:inline">Switch Role</span>
+                  <span className="sm:hidden">Role</span>
                   <ChevronDown className="w-3.5 h-3.5 text-[#5B6475]" />
                 </button>
 
@@ -437,7 +438,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
                     />
                     <div
                       role="menu"
-                      className="absolute right-0 mt-2 w-72 rounded-xl bg-white border border-[#CBD2DC] shadow-xl p-2 z-30"
+                      className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-xl bg-white border border-[#CBD2DC] shadow-xl p-2 z-30"
                     >
                       <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#5B6475] border-b border-[#E2E5EA] mb-1">
                         1-Click Demo Role Switcher
@@ -478,7 +479,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, pageTitle }) => {
           </header>
 
           {/* 4. Page Main Content Target */}
-          <main id="main-content" tabIndex={-1} className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto outline-none">
+          <main id="main-content" tabIndex={-1} className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto outline-none overflow-x-hidden">
             {children}
           </main>
         </div>

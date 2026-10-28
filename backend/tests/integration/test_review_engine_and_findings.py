@@ -188,6 +188,7 @@ def test_safety_daily_cap_zero_forces_fallback():
     assert rev_res.status_code == 200
     rev = rev_res.json()
     assert rev["status"] == "completed"
+    assert rev_res.headers.get("x-llm-cap-reached") == "true" or rev_res.headers.get("X-LLM-Cap-Reached") == "true"
 
     # Reset daily cap
     client.put("/api/v1/settings", json={"llm_daily_cap": 100}, headers=h_admin)

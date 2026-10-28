@@ -103,6 +103,7 @@ function NewSubmissionContent() {
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sampleDropdownVal, setSampleDropdownVal] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -127,6 +128,21 @@ function NewSubmissionContent() {
     setChannel(s.channel);
     setContent(s.content);
     setError(null);
+    if (key === "S1") setSampleDropdownVal("claim");
+    else if (key === "S2") setSampleDropdownVal("banned");
+    else if (key === "S3") setSampleDropdownVal("clean");
+    else setSampleDropdownVal("");
+  };
+
+  const handleDropdownSampleSelect = (val: string) => {
+    setSampleDropdownVal(val);
+    if (val === "claim") {
+      applySample("S1");
+    } else if (val === "banned") {
+      applySample("S2");
+    } else if (val === "clean") {
+      applySample("S3");
+    }
   };
 
   useEffect(() => {
@@ -452,8 +468,8 @@ function NewSubmissionContent() {
                 </div>
               ) : (
                 /* Selected File Card */
-                <div className="bg-[#F0FDFA] border border-[#ABEFC6] rounded-xl p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
+                <div className="bg-[#F0FDFA] border border-[#ABEFC6] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
                     <div className="w-10 h-10 rounded-lg bg-[#0F766E] text-white flex items-center justify-center flex-shrink-0">
                       {isImageFile(file) ? (
                         <ImageIcon className="w-5 h-5" />
@@ -461,23 +477,23 @@ function NewSubmissionContent() {
                         <FileText className="w-5 h-5" />
                       )}
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs text-[#1F2A44] truncate">{file.name}</span>
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-[#ECFDF3] text-[#067647] border border-[#ABEFC6]">
-                          Ready to upload
+                          Ready
                         </span>
                       </div>
                       <p className="text-[11px] text-[#5B6475] mt-0.5">
                         {(file.size / (1024 * 1024)).toFixed(2)} MB &middot;{" "}
-                        {isImageFile(file) ? "Image asset (OCR + Palette + Logo)" : "Structured Document (DOCX/PDF)"}
+                        {isImageFile(file) ? "Image asset" : "Structured Document"}
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleRemoveFile}
-                    className="px-3 py-1.5 rounded-lg border border-[#CBD2DC] bg-white text-xs font-semibold text-[#B42318] hover:bg-[#FEF3F2] hover:border-[#FECDCA] flex items-center gap-1.5 transition-colors flex-shrink-0"
+                    className="w-full sm:w-auto justify-center px-3 py-1.5 rounded-lg border border-[#CBD2DC] bg-white text-xs font-semibold text-[#B42318] hover:bg-[#FEF3F2] hover:border-[#FECDCA] flex items-center gap-1.5 transition-colors flex-shrink-0"
                     title="Remove attached file and restore text input"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -506,13 +522,33 @@ function NewSubmissionContent() {
               </div>
             ) : (
               <div>
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                   <label htmlFor="sub-content" className="block text-xs font-bold text-[#1F2A44]">
                     Marketing Copy Content <span className="text-[#B42318]">*</span>
                   </label>
-                  <span className="text-[11px] font-mono text-[#5B6475]">
-                    {content.length} characters
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label htmlFor="try-a-sample-dropdown" className="text-xs font-semibold text-[#0F766E] flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Try a sample:</span>
+                    </label>
+                    <select
+                      id="try-a-sample-dropdown"
+                      aria-label="Try a sample brand copy snippet"
+                      value={sampleDropdownVal}
+                      onChange={(e) => handleDropdownSampleSelect(e.target.value)}
+                      className="text-xs border border-[#CBD2DC] rounded-lg px-2.5 py-1 bg-white text-[#1F2A44] font-medium focus:ring-2 focus:ring-[#0F766E] focus:outline-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="" disabled>
+                        Choose sample snippet...
+                      </option>
+                      <option value="claim">Claim Violation (100% cure &amp; miracle)</option>
+                      <option value="banned">Banned Term (&apos;serum&apos; &amp; off-tone)</option>
+                      <option value="clean">Clean Copy (Compliant Rosehip Concentrate)</option>
+                    </select>
+                    <span className="text-[11px] font-mono text-[#5B6475] hidden sm:inline">
+                      {content.length} chars
+                    </span>
+                  </div>
                 </div>
                 <textarea
                   id="sub-content"
@@ -543,9 +579,9 @@ function NewSubmissionContent() {
             )}
 
             {/* Form Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E2E5EA]">
-              <Link href="/submissions/">
-                <Button type="button" variant="ghost" size="md">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-[#E2E5EA]">
+              <Link href="/submissions/" className="w-full sm:w-auto">
+                <Button type="button" variant="ghost" size="md" className="w-full justify-center">
                   Cancel
                 </Button>
               </Link>
@@ -555,6 +591,7 @@ function NewSubmissionContent() {
                 size="md"
                 isLoading={isSubmitting}
                 disabled={isSubmitting}
+                className="w-full sm:w-auto justify-center"
                 rightIcon={file ? <FileUp className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
               >
                 {file ? "Upload Document & Proceed" : "Create Submission & Proceed"}

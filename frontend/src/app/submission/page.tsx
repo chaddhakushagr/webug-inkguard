@@ -590,7 +590,7 @@ function SubmissionDetailContent() {
           )}
 
           {/* Submission Header Card */}
-          <div className="bg-white rounded-xl border border-[#CBD2DC] p-6 shadow-xs">
+          <div className="bg-white rounded-xl border border-[#CBD2DC] p-4 sm:p-6 shadow-xs">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#E2E5EA]">
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -1461,11 +1461,12 @@ function SubmissionDetailContent() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#E2E5EA]">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2 border-t border-[#E2E5EA]">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
+                className="w-full sm:w-auto justify-center"
                 onClick={() => setNoteModalOpen(false)}
               >
                 Cancel
@@ -1474,6 +1475,7 @@ function SubmissionDetailContent() {
                 type="button"
                 variant={noteModalType === "approve" ? "primary" : "danger"}
                 size="sm"
+                className="w-full sm:w-auto justify-center"
                 onClick={executeModalAction}
                 isLoading={isActionPending}
                 disabled={isActionPending}

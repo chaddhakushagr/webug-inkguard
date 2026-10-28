@@ -32,6 +32,7 @@ import {
   Eye,
   AlertCircle,
   Calendar,
+  X,
 } from "lucide-react";
 import { AuthGuard } from "@/features/auth/AuthGuard";
 
@@ -113,6 +114,23 @@ export default function DashboardPage() {
   const [expiringFacts, setExpiringFacts] = useState<KBEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGuideDismissed, setIsGuideDismissed] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("inkguard_first_run_dismissed") === "true";
+      setIsGuideDismissed(dismissed);
+    }
+  }, []);
+
+  const handleDismissGuide = () => {
+    setIsGuideDismissed(true);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("inkguard_first_run_dismissed", "true");
+      } catch {}
+    }
+  };
 
   useEffect(() => {
     // 1. Sync user from session
@@ -176,6 +194,10 @@ export default function DashboardPage() {
     MarkedPublished: submissions.filter((s) => s.status === "Marked Published").length,
   };
 
+  // User submissions for first-run evaluation
+  const userSubmissions = submissions.filter((s) => s.creator_id === user?.id);
+  const showFirstRunGuide = !isLoading && userSubmissions.length === 0 && !isGuideDismissed;
+
   const handleLoadSample = (sampleId: string) => {
     window.location.href = `/submissions/new/?sample=${sampleId}`;
   };
@@ -232,6 +254,121 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
+
+          {/* First-Run Guide Welcome Card (Phase 7.1) */}
+          {showFirstRunGuide && (
+            <div
+              id="first-run-welcome-card"
+              role="region"
+              aria-label="Welcome and first-run guide"
+              className="relative overflow-hidden bg-gradient-to-br from-white via-[#F0FDFA]/40 to-[#F7F7F4] rounded-2xl border-2 border-[#0F766E]/40 p-6 sm:p-8 shadow-sm"
+            >
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0F766E]/10 text-[#0F766E] text-xs font-bold uppercase tracking-wider mb-2 border border-[#0F766E]/20">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>First-Run Guide</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#1F2A44] tracking-tight">
+                    Submit content &rarr; Review findings &rarr; Approve or fix
+                  </h2>
+                  <p className="text-xs sm:text-sm text-[#5B6475] mt-1 max-w-2xl">
+                    Get started with automated pre-publication brand governance. Evaluate your marketing copy against brand tone, banned terms, and clinical claim verification in three simple steps:
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  id="dismiss-first-run-guide-btn"
+                  onClick={handleDismissGuide}
+                  className="px-3 py-1.5 rounded-lg border border-[#CBD2DC] bg-white hover:bg-[#F7F7F4] text-xs font-semibold text-[#5B6475] hover:text-[#1F2A44] transition-colors flex items-center gap-1.5 flex-shrink-0 shadow-xs"
+                  title="Dismiss this guide permanently"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Dismiss permanently</span>
+                </button>
+              </div>
+
+              {/* Three-Step Flow */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Step 1: Submit Content */}
+                <div className="bg-white rounded-xl border border-[#CBD2DC] p-5 shadow-xs flex flex-col justify-between hover:border-[#0F766E] transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="w-8 h-8 rounded-full bg-[#0F766E] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                        1
+                      </span>
+                      <span className="text-[10px] font-mono font-bold uppercase text-[#0F766E] px-2 py-0.5 rounded bg-[#F0FDFA] border border-[#ABEFC6]">
+                        Step 1
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-[#1F2A44] mb-1.5">
+                      Submit content
+                    </h3>
+                    <p className="text-xs text-[#5B6475] leading-relaxed">
+                      Paste marketing copy directly or upload a document (.docx, .pdf) or image (.png, .jpg) to begin pre-publication governance.
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-[#E2E5EA]">
+                    <Link href="/submissions/new/">
+                      <Button variant="primary" size="sm" className="w-full justify-center">
+                        Start New Submission &rarr;
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Step 2: Review Findings */}
+                <div className="bg-white rounded-xl border border-[#CBD2DC] p-5 shadow-xs flex flex-col justify-between hover:border-[#0F766E] transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="w-8 h-8 rounded-full bg-[#1F2A44] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                        2
+                      </span>
+                      <span className="text-[10px] font-mono font-bold uppercase text-[#1F2A44] px-2 py-0.5 rounded bg-[#F7F7F4] border border-[#CBD2DC]">
+                        Step 2
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-[#1F2A44] mb-1.5">
+                      Review findings
+                    </h3>
+                    <p className="text-xs text-[#5B6475] leading-relaxed">
+                      Automated pipeline scans against brand tone guidelines, banned terms, accessibility contrast, and cited clinical evidence.
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-[#E2E5EA]">
+                    <span className="text-xs font-semibold text-[#5B6475] block text-center">
+                      Every finding cites exact sources
+                    </span>
+                  </div>
+                </div>
+
+                {/* Step 3: Approve or Fix */}
+                <div className="bg-white rounded-xl border border-[#CBD2DC] p-5 shadow-xs flex flex-col justify-between hover:border-[#0F766E] transition-colors">
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="w-8 h-8 rounded-full bg-[#067647] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                        3
+                      </span>
+                      <span className="text-[10px] font-mono font-bold uppercase text-[#067647] px-2 py-0.5 rounded bg-[#ECFDF3] border border-[#ABEFC6]">
+                        Step 3
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-[#1F2A44] mb-1.5">
+                      Approve or fix
+                    </h3>
+                    <p className="text-xs text-[#5B6475] leading-relaxed">
+                      Accept 1-click suggested replacements, dismiss with documented rationale, or advance through reviewer workflow stages.
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-[#E2E5EA]">
+                    <span className="text-xs font-semibold text-[#067647] block text-center">
+                      Human in the loop always
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && <ErrorState message={error} onRetry={() => window.location.reload()} />}
 

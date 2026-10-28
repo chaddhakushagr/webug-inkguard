@@ -14,6 +14,18 @@ from app.ports.llm import LLMPort
 from app.config import settings
 
 
+import concurrent.futures
+
+def execute_with_30s_timeout(func, *args, timeout: float = 30.0, **kwargs):
+    """Executes func with an enforced 30-second timeout wrapper."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(func, *args, **kwargs)
+        try:
+            return future.result(timeout=timeout)
+        except concurrent.futures.TimeoutError:
+            raise TimeoutError(f"External call exceeded {timeout:.0f}-second timeout limit.")
+
+
 class OpenAICompatibleLLMAdapter:
     """OpenAI-compatible adapter supporting Google AI Studio and Ollama."""
 
@@ -22,7 +34,7 @@ class OpenAICompatibleLLMAdapter:
         base_url: Optional[str] = None,
         api_key: Optional[str] = None,
         model: Optional[str] = None,
-        timeout: float = 15.0,
+        timeout: float = 30.0,
         max_retries: int = 3,
     ):
         self.base_url = (base_url or settings.LLM_BASE_URL).rstrip("/")
@@ -92,13 +104,19 @@ class OpenAICompatibleLLMAdapter:
             "Authorization": f"Bearer {self.api_key}",
         }
 
-        # Safe logging without exposing secrets
-        # print(f"[LLM Request] Model: {self.model} | Chars sent: {len(json.dumps(payload))}")
-
+        start_time = time.time()
+        overall_timeout = 30.0
         last_error = None
+
         for attempt in range(1, self.max_retries + 1):
+            elapsed = time.time() - start_time
+            remaining = overall_timeout - elapsed
+            if remaining <= 0:
+                raise TimeoutError(f"External LLM call exceeded 30s timeout limit (elapsed: {elapsed:.2f}s)")
+
+            per_request_timeout = min(self.timeout, max(0.5, remaining))
             try:
-                with httpx.Client(timeout=self.timeout) as client:
+                with httpx.Client(timeout=per_request_timeout) as client:
                     resp = client.post(endpoint, json=payload, headers=headers)
 
                     if resp.status_code == 200:
@@ -107,12 +125,14 @@ class OpenAICompatibleLLMAdapter:
                         return json.loads(raw_content)
                     elif resp.status_code in (429, 500, 502, 503, 504):
                         last_error = f"HTTP {resp.status_code}: {resp.text}"
-                        time.sleep(0.5 * (2 ** (attempt - 1)))
+                        sleep_time = min(0.5 * (2 ** (attempt - 1)), max(0.1, (overall_timeout - (time.time() - start_time)) / 2))
+                        time.sleep(sleep_time)
                     else:
                         raise RuntimeError(f"LLM API Error {resp.status_code}: {resp.text}")
             except (httpx.TimeoutException, httpx.NetworkError) as e:
                 last_error = str(e)
-                time.sleep(0.5 * (2 ** (attempt - 1)))
+                sleep_time = min(0.5 * (2 ** (attempt - 1)), max(0.1, (overall_timeout - (time.time() - start_time)) / 2))
+                time.sleep(sleep_time)
 
         raise RuntimeError(f"LLM call failed after {self.max_retries} attempts. Last error: {last_error}")
 
@@ -125,7 +145,7 @@ class OpenAICompatibleLLMAdapter:
     ) -> Dict[str, Any]:
         system_prompt = self._load_prompt(f"analysis.{prompt_version}.md")
         payload = self._prepare_payload(sanitised_text, kb_entries, system_prompt)
-        return self._execute_with_retry(payload)
+        return execute_with_30s_timeout(self._execute_with_retry, payload, timeout=30.0)
 
     def suggest_fixes(
         self,
@@ -152,7 +172,7 @@ class OpenAICompatibleLLMAdapter:
             "temperature": 0.0,
             "response_format": {"type": "json_object"},
         }
-        res = self._execute_with_retry(payload)
+        res = execute_with_30s_timeout(self._execute_with_retry, payload, timeout=30.0)
         return res if isinstance(res, list) else res.get("suggestions", [])
 
     def verify(
@@ -197,7 +217,7 @@ class OpenAICompatibleLLMAdapter:
             "temperature": 0.0,
             "response_format": {"type": "json_object"},
         }
-        res = self._execute_with_retry(payload)
+        res = execute_with_30s_timeout(self._execute_with_retry, payload, timeout=30.0)
         return {
             "verdict": res.get("verdict", "supported"),
             "reason": res.get("reason", "Verification completed"),

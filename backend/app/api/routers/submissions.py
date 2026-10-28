@@ -1,7 +1,7 @@
 import hashlib
 import uuid
-from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, Depends, status, Query, BackgroundTasks, UploadFile, File, Form, Response
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, HTTPException, Depends, status, Query, BackgroundTasks, UploadFile, File, Form, Response, Header
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -231,6 +231,8 @@ def get_dashboard_counts(
 @router.post("/submissions", response_model=SubmissionDetail)
 def create_submission(
     req: SubmissionCreate,
+    idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
+    x_idempotency_key: Optional[str] = Header(None, alias="X-Idempotency-Key"),
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
 ):
@@ -252,6 +254,25 @@ def create_submission(
         )
     content_hash = hashlib.sha256(content_text.encode("utf-8")).hexdigest()
     now = datetime.now(timezone.utc)
+
+    # Idempotency / 60-second deduplication:
+    # Submitting the same content twice within 60 seconds returns the existing submission_id, not a duplicate.
+    cutoff_time = now - timedelta(seconds=60)
+    existing_version = (
+        db.query(SubmissionVersion)
+        .join(Submission, Submission.id == SubmissionVersion.submission_id)
+        .filter(
+            Submission.creator_id == current_user.id,
+            SubmissionVersion.content_hash == content_hash,
+            Submission.created_at >= cutoff_time,
+        )
+        .order_by(Submission.created_at.desc())
+        .first()
+    )
+    if existing_version:
+        existing_sub = db.query(Submission).filter(Submission.id == existing_version.submission_id).first()
+        if existing_sub:
+            return build_submission_detail(existing_sub, current_user, db)
 
     normalized_ch = normalize_channel(req.channel)
     risk_tier = get_risk_tier_for_channel(normalized_ch)
@@ -1047,6 +1068,7 @@ def delete_submission(
 def trigger_review(
     submission_id: str,
     background_tasks: BackgroundTasks,
+    response: Response,
     sync: bool = False,
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
@@ -1119,6 +1141,11 @@ def trigger_review(
         claim_confidence_threshold=settings.CLAIM_CONFIDENCE_THRESHOLD,
     )
 
+    cap_setting = store.get_setting("llm_daily_cap", settings.LLM_DAILY_CAP)
+    daily_cap = int(cap_setting) if cap_setting is not None else settings.LLM_DAILY_CAP
+    live_calls_today = store.get_daily_live_calls_count()
+    is_cap_reached = (daily_cap <= 0 or live_calls_today >= daily_cap)
+
     if sync:
         orchestrator.run_review(
             review_id=rev.id,
@@ -1128,6 +1155,8 @@ def trigger_review(
             user_max_tier=current_user.max_tier,
         )
         db.refresh(rev)
+        if is_cap_reached or (rev.stats and "cap reached" in str(rev.stats.get("fallback_reason", "")).lower()):
+            response.headers["X-LLM-Cap-Reached"] = "true"
         count = db.query(Finding).filter(Finding.review_id == rev.id).count()
         return ReviewResponse(
             id=rev.id,
@@ -1146,6 +1175,9 @@ def trigger_review(
         )
 
     # Background asynchronous task execution
+    if is_cap_reached:
+        response.headers["X-LLM-Cap-Reached"] = "true"
+
     background_tasks.add_task(
         orchestrator.run_review,
         review_id=rev.id,
@@ -1172,12 +1204,16 @@ def trigger_review(
 @router.get("/reviews/{review_id}", response_model=ReviewResponse)
 def get_review(
     review_id: str,
+    response: Response,
     db: Session = Depends(get_db),
     current_user: AuthenticatedUser = Depends(get_current_user),
 ):
     rev = db.query(Review).filter(Review.id == review_id).first()
     if not rev:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+
+    if rev.stats and "cap reached" in str(rev.stats.get("fallback_reason", "")).lower():
+        response.headers["X-LLM-Cap-Reached"] = "true"
 
     count = db.query(Finding).filter(Finding.review_id == rev.id).count()
     fallback_reason = None

@@ -356,9 +356,17 @@ class LLMVerifierStage:
                         prompt_version=self.prompt_version,
                     )
                 except Exception as e:
-                    # AI down, timeout, or cap reached: fallback gracefully without error
-                    verdict_result = deterministic_verify(finding.to_dict(), finding.excerpt, entry)
-                    verdict_result["reason"] = f"Fallback: {verdict_result.get('reason', '')}"
+                    err_msg = str(e).lower()
+                    if "timeout" in err_msg or "timed out" in err_msg or isinstance(e, TimeoutError):
+                        # Safe fallback: finding stays with needs_human_judgment, no 500
+                        verdict_result = {
+                            "verdict": "unsure",
+                            "reason": f"Verifier timeout (exceeded 30s) — fallback applied; human judgment required.",
+                        }
+                    else:
+                        # AI down or cap reached: deterministic fallback
+                        verdict_result = deterministic_verify(finding.to_dict(), finding.excerpt, entry)
+                        verdict_result["reason"] = f"Fallback: {verdict_result.get('reason', '')}"
             else:
                 # Mock or rules_only mode
                 verdict_result = deterministic_verify(finding.to_dict(), finding.excerpt, entry)

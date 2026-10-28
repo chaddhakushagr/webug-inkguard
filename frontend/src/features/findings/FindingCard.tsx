@@ -117,7 +117,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
       aria-label={`${finding.severity} severity finding: ${finding.explanation}`}
       onClick={() => onSelect(finding.id)}
       onFocus={() => onSelect(finding.id)}
-      className={`p-4 rounded-xl border bg-white shadow-xs transition-all cursor-pointer ${cardBorderClass} ${statusBorderColor} ${
+      className={`p-3.5 sm:p-4 rounded-xl border bg-white shadow-xs transition-all cursor-pointer overflow-hidden ${cardBorderClass} ${statusBorderColor} ${
         isSelected
           ? "ring-2 ring-[#0F766E] border-[#0F766E] shadow-sm"
           : "border-[#CBD2DC] hover:border-[#CBD2DC]/80"
@@ -331,6 +331,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
               type="button"
               variant="ghost"
               size="sm"
+              className="flex-1 sm:flex-none justify-center"
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenEscalate(finding);
@@ -347,6 +348,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
               type="button"
               variant="secondary"
               size="sm"
+              className="flex-1 sm:flex-none justify-center"
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenDismiss(finding);
@@ -363,6 +365,7 @@ export const FindingCard: React.FC<FindingCardProps> = ({
               type="button"
               variant="primary"
               size="sm"
+              className="flex-1 sm:flex-none justify-center"
               onClick={(e) => {
                 e.stopPropagation();
                 onAccept(finding.id);
