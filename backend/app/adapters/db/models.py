@@ -10,6 +10,7 @@ from sqlalchemy import (
     JSON,
     ForeignKey,
     Text,
+    LargeBinary,
 )
 from sqlalchemy.orm import relationship
 from app.adapters.db.session import Base
@@ -149,6 +150,7 @@ class Finding(Base):
     span_end = Column(Integer, nullable=False)
     excerpt = Column(Text, nullable=False)
     cited_entry_id = Column(String(36), nullable=True)
+    cited_entry_code = Column(String(50), nullable=True)
     cited_entry_version = Column(Integer, nullable=True)
     claim_verdict = Column(String(50), nullable=True)  # Supported, Contradicted, Unverified, Expired
     is_policy = Column(Boolean, default=True)
@@ -157,8 +159,23 @@ class Finding(Base):
     suggested_fix = Column(Text, nullable=True)
     verifier_verdict = Column(String(32), nullable=True)
     verifier_reason = Column(Text, nullable=True)
+    location = Column(String(255), nullable=True)
     status = Column(String(50), default="open")  # open, accepted, dismissed, escalated
     is_synthetic = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+
+
+class UploadedDocument(Base):
+    __tablename__ = "uploaded_documents"
+
+    id = Column(String(36), primary_key=True, default=get_uuid)
+    submission_id = Column(String(36), ForeignKey("submissions.id"), index=True, nullable=False)
+    submission_version_id = Column(String(36), ForeignKey("submission_versions.id"), index=True, nullable=False)
+    filename = Column(String(255), nullable=False)
+    content_type = Column(String(100), nullable=False)
+    file_size = Column(Integer, nullable=False)
+    sha256 = Column(String(64), nullable=False)
+    data = Column(LargeBinary, nullable=False)
     created_at = Column(DateTime(timezone=True), default=get_utc_now)
 
 

@@ -1,7 +1,7 @@
 import hashlib
 import uuid
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, Depends, status, Query, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, status, Query, BackgroundTasks, UploadFile, File, Form, Response
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -26,12 +26,15 @@ from app.adapters.db.models import (
     Review,
     AICall,
     Team,
+    UploadedDocument,
 )
 from app.adapters.db.audit import record_audit
 from app.adapters.retrieval.bm25 import BM25Retriever
 from app.adapters.llm import get_llm_adapter
 from app.adapters.db.review_store import SqlAlchemyReviewStore
 from app.application.review import ReviewOrchestrator
+from app.adapters.documents.extractor import DocumentExtractor
+from app.domain.documents.models import DocumentValidationError
 from app.config import settings
 from app.api.dependencies import get_current_user, require_role, AuthenticatedUser
 from app.domain.workflow.permissions import (
@@ -132,6 +135,7 @@ def build_submission_detail(
         published_at=sub.published_at,
         is_synthetic=sub.is_synthetic,
         allowed_actions=actions,
+        source=current_ver.source if current_ver else None,
         created_at=sub.created_at,
         updated_at=sub.updated_at,
     )
@@ -295,6 +299,203 @@ def create_submission(
     return build_submission_detail(sub, current_user, db)
 
 
+@router.post("/submissions/upload", response_model=SubmissionDetail)
+async def upload_document_submission(
+    file: UploadFile = File(...),
+    title: Optional[str] = Form(None),
+    channel: str = Form("web"),
+    team_id: Optional[str] = Form(None),
+    sync_review: bool = Form(False),
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user),
+):
+    # 1. Read raw upload bytes
+    try:
+        file_bytes = await file.read()
+    except Exception as read_err:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Failed to read uploaded file: {str(read_err)}",
+        )
+
+    if not file_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="File is empty (0 bytes).",
+        )
+
+    # 2. Extract structured content behind DocumentExtractor port
+    extractor = DocumentExtractor(timeout_seconds=10.0)
+    try:
+        doc_structure = extractor.extract(file_bytes, file.filename or "uploaded_document")
+    except DocumentValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=exc.message,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Document parsing error: {str(exc)}",
+        )
+
+    now = datetime.now(timezone.utc)
+    risk_tier = get_risk_tier_for_channel(channel)
+    extracted_text = doc_structure.full_text.strip()
+    if not extracted_text:
+        extracted_text = f"[Document extracted from {file.filename} with {doc_structure.page_count} page(s)]"
+
+    if len(extracted_text) > settings.MAX_CONTENT_CHARS:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Extracted content length ({len(extracted_text)}) exceeds limit of {settings.MAX_CONTENT_CHARS} characters.",
+        )
+
+    content_hash = hashlib.sha256(extracted_text.encode("utf-8")).hexdigest()
+    file_sha256 = hashlib.sha256(file_bytes).hexdigest()
+
+    # Determine title
+    sub_title = (title or "").strip()
+    if not sub_title and doc_structure.title:
+        sub_title = doc_structure.title.strip()
+    if not sub_title:
+        clean_fn = (file.filename or "Document").rsplit(".", 1)[0]
+        sub_title = clean_fn.replace("_", " ").replace("-", " ").title()
+
+    team_val = team_id or getattr(current_user, "team_id", None) or getattr(current_user, "team", None)
+    resolved_team_id = None
+    if team_val:
+        t_obj = db.query(Team).filter((Team.id == team_val) | (Team.name == team_val)).first()
+        resolved_team_id = t_obj.id if t_obj else None
+
+    # 3. Create Submission record
+    sub = Submission(
+        title=sub_title,
+        channel=channel.strip().lower(),
+        risk_tier=risk_tier,
+        status="Draft",
+        creator_id=current_user.id,
+        team_id=resolved_team_id,
+        is_synthetic=True,
+        created_at=now,
+        updated_at=now,
+    )
+    db.add(sub)
+    db.flush()
+
+    # 4. Create SubmissionVersion record with source="upload_docx", "upload_pdf", or "upload_image"
+    if doc_structure.format == "image":
+        source_type = "upload_image"
+    else:
+        source_type = f"upload_{doc_structure.format}"
+
+    ver = SubmissionVersion(
+        submission_id=sub.id,
+        version_no=1,
+        content=extracted_text,
+        content_hash=content_hash,
+        created_by=current_user.id,
+        source=source_type,
+        created_at=now,
+    )
+    db.add(ver)
+    db.flush()
+
+    sub.current_version_id = ver.id
+
+    # 5. Persist original upload bytes in database blob table
+    if doc_structure.format == "image":
+        if file.content_type and file.content_type.startswith("image/"):
+            content_type = file.content_type
+        elif file_bytes.startswith(b"\x89PNG"):
+            content_type = "image/png"
+        elif file_bytes.startswith(b"\xff\xd8\xff"):
+            content_type = "image/jpeg"
+        elif file_bytes.startswith(b"RIFF") and len(file_bytes) >= 12 and file_bytes[8:12] == b"WEBP":
+            content_type = "image/webp"
+        elif file_bytes.startswith(b"GIF87a") or file_bytes.startswith(b"GIF89a"):
+            content_type = "image/gif"
+        else:
+            content_type = "image/png"
+    elif doc_structure.format == "pdf":
+        content_type = file.content_type or "application/pdf"
+    else:
+        content_type = file.content_type or "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+    default_ext = "png" if doc_structure.format == "image" else doc_structure.format
+    uploaded_doc = UploadedDocument(
+        submission_id=sub.id,
+        submission_version_id=ver.id,
+        filename=file.filename or f"upload.{default_ext}",
+        content_type=content_type,
+        file_size=len(file_bytes),
+        sha256=file_sha256,
+        data=file_bytes,
+        created_at=now,
+    )
+    db.add(uploaded_doc)
+    db.commit()
+    db.refresh(sub)
+
+    record_audit(
+        db=db,
+        action="submission_upload",
+        entity_type="submission",
+        entity_id=sub.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role,
+        details={
+            "filename": file.filename,
+            "format": doc_structure.format,
+            "file_size": len(file_bytes),
+            "sha256": file_sha256,
+            "source": source_type,
+        },
+    )
+
+    # 6. Optionally trigger review synchronously or asynchronously
+    if sync_review:
+        rev = Review(
+            submission_version_id=ver.id,
+            status="running",
+            mode=settings.LLM_MODE,
+            provider="mock" if settings.LLM_MODE == "mock" else "Google AI Studio",
+            model="mock-pipeline-v1" if settings.LLM_MODE == "mock" else settings.LLM_MODEL,
+            prompt_version="v1",
+            kb_snapshot=[],
+            redaction_log=[],
+            stats={},
+            started_at=now,
+        )
+        db.add(rev)
+        db.commit()
+        db.refresh(rev)
+
+        retriever = BM25Retriever()
+        llm_adapter = get_llm_adapter()
+        store = SqlAlchemyReviewStore(SessionLocal)
+        orchestrator = ReviewOrchestrator(
+            store=store,
+            retriever=retriever,
+            llm_adapter=llm_adapter,
+            default_mode=settings.LLM_MODE,
+            daily_cap=settings.LLM_DAILY_CAP,
+            model_name=settings.LLM_MODEL,
+            verifier_enabled=settings.VERIFIER_ENABLED,
+            claim_confidence_threshold=settings.CLAIM_CONFIDENCE_THRESHOLD,
+        )
+        orchestrator.run_review(
+            review_id=rev.id,
+            submission_id=sub.id,
+            user_id=current_user.id,
+            user_role=current_user.role,
+            user_max_tier=current_user.max_tier,
+        )
+        db.refresh(sub)
+
+    return build_submission_detail(sub, current_user, db)
+
+
 @router.get("/submissions/{submission_id}", response_model=SubmissionDetail)
 def get_submission(
     submission_id: str,
@@ -305,6 +506,35 @@ def get_submission(
     if not sub:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
     return build_submission_detail(sub, current_user, db)
+
+
+@router.get("/submissions/{submission_id}/document")
+def download_submission_document(
+    submission_id: str,
+    db: Session = Depends(get_db),
+    current_user: AuthenticatedUser = Depends(get_current_user),
+):
+    sub = db.query(Submission).filter(Submission.id == submission_id).first()
+    if not sub:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
+
+    up_doc = (
+        db.query(UploadedDocument)
+        .filter(UploadedDocument.submission_id == submission_id)
+        .order_by(UploadedDocument.created_at.desc())
+        .first()
+    )
+    if not up_doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No uploaded document exists for this submission.",
+        )
+
+    return Response(
+        content=up_doc.data,
+        media_type=up_doc.content_type,
+        headers={"Content-Disposition": f'attachment; filename="{up_doc.filename}"'},
+    )
 
 
 @router.put("/submissions/{submission_id}/content", response_model=SubmissionDetail)

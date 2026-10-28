@@ -96,60 +96,73 @@ class ReviewOrchestrator:
             mode=effective_mode,
             kb_pool=kb_pool,
             metadata={"submission_id": submission_id},
+            document_structure=sub.get("document_structure"),
         )
 
+        skip_text_pipeline = False
+        doc = getattr(context, "document_structure", None)
+        if (doc and getattr(doc, "format", "") == "image" and not getattr(doc, "ocr_applied", False)) or (
+            context.text and context.text.startswith("[Image submitted. OCR unavailable")
+        ):
+            skip_text_pipeline = True
+
         try:
-            # Step A: extracting (Extract + Sanitise)
-            self.store.update_review_progress(review_id, "extracting")
-            context = ExtractStage().process(context)
-            context = SanitiseStage().process(context)
+            if skip_text_pipeline:
+                # When OCR is unavailable, skip text pipeline; visual checks (palette, logo) still run
+                self.store.update_review_progress(review_id, "rule_checks")
+                context = A11yChecksStage().process(context)
+            else:
+                # Step A: extracting (Extract + Sanitise)
+                self.store.update_review_progress(review_id, "extracting")
+                context = ExtractStage().process(context)
+                context = SanitiseStage().process(context)
 
-            # Step B: rule_checks (RuleChecks + A11yChecks)
-            self.store.update_review_progress(review_id, "rule_checks")
-            context = RuleChecksStage().process(context)
-            context = A11yChecksStage().process(context)
+                # Step B: rule_checks (RuleChecks + A11yChecks)
+                self.store.update_review_progress(review_id, "rule_checks")
+                context = RuleChecksStage().process(context)
+                context = A11yChecksStage().process(context)
 
-            # Step C: retrieving (In-process BM25)
-            self.store.update_review_progress(review_id, "retrieving")
-            context = RetrieveStage(self.retriever).process(context)
+                # Step C: retrieving (In-process BM25)
+                self.store.update_review_progress(review_id, "retrieving")
+                context = RetrieveStage(self.retriever).process(context)
 
-            # Step D: analysing (LLM analysis with partial survival on error/timeout)
-            self.store.update_review_progress(review_id, "analysing")
-            if context.mode != "rules_only":
-                try:
-                    context = AnalyseStage(self.llm).process(context)
-                except Exception as e:
-                    fallback_reason = f"Model analysis error or timeout: {str(e)}. Rule findings preserved."
+                # Step D: analysing (LLM analysis with partial survival on error/timeout)
+                self.store.update_review_progress(review_id, "analysing")
+                if context.mode != "rules_only":
+                    try:
+                        context = AnalyseStage(self.llm).process(context)
+                    except Exception as e:
+                        fallback_reason = f"Model analysis error or timeout: {str(e)}. Rule findings preserved."
 
-            # Filter low-confidence AI claim and tone findings before guardrails
-            context = ConfidenceFilterStage(threshold=self.claim_confidence_threshold).process(context)
+                # Filter low-confidence AI claim and tone findings before guardrails
+                context = ConfidenceFilterStage(threshold=self.claim_confidence_threshold).process(context)
 
-            # Step E: finalising (Guardrails + Verifier + Suggestions)
-            self.store.update_review_progress(review_id, "finalising")
-            context = GuardrailsStage().process(context)
+                # Step E: finalising (Guardrails + Verifier + Suggestions)
+                self.store.update_review_progress(review_id, "finalising")
+                context = GuardrailsStage().process(context)
 
-            is_verifier_active = bool(self.store.get_setting("verifier_enabled", self.verifier_enabled))
-            if is_verifier_active:
-                context = LLMVerifierStage(llm_adapter=self.llm, enabled=True).process(context)
+                is_verifier_active = bool(self.store.get_setting("verifier_enabled", self.verifier_enabled))
+                if is_verifier_active:
+                    context = LLMVerifierStage(llm_adapter=self.llm, enabled=True).process(context)
 
-            # Generate suggestions if LLM is active
-            if context.mode != "rules_only":
-                try:
-                    findings_needing_sugg = [f.to_dict() for f in context.findings if not f.suggested_fix]
-                    if findings_needing_sugg:
-                        sugg_list = self.llm.suggest_fixes(
-                            sanitised_text=context.sanitised_text,
-                            findings=findings_needing_sugg,
-                            kb_entries=context.kb_retrieved,
-                        )
-                        sugg_map = {s["finding_id"]: s["suggested_fix"] for s in sugg_list if "finding_id" in s}
-                        for f in context.findings:
-                            if f.id in sugg_map:
-                                f.suggested_fix = sugg_map[f.id]
-                        context = SuggestionValidatorStage().process(context)
-                except Exception as e:
-                    # Suggestions fail gracefully without failing review
-                    pass
+                # Generate suggestions if LLM is active
+                if context.mode != "rules_only":
+                    try:
+                        findings_needing_sugg = [f.to_dict() for f in context.findings if not f.suggested_fix]
+                        if findings_needing_sugg:
+                            sugg_list = self.llm.suggest_fixes(
+                                sanitised_text=context.sanitised_text,
+                                findings=findings_needing_sugg,
+                                kb_entries=context.kb_retrieved,
+                            )
+                            sugg_map = {s["finding_id"]: s["suggested_fix"] for s in sugg_list if "finding_id" in s}
+                            for f in context.findings:
+                                if f.id in sugg_map:
+                                    f.suggested_fix = sugg_map[f.id]
+                            context = SuggestionValidatorStage().process(context)
+                    except Exception as e:
+                        # Suggestions fail gracefully without failing review
+                        pass
 
             elapsed_ms = int((time.perf_counter() - start_time) * 1000)
             stats = {
@@ -159,10 +172,18 @@ class ReviewOrchestrator:
                 "latency_ms": elapsed_ms,
             }
 
-            # Map KB codes to IDs
+            # Map KB codes to IDs and map every finding span to a location
             code_to_entry = {e.get("code"): e for e in kb_pool if "code" in e}
             serialised_findings = []
             for item in context.findings:
+                if not item.location:
+                    if getattr(context, "document_structure", None):
+                        item.location = context.document_structure.find_location(item.span_start, item.span_end)
+                    else:
+                        prefix = (context.text or "")[:item.span_start]
+                        p_num = len(prefix.split("\n\n"))
+                        item.location = f"Paragraph {p_num}"
+
                 d = item.to_dict()
                 if item.cited_entry_code and item.cited_entry_code in code_to_entry:
                     matched = code_to_entry[item.cited_entry_code]

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -21,7 +21,16 @@ import {
   ShieldAlert,
   Info,
   CheckCircle2,
+  UploadCloud,
+  FileText,
+  Image as ImageIcon,
+  X,
+  AlertCircle,
+  FileUp,
 } from "lucide-react";
+
+const ALLOWED_EXTENSIONS = [".docx", ".pdf", ".png", ".jpg", ".jpeg", ".webp"];
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 const SAMPLES: Record<
   string,
@@ -90,8 +99,12 @@ function NewSubmissionContent() {
   const [title, setTitle] = useState("");
   const [channel, setChannel] = useState("social");
   const [content, setContent] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const getRiskTier = (ch: string): "low" | "medium" | "high" => {
     if (ch === "press_release") return "high";
@@ -101,9 +114,15 @@ function NewSubmissionContent() {
 
   const currentRisk = getRiskTier(channel);
 
+  const isImageFile = (f: File) => {
+    const ext = "." + f.name.split(".").pop()?.toLowerCase();
+    return [".png", ".jpg", ".jpeg", ".webp"].includes(ext) || f.type.startsWith("image/");
+  };
+
   const applySample = (key: string) => {
     const s = SAMPLES[key];
     if (!s) return;
+    setFile(null); // Clear any chosen file to ensure only text is active
     setTitle(s.title);
     setChannel(s.channel);
     setContent(s.content);
@@ -116,27 +135,140 @@ function NewSubmissionContent() {
     }
   }, [sampleParam]);
 
+  const handleFileValidationAndSet = (selectedFile: File) => {
+    setError(null);
+
+    // 1. Check size (5 MB limit)
+    if (selectedFile.size > MAX_FILE_SIZE_BYTES) {
+      const mb = (selectedFile.size / (1024 * 1024)).toFixed(1);
+      const msg = `File is too large (${mb} MB). Maximum allowed size is 5 MB.`;
+      setError(msg);
+      toast(msg, "error");
+      return false;
+    }
+
+    // 2. Check extension
+    const ext = "." + selectedFile.name.split(".").pop()?.toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      const msg = `Unsupported file format (${ext}). Allowed formats: ${ALLOWED_EXTENSIONS.join(", ")}`;
+      setError(msg);
+      toast(msg, "error");
+      return false;
+    }
+
+    // Set file and collapse text field
+    setFile(selectedFile);
+    setContent(""); // Clear content so we never send both
+
+    // Auto-populate title if empty
+    if (!title.trim()) {
+      const cleanName = selectedFile.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[-_]/g, " ")
+        .trim();
+      if (cleanName) {
+        setTitle(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
+      }
+    }
+
+    toast(`Attached ${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)`, "info");
+    return true;
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileValidationAndSet(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileValidationAndSet(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    setError(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      setError("Please provide both a title and copy content.");
-      return;
-    }
-    setIsSubmitting(true);
     setError(null);
-    try {
-      const sub = await api.createSubmission({
-        title: title.trim(),
-        channel,
-        content: content.trim(),
-      });
-      toast("Draft submission created successfully.", "success");
-      window.location.href = `/submission/?id=${sub.id}`;
-    } catch (err: any) {
-      const errMsg = err.message || "Failed to create submission";
-      setError(errMsg);
-      toast(errMsg, "error");
-      setIsSubmitting(false);
+
+    // INVARIANT: Never send both file and text simultaneously.
+    if (file) {
+      if (!title.trim()) {
+        setError("Please provide a title for this file submission.");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("title", title.trim());
+        formData.append("channel", channel);
+
+        const sub = await api.uploadSubmission(formData);
+        toast("Document uploaded and structured successfully.", "success");
+        window.location.href = `/submission/?id=${sub.id}`;
+      } catch (err: any) {
+        let errMsg = err.message || "Failed to upload document.";
+        if (err.status === 413 || errMsg.toLowerCase().includes("too large") || errMsg.toLowerCase().includes("limit")) {
+          errMsg = "File is too large (exceeds the 5 MB limit). Please compress the file and retry.";
+        } else if (
+          err.status === 422 ||
+          errMsg.toLowerCase().includes("unsupported") ||
+          errMsg.toLowerCase().includes("corrupted") ||
+          errMsg.toLowerCase().includes("parsing")
+        ) {
+          errMsg = `Document error: ${errMsg}. Allowed formats: .docx, .pdf, .png, .jpg, .jpeg, .webp`;
+        } else if (err.status >= 500) {
+          errMsg = "Server error occurred while parsing document. Please check the file and try again.";
+        }
+        setError(errMsg);
+        toast(errMsg, "error");
+        setIsSubmitting(false);
+      }
+    } else {
+      // Pure Text Submission
+      if (!title.trim() || !content.trim()) {
+        setError("Please provide both a title and marketing copy content, or upload a document/image above.");
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const sub = await api.createSubmission({
+          title: title.trim(),
+          channel,
+          content: content.trim(),
+        });
+        toast("Draft submission created successfully.", "success");
+        window.location.href = `/submission/?id=${sub.id}`;
+      } catch (err: any) {
+        const errMsg = err.message || "Failed to create submission";
+        setError(errMsg);
+        toast(errMsg, "error");
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -154,7 +286,7 @@ function NewSubmissionContent() {
                 </h1>
               </div>
               <p className="mt-1 text-xs sm:text-sm text-[#5B6475]">
-                Author new copy or pick one of the 5 benchmark evaluation samples.
+                Submit copy directly, upload a document (Word, PDF), attach a brand image, or load a benchmark sample.
               </p>
             </div>
             <Link href="/submissions/">
@@ -164,7 +296,7 @@ function NewSubmissionContent() {
             </Link>
           </div>
 
-          {/* Quick Sample Selector (SPEC Section 9 & 10) */}
+          {/* Quick Sample Selector (Disabled when file is selected) */}
           <div className="bg-white rounded-xl border border-[#CBD2DC] p-5 shadow-xs">
             <div className="flex items-center justify-between border-b border-[#E2E5EA] pb-3 mb-4">
               <div className="flex items-center gap-2">
@@ -173,7 +305,9 @@ function NewSubmissionContent() {
                   One-Click Benchmark Samples (S1 to S5)
                 </h2>
               </div>
-              <span className="text-[11px] text-[#5B6475]">Instant copy loader</span>
+              <span className="text-[11px] text-[#5B6475]">
+                {file ? "Clicking a sample switches to text mode" : "Instant copy loader"}
+              </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
@@ -206,8 +340,9 @@ function NewSubmissionContent() {
           {/* New Submission Form */}
           <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-[#CBD2DC] p-6 space-y-6">
             {error && (
-              <div className="p-3 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-xs text-[#B42318]">
-                {error}
+              <div className="p-3 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-xs text-[#B42318] flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="leading-relaxed">{error}</div>
               </div>
             )}
 
@@ -220,7 +355,7 @@ function NewSubmissionContent() {
                 <input
                   id="sub-title"
                   type="text"
-                  placeholder="e.g. Spring Hydration Campaign Social Post"
+                  placeholder="e.g. Spring Hydration Campaign Post or Q4 Brand Brief"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
@@ -275,29 +410,136 @@ function NewSubmissionContent() {
               </span>
             </div>
 
-            {/* Copy Content Area */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="sub-content" className="block text-xs font-bold text-[#1F2A44]">
-                  Marketing Copy Content <span className="text-[#B42318]">*</span>
-                </label>
-                <span className="text-[11px] font-mono text-[#5B6475]">
-                  {content.length} characters
-                </span>
-              </div>
-              <textarea
-                id="sub-content"
-                rows={8}
-                placeholder="Paste marketing copy, promotional text, or press announcement here..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                className="w-full p-3 rounded-lg border border-[#CBD2DC] bg-[#F7F7F4] text-xs text-[#1F2A44] font-mono focus:outline-none focus:ring-2 focus:ring-[#0F766E] leading-relaxed"
+            {/* File Upload Area (Above the text field) */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-[#1F2A44]">
+                Upload Document or Image Asset <span className="text-[11px] font-normal text-[#5B6475]">(Optional — replaces text input)</span>
+              </label>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                id="file-upload-input"
+                accept=".docx,.pdf,.png,.jpg,.jpeg,.webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/png,image/jpeg,image/webp"
+                onChange={handleFileInputChange}
+                className="hidden"
               />
-              <p className="text-[11px] text-[#5B6475] mt-1">
-                Plain text only. Formatting and claims will be validated in the review pipeline.
-              </p>
+
+              {!file ? (
+                /* Drag and drop zone */
+                <div
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                    isDragging
+                      ? "border-[#0F766E] bg-[#F0FDFA] scale-[1.01]"
+                      : "border-[#CBD2DC] hover:border-[#0F766E] bg-[#F7F7F4]/60 hover:bg-[#F0FDFA]/40"
+                  }`}
+                >
+                  <UploadCloud className="w-8 h-8 text-[#0F766E] mx-auto mb-2" />
+                  <p className="text-xs font-semibold text-[#1F2A44]">
+                    Drag &amp; drop your document or image here, or{" "}
+                    <span className="text-[#0F766E] underline">browse files</span>
+                  </p>
+                  <p className="text-[11px] text-[#5B6475] mt-1">
+                    Accepts Word (<strong>.docx</strong>), PDF (<strong>.pdf</strong>), and Images (<strong>.png, .jpg, .jpeg, .webp</strong>) up to 5 MB
+                  </p>
+                </div>
+              ) : (
+                /* Selected File Card */
+                <div className="bg-[#F0FDFA] border border-[#ABEFC6] rounded-xl p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-[#0F766E] text-white flex items-center justify-center flex-shrink-0">
+                      {isImageFile(file) ? (
+                        <ImageIcon className="w-5 h-5" />
+                      ) : (
+                        <FileText className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-[#1F2A44] truncate">{file.name}</span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-[#ECFDF3] text-[#067647] border border-[#ABEFC6]">
+                          Ready to upload
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#5B6475] mt-0.5">
+                        {(file.size / (1024 * 1024)).toFixed(2)} MB &middot;{" "}
+                        {isImageFile(file) ? "Image asset (OCR + Palette + Logo)" : "Structured Document (DOCX/PDF)"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="px-3 py-1.5 rounded-lg border border-[#CBD2DC] bg-white text-xs font-semibold text-[#B42318] hover:bg-[#FEF3F2] hover:border-[#FECDCA] flex items-center gap-1.5 transition-colors flex-shrink-0"
+                    title="Remove attached file and restore text input"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
+
+            {/* Copy Content Area (Collapses when a file is selected) */}
+            {file ? (
+              <div className="p-4 bg-[#F7F7F4] rounded-xl border border-[#CBD2DC] text-xs text-[#5B6475] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-[#0F766E] flex-shrink-0" />
+                  <span>
+                    <strong>Text input collapsed:</strong> File upload mode active. Content will be extracted directly from <em>{file.name}</em> during review.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="text-xs font-semibold text-[#0F766E] hover:underline flex-shrink-0 ml-2"
+                >
+                  Switch to text input
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="sub-content" className="block text-xs font-bold text-[#1F2A44]">
+                    Marketing Copy Content <span className="text-[#B42318]">*</span>
+                  </label>
+                  <span className="text-[11px] font-mono text-[#5B6475]">
+                    {content.length} characters
+                  </span>
+                </div>
+                <textarea
+                  id="sub-content"
+                  rows={8}
+                  placeholder="Paste marketing copy, promotional text, or press announcement here..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required={!file}
+                  className="w-full p-3 rounded-lg border border-[#CBD2DC] bg-[#F7F7F4] text-xs text-[#1F2A44] font-mono focus:outline-none focus:ring-2 focus:ring-[#0F766E] leading-relaxed"
+                />
+                <p className="text-[11px] text-[#5B6475] mt-1">
+                  Plain text copy input. Alternatively, upload a Word document (.docx), PDF (.pdf), or Image above.
+                </p>
+              </div>
+            )}
+
+            {/* Upload Processing State Notification */}
+            {isSubmitting && file && (
+              <div className="p-4 bg-[#F0FDFA] border border-[#0F766E]/40 rounded-xl space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#0F766E]">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#0F766E] border-t-transparent" />
+                  <span>Processing file upload &amp; structural analysis...</span>
+                </div>
+                <p className="text-[11px] text-[#5B6475]">
+                  Validating file integrity, extracting headings/tables/images, running OCR, and computing brand palette &amp; logo checks. This can take a few seconds.
+                </p>
+              </div>
+            )}
 
             {/* Form Actions */}
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E2E5EA]">
@@ -311,9 +553,10 @@ function NewSubmissionContent() {
                 variant="primary"
                 size="md"
                 isLoading={isSubmitting}
-                rightIcon={<ArrowRight className="w-4 h-4" />}
+                disabled={isSubmitting}
+                rightIcon={file ? <FileUp className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
               >
-                Create Submission &amp; Proceed to Review
+                {file ? "Upload Document & Proceed" : "Create Submission & Proceed"}
               </Button>
             </div>
           </form>

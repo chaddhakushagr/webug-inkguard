@@ -28,6 +28,7 @@ class FindingItem:
     fingerprint: Optional[str] = None
     verifier_verdict: Optional[str] = None  # supported, not_supported, unsure
     verifier_reason: Optional[str] = None
+    location: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -50,6 +51,7 @@ class FindingItem:
             "fingerprint": self.fingerprint,
             "verifier_verdict": self.verifier_verdict,
             "verifier_reason": self.verifier_reason,
+            "location": self.location,
         }
 
 
@@ -68,6 +70,7 @@ class ReviewContext:
     mode: str = "mock"
     stats: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    document_structure: Optional[Any] = None
 
 
 class ReviewStage(Protocol):

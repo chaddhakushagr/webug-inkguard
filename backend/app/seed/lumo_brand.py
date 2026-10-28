@@ -465,6 +465,78 @@ SEED_RULES = [
             "message": "Accessibility violation: Avoid 'click here' link text; use descriptive destinations",
         },
     },
+    {
+        "code": "RULE-A11Y-02",
+        "type": "rule",
+        "title": "Alternative Text for Images",
+        "body": "All images must provide informative alternative text describing their visual content for screen readers.",
+        "classification": "public",
+        "data": {
+            "rule_type": "accessibility",
+            "severity": "medium",
+            "message": "Image lacks alternative text; add descriptive alt text for visually impaired users.",
+        },
+    },
+    {
+        "code": "RULE-A11Y-03",
+        "type": "rule",
+        "title": "Logical Heading Hierarchy",
+        "body": "Heading levels must follow a sequential hierarchy without skipping levels (e.g. Heading 1 directly to Heading 3).",
+        "classification": "public",
+        "data": {
+            "rule_type": "accessibility",
+            "severity": "low",
+            "message": "Heading level skipped; preserve sequential heading hierarchy (e.g. H1 to H2 to H3).",
+        },
+    },
+    {
+        "code": "RULE-A11Y-04",
+        "type": "rule",
+        "title": "Non-empty Heading Structure",
+        "body": "Headings must not be blank or contain only whitespace, as empty headings confuse screen reader navigation.",
+        "classification": "public",
+        "data": {
+            "rule_type": "accessibility",
+            "severity": "medium",
+            "message": "Empty heading detected; headings must contain descriptive text.",
+        },
+    },
+    {
+        "code": "RULE-A11Y-05",
+        "type": "rule",
+        "title": "Color Contrast Compliance (WCAG AA)",
+        "body": "Text runs must maintain a minimum contrast ratio of 4.5:1 against the background for visual readability.",
+        "classification": "public",
+        "data": {
+            "rule_type": "accessibility",
+            "severity": "medium",
+            "message": "Low contrast text run detected; text color must achieve at least 4.5:1 contrast ratio against the background.",
+        },
+    },
+    {
+        "code": "RULE-A11Y-06",
+        "type": "rule",
+        "title": "Reading Grade and Comprehensibility",
+        "body": "Consumer content should maintain a reading grade level accessible to the general public (target grade 10-12).",
+        "classification": "public",
+        "data": {
+            "rule_type": "accessibility",
+            "severity": "medium",
+            "message": "Reading grade level exceeds consumer accessibility target; simplify complex phrasing.",
+        },
+    },
+    {
+        "code": "RULE-A11Y-07",
+        "type": "rule",
+        "title": "Document Title and Structure",
+        "body": "Documents must specify a descriptive document title and structured headings for screen readers.",
+        "classification": "public",
+        "data": {
+            "rule_type": "accessibility",
+            "severity": "low",
+            "message": "Document lacks a descriptive title or accessibility structure for assistive technologies.",
+        },
+    },
 ]
 
 # --- 4. FACTS (12 facts: 2 expired, 1 expiring soon, 1 confidential) ---
@@ -675,6 +747,34 @@ SEED_ASSETS = [
                 "border": "#E2E5EA",
                 "muted": "#5B6475",
             },
+        },
+    },
+    {
+        "code": "PALETTE-001",
+        "type": "brand_colours",
+        "title": "Lumo Brand Color Palette",
+        "body": "Official brand color palette: Deep Teal (#1A3C34), Warm Cream (#F5F0E8), Gold (#D4A853), and White (#FFFFFF). Visual assets must adhere to these approved tones.",
+        "classification": "public",
+        "data": {
+            "approved_colours": [
+                {"name": "Deep Teal", "hex": "#1A3C34"},
+                {"name": "Warm Cream", "hex": "#F5F0E8"},
+                {"name": "Gold", "hex": "#D4A853"},
+                {"name": "White", "hex": "#FFFFFF"},
+            ],
+            "colors": ["#1A3C34", "#F5F0E8", "#D4A853", "#FFFFFF"],
+        },
+    },
+    {
+        "code": "ASSET-LOGO-01",
+        "type": "asset",
+        "title": "Lumo Primary Brand Logo",
+        "body": "Official primary brand logo wordmark (100x40 solid-color rectangle with LUMO text). Visual asset submissions are checked for logo integrity.",
+        "classification": "public",
+        "data": {
+            "asset_type": "logo",
+            "format": "PNG",
+            "filename": "lumo_logo.png",
         },
     },
 ]

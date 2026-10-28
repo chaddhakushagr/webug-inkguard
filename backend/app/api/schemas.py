@@ -185,6 +185,7 @@ class SubmissionDetail(BaseModel):
     published_at: Optional[datetime] = None
     is_synthetic: bool = True
     allowed_actions: List[str]
+    source: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -247,6 +248,7 @@ class FindingResponse(BaseModel):
     suggested_fix: Optional[str] = None
     verifier_verdict: Optional[str] = None
     verifier_reason: Optional[str] = None
+    location: Optional[str] = None
     status: str
     is_synthetic: bool
     created_at: datetime

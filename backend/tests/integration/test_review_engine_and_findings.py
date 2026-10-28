@@ -27,7 +27,8 @@ def get_token(email: str) -> str:
     return res.json()["access_token"]
 
 
-def test_full_review_flow_and_findings_triage_in_mock_mode():
+def test_full_review_flow_and_findings_triage_in_mock_mode(monkeypatch):
+    monkeypatch.setattr(settings, "LLM_MODE", "mock")
     creator_token = get_token("creator.social@lumo.internal")
     h_creator = {"Authorization": f"Bearer {creator_token}"}
 

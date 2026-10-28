@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   Info,
   Scale,
+  MapPin,
+  Palette,
 } from "lucide-react";
 
 interface FindingCardProps {
@@ -173,6 +175,42 @@ export const FindingCard: React.FC<FindingCardProps> = ({
         <div className="p-2.5 bg-[#F7F7F4] rounded-lg border border-[#E2E5EA] font-serif text-xs text-[#1F2A44] mt-1 font-medium leading-relaxed">
           &ldquo;{finding.excerpt}&rdquo;
         </div>
+
+        {/* Secondary location & visual check type label */}
+        {(() => {
+          const code = (finding.cited_entry_code || "").toUpperCase();
+          const loc = (finding.location || "").toLowerCase();
+          const excerpt = (finding.excerpt || "").toLowerCase();
+          const expl = (finding.explanation || "").toLowerCase();
+
+          let visualCheckType: "Palette" | "Logo" | "Contrast" | null = null;
+          if (code.includes("PALETTE") || loc.includes("palette") || excerpt.includes("off-palette") || expl.includes("palette") || expl.includes("delta-e")) {
+            visualCheckType = "Palette";
+          } else if (code.includes("LOGO") || loc.includes("logo") || ["logo_present", "logo_distorted", "no_logo_found"].includes(excerpt) || expl.includes("logo")) {
+            visualCheckType = "Logo";
+          } else if ((code === "RULE-A11Y-05" || expl.includes("contrast")) && (loc.includes("image") || loc.includes("ocr") || loc.includes("text at"))) {
+            visualCheckType = "Contrast";
+          }
+
+          if (!finding.location && !visualCheckType) return null;
+
+          return (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
+              {finding.location && (
+                <span className="inline-flex items-center gap-1 font-medium text-[#5B6475] bg-[#F7F7F4] px-2 py-0.5 rounded border border-[#CBD2DC]">
+                  <MapPin className="w-3 h-3 text-[#0F766E]" />
+                  <span className="text-[#1F2A44]">{finding.location}</span>
+                </span>
+              )}
+              {visualCheckType && (
+                <span className="inline-flex items-center gap-1 font-bold text-[10px] uppercase tracking-wide bg-[#ECFDF3] text-[#067647] px-2 py-0.5 rounded border border-[#ABEFC6]">
+                  <Palette className="w-3 h-3 text-[#067647]" />
+                  Visual Check: {visualCheckType}
+                </span>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Plain Language Explanation */}

@@ -18,9 +18,9 @@ In [SUBMISSION_R2.md](file:///home/redpanda/Documents/WeBug/docs/SUBMISSION_R2.m
 | • *Ambiguity Scoring* | [ambiguity.py:1](file:///home/redpanda/Documents/WeBug/backend/app/domain/insights/ambiguity.py#L1), [insights.py:240](file:///home/redpanda/Documents/WeBug/backend/app/api/routers/insights.py#L240), [GUIDELINE_HEALTH.md](file:///home/redpanda/Documents/WeBug/docs/GUIDELINE_HEALTH.md) (Ambiguity score 0-100 incorporating creator dismissals, reviewer overrides, discordance, clarification comments, minimum 5-event sample threshold) | None — full pure Python formula and endpoint `GET /insights/guideline-health` | **Done** |
 | • *Gap Detection* | [gaps.py:1](file:///home/redpanda/Documents/WeBug/backend/app/domain/insights/gaps.py#L1), [insights.py:380](file:///home/redpanda/Documents/WeBug/backend/app/api/routers/insights.py#L380) (BM25 lexical clustering of uncited reviewer comments into draft rule proposals, approve/reject workflow with versioning and audit log) | None — full pure Python clustering, endpoints `GET /insights/gaps` and `POST /insights/gaps/{id}/approve` / `reject` | **Done** |
 | • *Rule Lifecycle Management* | [stale.py:1](file:///home/redpanda/Documents/WeBug/backend/app/domain/insights/stale.py#L1), [insights.py:320](file:///home/redpanda/Documents/WeBug/backend/app/api/routers/insights.py#L320) (Automated detection of unused rules, overdue reviews, expired facts, and rules citing expired facts) | None — pure Python detection and endpoint `GET /insights/stale` | **Done** |
-| **3. Multi-Format Review** | | | **Not started** |
-| • *Document Structure Extraction* | [pipeline.py:45](file:///home/redpanda/Documents/WeBug/backend/app/domain/review/pipeline.py#L45) (`ExtractStage` for raw pasted text) | Native PDF and DOCX structural parsers (`pypdf` / `python-docx`), block chunking (headings, tables, callouts, disclaimers), and file upload endpoint `POST /submissions/upload` | **Not started** |
-| • *Computer-Vision Brand Compliance* | [accessibility.py:65](file:///home/redpanda/Documents/WeBug/backend/app/domain/review/accessibility.py#L65) (Markdown image alt-text syntax check), [lumo_brand.py:630](file:///home/redpanda/Documents/WeBug/backend/app/seed/lumo_brand.py#L630) (Asset metadata entries) | OCR extraction for embedded image claims, 4.5:1 text/image pixel contrast calculation, CIEDE2000 brand color palette distance, and perceptual-hash (pHash/dHash) logo integrity checks | **Not started** |
+| **3. Multi-Format Review** | | | **Backend Done** |
+| • *Document Structure Extraction* | [extractor.py:18](file:///home/redpanda/Documents/WeBug/backend/app/adapters/documents/extractor.py#L18), [docx_extractor.py:1](file:///home/redpanda/Documents/WeBug/backend/app/adapters/documents/docx_extractor.py#L1), [pdf_extractor.py:1](file:///home/redpanda/Documents/WeBug/backend/app/adapters/documents/pdf_extractor.py#L1), [submissions.py:301](file:///home/redpanda/Documents/WeBug/backend/app/api/routers/submissions.py#L301) | Document structural ingestion for DOCX (`python-docx`), text & scanned PDF (`pdfplumber`), heading hierarchy, tables, links, images, paragraph location tracking, and database blob storage via `POST /api/v1/submissions/upload` | **Done** |
+| • *Computer-Vision Brand Compliance* | [image_extractor.py:1](file:///home/redpanda/Documents/WeBug/backend/app/adapters/documents/image_extractor.py#L1), [color_math.py:1](file:///home/redpanda/Documents/WeBug/backend/app/domain/review/color_math.py#L1), [lumo_brand.py:752](file:///home/redpanda/Documents/WeBug/backend/app/seed/lumo_brand.py#L752) | Pure Python CIE Lab Delta-E brand palette check against `PALETTE-001`, average hash perceptual logo match against `ASSET-LOGO-01`, OCR degradation via `shutil.which("tesseract")`, WCAG AA 4.5:1 text/image contrast calculation (`RULE-A11Y-05`), and image intake security | **Done** |
 
 ---
 
@@ -268,13 +268,13 @@ The following checklist represents the exact sequence of implementation tasks fo
 - [x] **G-07**: Update `/insights` and `/kb` frontend interfaces to display ambiguity badges, candidate rule proposals, and impact simulation drawer (Guideline Health page live at `/insights/guideline-health` with three tabs: Ambiguous rules with drill-down, Stale items with KB review link, and Gaps approval/rejection workflow).
 
 ### Track 3: Multi-Format Review (P2)
-- [ ] **G-08**: Implement document structural ingestion for PDF and DOCX files (`pypdf` / `python-docx`), extracting hierarchical headers, tables, callouts, and disclaimers into clean semantic blocks with `POST /api/v1/submissions/upload`.
-- [ ] **G-09**: Implement Computer-Vision Brand Asset Compliance pipeline:
-  - OCR extraction for embedded image claims (`pytesseract` or vision model).
-  - Pixel text/image contrast calculation against WCAG 4.5:1 ratio.
-  - CIEDE2000 brand color palette distance calculation.
-  - Perceptual hashing (`dHash` / `pHash`) for logo integrity verification.
-- [ ] **G-10**: Update frontend submission interface to support drag-and-drop PDF/DOCX and image asset uploads with an embedded visual asset compliance panel.
+- [x] **G-08**: Implement document structural ingestion for PDF and DOCX files (`pypdf` / `python-docx`), extracting hierarchical headers, tables, callouts, and disclaimers into clean semantic blocks with `POST /api/v1/submissions/upload`.
+- [x] **G-09**: Implement Computer-Vision Brand Asset Compliance pipeline:
+  - OCR extraction for embedded image claims (`pytesseract` or clean degradation).
+  - Pixel text/image contrast calculation against WCAG 4.5:1 ratio (`RULE-A11Y-05`).
+  - Pure Python CIE Lab Delta-E brand color palette distance calculation (`PALETTE-001`).
+  - Perceptual average hashing for logo integrity verification (`ASSET-LOGO-01`).
+- [x] **G-10**: Update frontend submission interface to support drag-and-drop PDF/DOCX and image asset uploads with an embedded visual asset compliance panel.
 
 ### Track 4: Unbuilt Features & Defect Hardening (P3)
 - [ ] **G-11**: Implement `F-14`: Unstructured guideline document importer (.txt / .md to candidate entries with heuristic classification and human confirmation in UI).

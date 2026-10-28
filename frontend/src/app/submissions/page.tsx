@@ -220,7 +220,9 @@ function SubmissionsContent() {
                             {s.title}
                           </span>
                           <span className="text-[11px] text-[#5B6475] line-clamp-1 mt-0.5">
-                            {s.content}
+                            {s.content.includes("OCR unavailable on this host")
+                              ? "Image submission · Text extraction requires Tesseract"
+                              : s.content}
                           </span>
                         </td>
                         <td className="py-3 px-4">

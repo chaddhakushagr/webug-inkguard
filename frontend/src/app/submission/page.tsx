@@ -19,7 +19,7 @@ import {
   Banner,
   toast,
 } from "@/shared/ui";
-import { api } from "@/shared/api/client";
+import { api, getApiBase } from "@/shared/api/client";
 import {
   Submission,
   SubmissionVersion,
@@ -56,6 +56,9 @@ import {
   Filter,
   RotateCw,
   Search,
+  Info,
+  ExternalLink,
+  Image as LucideImage,
 } from "lucide-react";
 
 export default function SubmissionDetailPage() {
@@ -535,6 +538,16 @@ function SubmissionDetailContent() {
 
   const isReviewer = user?.role === "reviewer";
 
+  const isDocxOrPdf =
+    sub.source === "upload_docx" ||
+    sub.source === "upload_pdf" ||
+    versions.some((v) => v.source === "upload_docx" || v.source === "upload_pdf") ||
+    sub.title.toLowerCase().endsWith(".docx") ||
+    sub.title.toLowerCase().endsWith(".pdf");
+
+  const policyFindings = findings.filter((f) => f.is_policy !== false);
+  const isOCRUnavailable = sub.content.includes("OCR unavailable on this host");
+
   return (
     <AuthGuard>
       <AppShell pageTitle={sub.title}>
@@ -791,9 +804,11 @@ function SubmissionDetailContent() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-mono text-[#5B6475]">
-                      {isEditing ? editContent.length : sub.content.length} chars
+                      {isOCRUnavailable
+                        ? "Image submission"
+                        : `${isEditing ? editContent.length : sub.content.length} chars`}
                     </span>
-                    {allowed.includes("edit") && !isReviewer && !isEditing && (
+                    {allowed.includes("edit") && !isReviewer && !isEditing && !isOCRUnavailable && (
                       <button
                         type="button"
                         onClick={() => setIsEditing(true)}
@@ -805,7 +820,49 @@ function SubmissionDetailContent() {
                   </div>
                 </div>
 
-                {isEditing ? (
+                {isOCRUnavailable ? (
+                  <div className="space-y-4">
+                    {/* Soft OCR Banner (Requirement 4) */}
+                    <div className="p-4 rounded-xl bg-[#F0FDFA] border border-[#ABEFC6] text-xs text-[#0F766E] flex items-start gap-3">
+                      <Info className="w-5 h-5 text-[#0F766E] flex-shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="font-bold text-[#1F2A44] text-xs">
+                          Text Extraction from Images
+                        </p>
+                        <p className="text-[#0F766E] leading-relaxed">
+                          Text extraction from images requires Tesseract. Install it locally or deploy via Docker (see README).
+                        </p>
+                        <p className="text-[11px] text-[#5B6475]">
+                          Visual brand compliance checks (brand color palette conformance and logo detection) evaluated automatically on the submitted image.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Image Preview & Asset View */}
+                    <div className="p-4 bg-[#F7F7F4] rounded-xl border border-[#CBD2DC] flex flex-col items-center justify-center text-center">
+                      <div className="max-w-md w-full overflow-hidden rounded-lg border border-[#CBD2DC] bg-white shadow-xs p-2">
+                        <img
+                          src={`${getApiBase()}/submissions/${sub.id}/document`}
+                          alt={sub.title}
+                          className="w-full max-h-72 object-contain rounded"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      </div>
+                      <a
+                        href={`${getApiBase()}/submissions/${sub.id}/document`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 text-xs font-semibold text-[#0F766E] hover:underline inline-flex items-center gap-1.5"
+                      >
+                        <LucideImage className="w-3.5 h-3.5" />
+                        View original uploaded image
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ) : isEditing ? (
                   <div className="space-y-4">
                     <div className="p-3 bg-[#FFFBEB] border border-[#FDE68A] text-xs text-[#B45309] rounded-lg">
                       <strong>Notice:</strong> Editing content creates a new version, voids any existing approvals, and resets workflow status to Draft.
@@ -1273,8 +1330,30 @@ function SubmissionDetailContent() {
 
                 {/* Finding Cards List */}
                 <div className="space-y-3">
+                  {isDocxOrPdf && policyFindings.length === 0 && findings.length > 0 && (
+                    <div className="p-3 bg-[#ECFDF3] border border-[#ABEFC6] rounded-lg text-xs text-[#067647] flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#067647] flex-shrink-0" />
+                      <span>
+                        <strong>No policy issues found in this document.</strong> The {findings.length} item(s) below are non-blocking advisory observations.
+                      </span>
+                    </div>
+                  )}
+
                   {findings.length === 0 ? (
-                    review?.status === "completed" ? (
+                    isDocxOrPdf ? (
+                      /* Document Clean State (Requirement 5) */
+                      <div className="p-6 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl text-center space-y-2">
+                        <div className="w-10 h-10 mx-auto rounded-full bg-[#067647] text-white flex items-center justify-center font-bold">
+                          ✓
+                        </div>
+                        <h3 className="text-sm font-bold text-[#067647]">
+                          No policy issues found in this document
+                        </h3>
+                        <p className="text-xs text-[#067647] leading-relaxed">
+                          No policy violations, tone deviations, or unverified claims detected in this document. All structure, accessibility, and brand standards comply.
+                        </p>
+                      </div>
+                    ) : review?.status === "completed" ? (
                       /* Clean Bill of Health State */
                       <div className="p-6 bg-[#ECFDF3] border border-[#ABEFC6] rounded-xl text-center space-y-2">
                         <div className="w-10 h-10 mx-auto rounded-full bg-[#067647] text-white flex items-center justify-center font-bold">

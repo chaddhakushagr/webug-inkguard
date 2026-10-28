@@ -77,6 +77,7 @@ export interface Submission {
   published_url?: string | null;
   published_at?: string | null;
   is_synthetic: boolean;
+  source?: string | null;
   allowed_actions: string[];
   created_at: string;
   updated_at: string;
@@ -88,12 +89,13 @@ export interface Finding {
   submission_version_id: string;
   fingerprint: string;
   source: "rule" | "ai";
-  issue_type: "terminology" | "tone" | "claim" | "missing_disclaimer" | "confidential_leak" | "accessibility" | "readability" | "general_note";
+  issue_type: "terminology" | "tone" | "claim" | "missing_disclaimer" | "confidential_leak" | "accessibility" | "readability" | "general_note" | "brand";
   severity: "low" | "medium" | "high";
   confidence: number;
   span_start: number;
   span_end: number;
   excerpt: string;
+  location?: string | null;
   cited_entry_id?: string | null;
   cited_entry_code?: string | null;
   cited_entry_version?: number | null;

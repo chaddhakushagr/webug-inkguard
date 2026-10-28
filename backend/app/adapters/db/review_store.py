@@ -16,6 +16,7 @@ from app.adapters.db.models import (
     Finding,
     AICall,
     Setting,
+    UploadedDocument,
 )
 from app.adapters.db.audit import record_audit
 
@@ -43,6 +44,20 @@ class SqlAlchemyReviewStore(ReviewStorePort):
                     .first()
                 )
 
+            doc_structure = None
+            if ver:
+                up_doc = (
+                    db.query(UploadedDocument)
+                    .filter(UploadedDocument.submission_version_id == ver.id)
+                    .first()
+                )
+                if up_doc:
+                    try:
+                        from app.adapters.documents.extractor import DocumentExtractor
+                        doc_structure = DocumentExtractor().extract(up_doc.data, up_doc.filename)
+                    except Exception:
+                        doc_structure = None
+
             return {
                 "id": sub.id,
                 "title": sub.title,
@@ -54,6 +69,7 @@ class SqlAlchemyReviewStore(ReviewStorePort):
                 "current_version_id": ver.id if ver else None,
                 "version_no": ver.version_no if ver else 1,
                 "content": ver.content if ver else "",
+                "document_structure": doc_structure,
             }
 
     def get_kb_pool(self, user_max_tier: str) -> List[Dict[str, Any]]:
@@ -140,6 +156,7 @@ class SqlAlchemyReviewStore(ReviewStorePort):
                     span_end=int(item.get("span_end", 0)),
                     excerpt=item.get("excerpt", ""),
                     cited_entry_id=item.get("cited_entry_id"),
+                    cited_entry_code=item.get("cited_entry_code"),
                     cited_entry_version=item.get("cited_entry_version"),
                     claim_verdict=item.get("claim_verdict"),
                     is_policy=bool(item.get("is_policy", True)),
@@ -148,6 +165,7 @@ class SqlAlchemyReviewStore(ReviewStorePort):
                     suggested_fix=item.get("suggested_fix"),
                     verifier_verdict=item.get("verifier_verdict"),
                     verifier_reason=item.get("verifier_reason"),
+                    location=item.get("location"),
                     status="open",
                     is_synthetic=True,
                     created_at=now,

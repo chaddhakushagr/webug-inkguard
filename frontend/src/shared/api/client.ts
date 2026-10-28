@@ -69,10 +69,13 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   }
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     Accept: "application/json",
     ...(options.headers as Record<string, string>),
   };
+
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -190,6 +193,11 @@ export const api = {
     request<Submission>("/submissions", {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+  uploadSubmission: (formData: FormData) =>
+    request<Submission>("/submissions/upload", {
+      method: "POST",
+      body: formData,
     }),
   updateContent: (id: string, content: string) =>
     request<Submission>(`/submissions/${id}/content`, {
